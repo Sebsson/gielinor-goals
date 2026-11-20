@@ -1,0 +1,679 @@
+/*
+ * Copyright (c) 2026, Sebas
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+package com.gielinorgoals.ui;
+
+import com.gielinorgoals.model.CombatAchievementRequirement;
+import com.gielinorgoals.model.DiaryArea;
+import com.gielinorgoals.model.DiaryRequirement;
+import com.gielinorgoals.model.DiaryTier;
+import com.gielinorgoals.model.GameData;
+import com.gielinorgoals.model.ItemRequirement;
+import com.gielinorgoals.model.QuestRequirement;
+import com.gielinorgoals.model.Requirement;
+import com.gielinorgoals.model.SkillRequirement;
+import com.gielinorgoals.tracking.AchievementTracker;
+import com.gielinorgoals.tracking.CompletionStatus;
+import com.gielinorgoals.tracking.SkillTracker;
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+import javax.annotation.Nullable;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
+import lombok.Value;
+import net.runelite.api.Experience;
+import net.runelite.api.QuestState;
+import net.runelite.api.Skill;
+import net.runelite.client.ui.ColorScheme;
+import net.runelite.client.ui.DynamicGridLayout;
+import net.runelite.client.ui.FontManager;
+import net.runelite.client.util.AsyncBufferedImage;
+import net.runelite.client.util.QuantityFormatter;
+
+/**
+ * Modal dialog för att skapa eller redigera ett mål. Typspecifika fält ligger i ett
+ * CardLayout, som alltid är lika stort som det största kortet; en JOptionPane ändrar
+ * nämligen inte storlek när innehållet byts.
+ *
+ * Dialogen är "snäll": sådant som redan är klart (quests, diary-nivåer, CA-uppgifter,
+ * levels man redan har) går inte att välja, och samma mål kan inte läggas till två gånger.
+ */
+final class GoalEditDialog
+{
+	enum GoalKind
+	{
+		MANUAL("Manual"),
+		SKILL_LEVEL("Skill level"),
+		SKILL_XP("Skill XP"),
+		ITEM("Item"),
+		QUEST("Quest"),
+		DIARY("Achievement diary"),
+		COMBAT_ACHIEVEMENT("Combat achievement");
+
+		private final String label;
+
+		GoalKind(String label)
+		{
+			this.label = label;
+		}
+
+		@Override
+		public String toString()
+		{
+			return label;
+		}
+	}
+
+	@Value
+	static class Result
+	{
+		String title;
+		String note;
+		@Nullable
+		Requirement requirement;
+	}
+
+	@Value
+	static class QuestOption
+	{
+		int id;
+		String name;
+		boolean inProgress;
+
+		@Override
+		public String toString()
+		{
+			return inProgress ? name + " (in progress)" : name;
+		}
+	}
+
+	@Value
+	static class DiaryOption
+	{
+		DiaryArea area;
+		DiaryTier tier;
+
+		@Override
+		public String toString()
+		{
+			return area.getDisplayName() + " - " + tier.getDisplayName();
+		}
+	}
+
+	static final int MAX_LIST_RESULTS = 500;
+
+	private final DialogServices services;
+	@Nullable
+	private final String editingGoalId;
+	// Kravet målet hade när dialogen öppnades; det får sparas igen även om det redan är nått.
+	@Nullable
+	private final Requirement originalRequirement;
+	private CompletionStatus status = CompletionStatus.UNKNOWN;
+
+	private final JComboBox<GoalKind> kindBox = new JComboBox<>(GoalKind.values());
+	private final JTextField titleField = new JTextField(20);
+	private final JTextArea noteArea = new JTextArea(3, 20);
+	private final CardLayout cards = new CardLayout();
+	private final JPanel cardPanel = new JPanel(cards);
+
+	// Skill-kortet.
+	private final JComboBox<Skill> skillBox = new JComboBox<>(trackableSkills());
+	private final JLabel targetLabel = new JLabel();
+	private final JTextField targetField = new JTextField(20);
+	private final JLabel currentSkillLabel = hintLabel();
+
+	// Föremålskortet.
+	private final SearchPanel<ItemSearch.ItemOption> itemPanel;
+	private final JTextField quantityField = new JTextField("1", 20);
+	private final JCheckBox variantsBox = new JCheckBox("Also count variants (e.g. charged/uncharged)");
+	private final JLabel ownedLabel = hintLabel();
+	private final Map<Integer, Icon> itemIcons = new HashMap<>();
+
+	// Quest-, diary- och CA-korten.
+	private final SearchPanel<QuestOption> questPanel;
+	private final SearchPanel<DiaryOption> diaryPanel;
+	private final SearchPanel<CombatAchievementCatalog.Task> caPanel;
+
+	private GoalEditDialog(DialogServices services, @Nullable String editingGoalId, String title,
+		@Nullable String note, @Nullable Requirement requirement)
+	{
+		this.services = services;
+		this.editingGoalId = editingGoalId;
+		this.originalRequirement = requirement;
+		titleField.setText(title);
+		noteArea.setText(note == null ? "" : note);
+		noteArea.setLineWrap(true);
+		noteArea.setWrapStyleWord(true);
+		noteArea.putClientProperty("JTextField.placeholderText", "Optional note, e.g. where to get it");
+
+		itemPanel = new SearchPanel<>("Type an item name, e.g. dragon pickaxe", services.getItemSearch()::search,
+			ItemSearch.ItemOption::getName, item -> itemIcon(item.getId()), 2);
+		itemPanel.setHint("Untradeable items are included.");
+		itemPanel.setOnSelect(item -> updateOwned());
+
+		questPanel = new SearchPanel<>("Filter quests", this::searchQuests, QuestOption::toString, quest -> null, 0);
+		diaryPanel = new SearchPanel<>("Filter diaries, e.g. varrock", this::searchDiaries, DiaryOption::toString,
+			diary -> null, 0);
+		caPanel = new SearchPanel<>("Filter tasks or bosses", this::searchCombatAchievements,
+			CombatAchievementCatalog.Task::toString, task -> null, 0);
+		caPanel.setOnSelect(task -> caPanel.setToolTipText(task.getDescription()));
+
+		cardPanel.add(new JPanel(), GoalKind.MANUAL.name());
+		cardPanel.add(buildSkillCard(), GoalKind.SKILL_LEVEL.name());
+		cardPanel.add(buildItemCard(), GoalKind.ITEM.name());
+		cardPanel.add(questPanel, GoalKind.QUEST.name());
+		cardPanel.add(diaryPanel, GoalKind.DIARY.name());
+		cardPanel.add(caPanel, GoalKind.COMBAT_ACHIEVEMENT.name());
+
+		questPanel.setHint("Loading your quests...");
+		diaryPanel.setHint("Loading your diaries...");
+		caPanel.setHint("Loading your combat achievements...");
+
+		prefill(requirement);
+		kindBox.addActionListener(e -> updateFields());
+		skillBox.addActionListener(e -> updateCurrentSkill());
+		updateFields();
+		updateCurrentSkill();
+
+		// Läs vad som redan är klart och fyll listorna när det är klart.
+		services.getCompletionLookup().load(this::onStatusLoaded);
+	}
+
+	/**
+	 * @param editingGoalId målet som redigeras (räknas inte som dubblett), eller null för ett nytt mål
+	 * @return null om användaren avbröt
+	 */
+	@Nullable
+	static Result show(Component parent, DialogServices services, String dialogTitle, @Nullable String editingGoalId,
+		String title, @Nullable String note, @Nullable Requirement requirement)
+	{
+		GoalEditDialog dialog = new GoalEditDialog(services, editingGoalId, title, note, requirement);
+		JPanel content = dialog.buildContent();
+
+		// Visa dialogen igen tills värdena är giltiga eller användaren avbryter.
+		while (true)
+		{
+			int choice = JOptionPane.showConfirmDialog(parent, content, dialogTitle,
+				JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+			if (choice != JOptionPane.OK_OPTION)
+			{
+				return null;
+			}
+
+			try
+			{
+				return dialog.toResult();
+			}
+			catch (IllegalArgumentException e)
+			{
+				JOptionPane.showMessageDialog(parent, e.getMessage(), dialogTitle, JOptionPane.INFORMATION_MESSAGE);
+			}
+		}
+	}
+
+	private void onStatusLoaded(CompletionStatus loaded)
+	{
+		status = loaded;
+		String suffix = loaded.isKnown() ? " you have completed are hidden." : "";
+		questPanel.setHint(loaded.isKnown() ? "Quests" + suffix : "Log in to hide quests you have done.");
+		diaryPanel.setHint(loaded.isKnown()
+			? "Done ones are hidden. Open the journal in game to add its tasks."
+			: "Log in to hide diaries you have done.");
+		caPanel.setHint(loaded.isKnown() ? "Tasks" + suffix : "Log in to hide tasks you have done.");
+		questPanel.refresh();
+		diaryPanel.refresh();
+		caPanel.refresh();
+	}
+
+	private void prefill(@Nullable Requirement requirement)
+	{
+		if (requirement instanceof SkillRequirement)
+		{
+			SkillRequirement skill = (SkillRequirement) requirement;
+			kindBox.setSelectedItem(skill.getMode() == SkillRequirement.Mode.LEVEL ? GoalKind.SKILL_LEVEL : GoalKind.SKILL_XP);
+			skillBox.setSelectedItem(skill.getSkill());
+			targetField.setText(String.valueOf(skill.getTarget()));
+		}
+		else if (requirement instanceof ItemRequirement)
+		{
+			ItemRequirement item = (ItemRequirement) requirement;
+			kindBox.setSelectedItem(GoalKind.ITEM);
+			itemPanel.preselect(new ItemSearch.ItemOption(item.getItemId(), item.getItemName()));
+			quantityField.setText(String.valueOf(item.getQuantity()));
+			variantsBox.setSelected(item.isIncludeVariants());
+			updateOwned();
+		}
+		else if (requirement instanceof QuestRequirement)
+		{
+			QuestRequirement quest = (QuestRequirement) requirement;
+			kindBox.setSelectedItem(GoalKind.QUEST);
+			questPanel.preselect(new QuestOption(quest.getQuestId(), quest.getQuestName(), false));
+		}
+		else if (requirement instanceof DiaryRequirement)
+		{
+			DiaryRequirement diary = (DiaryRequirement) requirement;
+			kindBox.setSelectedItem(GoalKind.DIARY);
+			diaryPanel.preselect(new DiaryOption(diary.getArea(), diary.getTier()));
+		}
+		else if (requirement instanceof CombatAchievementRequirement)
+		{
+			CombatAchievementRequirement task = (CombatAchievementRequirement) requirement;
+			kindBox.setSelectedItem(GoalKind.COMBAT_ACHIEVEMENT);
+			caPanel.preselect(new CombatAchievementCatalog.Task(task.getTaskId(), task.getTaskName(), "",
+				task.getTierName()));
+		}
+		else
+		{
+			kindBox.setSelectedItem(GoalKind.MANUAL);
+		}
+	}
+
+	private JPanel buildContent()
+	{
+		kindBox.setMaximumRowCount(GoalKind.values().length);
+		JPanel top = new JPanel(new DynamicGridLayout(0, 1, 0, 4));
+		top.add(new JLabel("What kind of goal?"));
+		top.add(kindBox);
+
+		JPanel titlePanel = new JPanel(new DynamicGridLayout(0, 1, 0, 4));
+		titlePanel.add(new JLabel("Title"));
+		titlePanel.add(titleField);
+
+		JScrollPane noteScroll = new JScrollPane(noteArea);
+		noteScroll.setPreferredSize(new Dimension(280, 56));
+		JPanel bottom = new JPanel(new BorderLayout(0, 4));
+		bottom.add(titlePanel, BorderLayout.NORTH);
+		bottom.add(noteScroll, BorderLayout.CENTER);
+
+		JPanel content = new JPanel(new BorderLayout(0, 10));
+		content.add(top, BorderLayout.NORTH);
+		content.add(cardPanel, BorderLayout.CENTER);
+		content.add(bottom, BorderLayout.SOUTH);
+
+		kindBox.addAncestorListener(new FocusOnShow());
+		return content;
+	}
+
+	private JPanel buildSkillCard()
+	{
+		skillBox.setMaximumRowCount(12);
+		skillBox.setRenderer(new DefaultListCellRenderer()
+		{
+			@Override
+			public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+				boolean isSelected, boolean cellHasFocus)
+			{
+				Object text = value instanceof Skill ? ((Skill) value).getName() : value;
+				return super.getListCellRendererComponent(list, text, index, isSelected, cellHasFocus);
+			}
+		});
+
+		JPanel card = new JPanel(new DynamicGridLayout(0, 1, 0, 4));
+		card.add(new JLabel("Skill"));
+		card.add(skillBox);
+		card.add(currentSkillLabel);
+		card.add(targetLabel);
+		card.add(targetField);
+		return northAligned(card);
+	}
+
+	private JPanel buildItemCard()
+	{
+		JPanel options = new JPanel(new DynamicGridLayout(0, 1, 0, 4));
+		options.add(ownedLabel);
+		options.add(new JLabel("How many? (e.g. 1, 500 or 10k)"));
+		options.add(quantityField);
+		options.add(variantsBox);
+
+		JPanel card = new JPanel(new BorderLayout(0, 6));
+		card.add(itemPanel, BorderLayout.CENTER);
+		card.add(options, BorderLayout.SOUTH);
+		return card;
+	}
+
+	private static JPanel northAligned(JPanel panel)
+	{
+		JPanel wrapper = new JPanel(new BorderLayout());
+		wrapper.add(panel, BorderLayout.NORTH);
+		return wrapper;
+	}
+
+	private static JLabel hintLabel()
+	{
+		JLabel label = new JLabel(" ");
+		label.setFont(FontManager.getRunescapeSmallFont());
+		label.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+		return label;
+	}
+
+	private void updateFields()
+	{
+		GoalKind kind = (GoalKind) kindBox.getSelectedItem();
+		titleField.putClientProperty("JTextField.placeholderText", kind == GoalKind.MANUAL
+			? "What do you want to do?"
+			: "Optional - named after the goal if empty");
+		titleField.repaint();
+		targetLabel.setText(kind == GoalKind.SKILL_XP
+			? "Target XP (e.g. 13034431 or 13m)"
+			: "Target level (" + SkillRequirement.MIN_LEVEL + "-" + SkillRequirement.MAX_LEVEL + ")");
+
+		// Level och XP delar samma kort.
+		GoalKind card = kind == GoalKind.SKILL_XP ? GoalKind.SKILL_LEVEL : kind;
+		cards.show(cardPanel, card.name());
+	}
+
+	private void updateCurrentSkill()
+	{
+		Skill skill = (Skill) skillBox.getSelectedItem();
+		long xp = services.currentGameData().getXp(skill);
+		if (xp < 0)
+		{
+			currentSkillLabel.setText("Log in to see your current level.");
+			return;
+		}
+		int level = Experience.getLevelForXp((int) Math.min(xp, SkillRequirement.MAX_XP));
+		currentSkillLabel.setText("You are level " + level + " (" + QuantityFormatter.formatNumber(xp) + " XP).");
+	}
+
+	private void updateOwned()
+	{
+		ItemSearch.ItemOption item = itemPanel.getSelected();
+		if (item == null)
+		{
+			ownedLabel.setText(" ");
+			return;
+		}
+		long owned = services.currentGameData().getItemCount(item.getId());
+		ownedLabel.setText(owned < 0 ? " " : "You have " + QuantityFormatter.formatNumber(owned) + " right now.");
+	}
+
+	// Ikonerna cachas så att listan bara ritas om en gång per föremål när bilden laddats.
+	private Icon itemIcon(int itemId)
+	{
+		return itemIcons.computeIfAbsent(itemId, id ->
+		{
+			AsyncBufferedImage image = services.getItemSearch().getImage(id);
+			image.onLoaded(itemPanel::repaintList);
+			return new ImageIcon(image);
+		});
+	}
+
+	private Result toResult()
+	{
+		GoalKind kind = (GoalKind) kindBox.getSelectedItem();
+		String title = titleField.getText().trim();
+		String note = noteArea.getText();
+		Requirement requirement = buildRequirement(kind, title);
+
+		if (requirement != null && services.isDuplicate(requirement, editingGoalId))
+		{
+			throw new IllegalArgumentException("You already have this goal in your list.");
+		}
+		return new Result(title, note, requirement);
+	}
+
+	@Nullable
+	private Requirement buildRequirement(GoalKind kind, String title)
+	{
+		switch (kind)
+		{
+			case SKILL_LEVEL:
+			{
+				Skill skill = (Skill) skillBox.getSelectedItem();
+				SkillRequirement requirement = SkillRequirement.level(skill, parseLevel(targetField.getText().trim()));
+				rejectIfReached(requirement, "You already have level " + requirement.getTarget() + " " + skill.getName() + ".");
+				return requirement;
+			}
+			case SKILL_XP:
+			{
+				Skill skill = (Skill) skillBox.getSelectedItem();
+				SkillRequirement requirement = SkillRequirement.xp(skill, parseXp(targetField.getText().trim()));
+				rejectIfReached(requirement, "You already have that much " + skill.getName() + " XP.");
+				return requirement;
+			}
+			case ITEM:
+			{
+				ItemSearch.ItemOption item = requireSelected(itemPanel, "Search for an item and pick it in the list.");
+				return new ItemRequirement(item.getId(), item.getName(),
+					parseQuantity(quantityField.getText().trim()), variantsBox.isSelected());
+			}
+			case QUEST:
+			{
+				QuestOption quest = requireSelected(questPanel, "Pick a quest in the list.");
+				return new QuestRequirement(quest.getId(), quest.getName());
+			}
+			case DIARY:
+			{
+				DiaryOption diary = requireSelected(diaryPanel, "Pick a diary in the list.");
+				return new DiaryRequirement(diary.getArea(), diary.getTier());
+			}
+			case COMBAT_ACHIEVEMENT:
+			{
+				CombatAchievementCatalog.Task task = requireSelected(caPanel, "Pick a task in the list.");
+				return new CombatAchievementRequirement(task.getId(), task.getName(), task.getTier());
+			}
+			case MANUAL:
+			default:
+				if (title.isEmpty())
+				{
+					throw new IllegalArgumentException("Give the goal a title, e.g. \"Get a Fire cape\".");
+				}
+				return null;
+		}
+	}
+
+	// Ett skill-mål som redan är nått vore klart direkt, så det stoppas med en vänlig förklaring.
+	private void rejectIfReached(SkillRequirement requirement, String message)
+	{
+		if (requirement.equals(originalRequirement))
+		{
+			return;
+		}
+		GameData data = services.currentGameData();
+		if (data.getXp(requirement.getSkill()) >= requirement.targetXp())
+		{
+			throw new IllegalArgumentException(message);
+		}
+	}
+
+	private static <T> T requireSelected(SearchPanel<T> panel, String message)
+	{
+		T selected = panel.getSelected();
+		if (selected == null)
+		{
+			throw new IllegalArgumentException(message);
+		}
+		return selected;
+	}
+
+	private void searchQuests(String query, Consumer<List<QuestOption>> callback)
+	{
+		callback.accept(filterQuests(status, query));
+	}
+
+	private void searchDiaries(String query, Consumer<List<DiaryOption>> callback)
+	{
+		callback.accept(filterDiaries(status, query));
+	}
+
+	private void searchCombatAchievements(String query, Consumer<List<CombatAchievementCatalog.Task>> callback)
+	{
+		CompletionStatus current = status;
+		services.getCombatAchievements().search(query, MAX_LIST_RESULTS, tasks ->
+		{
+			List<CombatAchievementCatalog.Task> remaining = new ArrayList<>();
+			for (CombatAchievementCatalog.Task task : tasks)
+			{
+				if (!current.isAlreadyComplete(new CombatAchievementRequirement(task.getId(), task.getName(), task.getTier())))
+				{
+					remaining.add(task);
+				}
+			}
+			callback.accept(remaining);
+		});
+	}
+
+	/**
+	 * Quests som inte är klara, i bokstavsordning (påbörjade markeras).
+	 */
+	static List<QuestOption> filterQuests(CompletionStatus status, String query)
+	{
+		List<QuestOption> all = new ArrayList<>();
+		AchievementTracker.questsById().values().stream()
+			.sorted(Comparator.comparing(net.runelite.api.Quest::getName))
+			.forEach(quest ->
+			{
+				QuestState state = status.getQuestState(quest.getId());
+				if (state != QuestState.FINISHED)
+				{
+					all.add(new QuestOption(quest.getId(), quest.getName(), state == QuestState.IN_PROGRESS));
+				}
+			});
+		return SearchRanking.rank(all, QuestOption::getName, query, MAX_LIST_RESULTS);
+	}
+
+	/**
+	 * Diary-nivåer som inte är klara, område för område.
+	 */
+	static List<DiaryOption> filterDiaries(CompletionStatus status, String query)
+	{
+		List<DiaryOption> all = new ArrayList<>();
+		for (DiaryArea area : DiaryArea.values())
+		{
+			for (DiaryTier tier : DiaryTier.values())
+			{
+				if (!status.isAlreadyComplete(new DiaryRequirement(area, tier)))
+				{
+					all.add(new DiaryOption(area, tier));
+				}
+			}
+		}
+		return SearchRanking.rank(all, DiaryOption::toString, query, MAX_LIST_RESULTS);
+	}
+
+	static int parseLevel(String text)
+	{
+		try
+		{
+			int level = Integer.parseInt(text);
+			if (level >= SkillRequirement.MIN_LEVEL && level <= SkillRequirement.MAX_LEVEL)
+			{
+				return level;
+			}
+		}
+		catch (NumberFormatException e)
+		{
+			// Faller igenom till felmeddelandet nedan.
+		}
+		throw new IllegalArgumentException("Enter a level between " + SkillRequirement.MIN_LEVEL
+			+ " and " + SkillRequirement.MAX_LEVEL + ".");
+	}
+
+	static long parseXp(String text)
+	{
+		long xp = parseAmount(text);
+		if (xp >= 1 && xp <= SkillRequirement.MAX_XP)
+		{
+			return xp;
+		}
+		throw new IllegalArgumentException("Enter an XP amount between 1 and 200m.");
+	}
+
+	static long parseQuantity(String text)
+	{
+		long quantity = parseAmount(text);
+		if (quantity >= 1 && quantity <= ItemRequirement.MAX_QUANTITY)
+		{
+			return quantity;
+		}
+		throw new IllegalArgumentException("Enter a quantity between 1 and "
+			+ QuantityFormatter.formatNumber(ItemRequirement.MAX_QUANTITY) + ".");
+	}
+
+	// Klientens parser förstår både "13,034,431" och förkortningar som "13m"; -1 vid fel.
+	private static long parseAmount(String text)
+	{
+		try
+		{
+			return QuantityFormatter.parseQuantity(text.replace(",", "").replace(" ", ""));
+		}
+		catch (ParseException | NumberFormatException e)
+		{
+			return -1;
+		}
+	}
+
+	private static Skill[] trackableSkills()
+	{
+		List<Skill> skills = new ArrayList<>();
+		for (Skill skill : Skill.values())
+		{
+			if (SkillTracker.isTrackable(skill))
+			{
+				skills.add(skill);
+			}
+		}
+		return skills.toArray(new Skill[0]);
+	}
+
+	private static final class FocusOnShow implements AncestorListener
+	{
+		@Override
+		public void ancestorAdded(AncestorEvent event)
+		{
+			event.getComponent().requestFocusInWindow();
+		}
+
+		@Override
+		public void ancestorRemoved(AncestorEvent event)
+		{
+		}
+
+		@Override
+		public void ancestorMoved(AncestorEvent event)
+		{
+		}
+	}
+}

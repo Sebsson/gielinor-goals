@@ -1,0 +1,466 @@
+/*
+ * Copyright (c) 2026, Sebas
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+package com.gielinorgoals;
+
+import com.gielinorgoals.model.DiaryJournal;
+import com.gielinorgoals.model.DiaryRequirement;
+import com.gielinorgoals.model.GameData;
+import com.gielinorgoals.model.Goal;
+import com.gielinorgoals.model.GoalEvaluator;
+import com.gielinorgoals.model.GoalProgress;
+import com.gielinorgoals.model.GoalTree;
+import com.gielinorgoals.model.Requirement;
+import com.gielinorgoals.persistence.GoalSerializer;
+import com.gielinorgoals.persistence.LoadResult;
+import com.gielinorgoals.persistence.SchemaMigrator;
+import com.google.gson.Gson;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import net.runelite.client.config.ConfigManager;
+
+/**
+ * Äger målträdet för den aktiva RuneScape-profilen, utvärderar automatiska mål mot
+ * senaste spelläget och sparar varje ändring via ConfigManager. Alla metoder anropas på EDT.
+ */
+@Slf4j
+@Singleton
+public class GoalManager
+{
+	static final String GOALS_KEY = "goals";
+	static final String CORRUPT_BACKUP_KEY = "goalsCorruptBackup";
+	// Kopia av datan som den såg ut före migrering till version N.
+	static final String MIGRATION_BACKUP_KEY_PREFIX = "goalsBackupBeforeV";
+
+	private final ConfigManager configManager;
+	private final GoalSerializer serializer;
+
+	// Profilen fångas vid laddning så att ändringar efter utloggning hamnar rätt.
+	@Getter
+	@Nullable
+	private String profileKey;
+	@Getter
+	private GoalTree tree = new GoalTree();
+	@Getter
+	private LoadResult.Status loadStatus = LoadResult.Status.OK;
+
+	// Senaste spelläget och vilken profil det hör till.
+	private GameData gameData = GameData.EMPTY;
+	@Nullable
+	private String gameDataProfileKey;
+	private Map<String, GoalProgress> progress = Collections.emptyMap();
+
+	private Runnable listener = () ->
+	{
+	};
+	private Consumer<List<Goal>> completionListener = goals ->
+	{
+	};
+
+	@Inject
+	GoalManager(ConfigManager configManager, Gson gson)
+	{
+		this.configManager = configManager;
+		this.serializer = new GoalSerializer(gson, new SchemaMigrator());
+	}
+
+	public void setListener(Runnable listener)
+	{
+		this.listener = listener;
+	}
+
+	/**
+	 * Anropas med mål som bockats av automatiskt när spelläget ändrats.
+	 */
+	public void setCompletionListener(Consumer<List<Goal>> completionListener)
+	{
+		this.completionListener = completionListener;
+	}
+
+	public boolean hasProfile()
+	{
+		return profileKey != null;
+	}
+
+	public boolean isEditable()
+	{
+		return hasProfile() && loadStatus != LoadResult.Status.NEWER_VERSION;
+	}
+
+	@Nullable
+	public GoalProgress getProgress(String goalId)
+	{
+		return progress.get(goalId);
+	}
+
+	/**
+	 * @return när banken senast sågs för den laddade profilen, eller null om det är okänt
+	 */
+	@Nullable
+	public Long getBankSeenAt()
+	{
+		if (!hasProfile() || !Objects.equals(profileKey, gameDataProfileKey))
+		{
+			return null;
+		}
+		return gameData.getBankSeenAt();
+	}
+
+	/**
+	 * Senaste spelläget om det hör till den laddade profilen, annars ett tomt läge.
+	 */
+	public GameData getCurrentGameData()
+	{
+		return hasGameData() ? gameData : GameData.EMPTY;
+	}
+
+	/**
+	 * @param exceptGoalId mål som inte räknas, t.ex. det som håller på att redigeras
+	 */
+	public boolean hasGoalWithRequirement(Requirement requirement, @Nullable String exceptGoalId)
+	{
+		for (Goal goal : tree.flatten())
+		{
+			if (!goal.getId().equals(exceptGoalId) && requirement.equals(goal.getRequirement()))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean hasGameData()
+	{
+		return hasProfile() && Objects.equals(profileKey, gameDataProfileKey);
+	}
+
+	public void loadProfile(@Nullable String newProfileKey)
+	{
+		profileKey = newProfileKey;
+		if (newProfileKey == null)
+		{
+			unload();
+			return;
+		}
+
+		String json = configManager.getConfiguration(GielinorGoalsConfig.GROUP, newProfileKey, GOALS_KEY);
+		LoadResult result = serializer.deserialize(json);
+		loadStatus = result.getStatus();
+		tree = new GoalTree(new ArrayList<>(result.getGoals()));
+
+		if (result.getStatus() == LoadResult.Status.CORRUPT)
+		{
+			// Rådatan sparas undan innan något kan skriva över den.
+			log.warn("Could not read saved goals, keeping a backup");
+			configManager.setConfiguration(GielinorGoalsConfig.GROUP, newProfileKey, CORRUPT_BACKUP_KEY, json);
+		}
+		else if (result.isMigrated())
+		{
+			configManager.setConfiguration(GielinorGoalsConfig.GROUP, newProfileKey,
+				MIGRATION_BACKUP_KEY_PREFIX + SchemaMigrator.CURRENT_VERSION, json);
+			save();
+		}
+
+		// Mål som nåtts medan pluginet var avstängt bockas av tyst.
+		if (!evaluate().isEmpty())
+		{
+			save();
+		}
+		listener.run();
+	}
+
+	public void unload()
+	{
+		profileKey = null;
+		tree = new GoalTree();
+		loadStatus = LoadResult.Status.OK;
+		progress = Collections.emptyMap();
+		listener.run();
+	}
+
+	/**
+	 * Nytt spelläge från trackers. Data från en annan profil än den laddade ignoreras.
+	 */
+	public void updateGameData(@Nullable String dataProfileKey, GameData data)
+	{
+		gameDataProfileKey = dataProfileKey;
+		gameData = data;
+
+		List<Goal> completed = evaluate();
+		if (!completed.isEmpty())
+		{
+			save();
+			completionListener.accept(completed);
+		}
+		listener.run();
+	}
+
+	/**
+	 * Lägger in uppgifterna från en öppnad diary-journal som delmål under de diary-mål
+	 * som gäller samma område, och bockar av uppgifter som är överstrukna i journalen.
+	 * Befintliga delmål matchas på text, så egna ändringar och manuella bockar finns kvar.
+	 *
+	 * @return meddelanden att visa i chatten (tomt om inget hände)
+	 */
+	public List<String> applyDiaryJournal(DiaryJournal journal)
+	{
+		List<String> messages = new ArrayList<>();
+		if (!isEditable())
+		{
+			return messages;
+		}
+
+		long now = System.currentTimeMillis();
+		boolean changed = false;
+		for (Goal goal : tree.flatten())
+		{
+			if (!(goal.getRequirement() instanceof DiaryRequirement) || goal.isCompleted())
+			{
+				continue;
+			}
+			DiaryRequirement diary = (DiaryRequirement) goal.getRequirement();
+			if (diary.getArea() != journal.getArea())
+			{
+				continue;
+			}
+
+			Integer mismatched = journal.getMismatchedTiers().get(diary.getTier());
+			if (mismatched != null)
+			{
+				messages.add("Could not read the " + diary.describe() + " tasks (found " + mismatched + " of "
+					+ diary.getArea().taskTotalFor(diary.getTier()) + ").");
+				continue;
+			}
+
+			int added = 0;
+			int ticked = 0;
+			for (DiaryJournal.Task task : journal.tasks(diary.getTier()))
+			{
+				Goal child = findChildByTitle(goal, task.getText());
+				if (child == null)
+				{
+					child = new Goal(task.getText());
+					if (task.isDone())
+					{
+						child.markCompleted(true, now);
+					}
+					goal.getChildren().add(child);
+					added++;
+				}
+				else if (task.isDone() && !child.isCompleted())
+				{
+					child.markCompleted(true, now);
+					ticked++;
+				}
+			}
+
+			if (added > 0)
+			{
+				messages.add("Added " + added + " tasks to " + goal.getDisplayTitle() + ".");
+			}
+			if (ticked > 0)
+			{
+				messages.add("Ticked off " + ticked + " " + diary.describe() + " tasks.");
+			}
+			changed |= added > 0 || ticked > 0;
+		}
+
+		if (changed)
+		{
+			evaluate();
+			save();
+			listener.run();
+		}
+		return messages;
+	}
+
+	@Nullable
+	private static Goal findChildByTitle(Goal parent, String title)
+	{
+		for (Goal child : parent.getChildren())
+		{
+			if (title.equalsIgnoreCase(child.getTitle()))
+			{
+				return child;
+			}
+		}
+		return null;
+	}
+
+	public void addGoal(@Nullable String parentId, String title, @Nullable String note, @Nullable Requirement requirement)
+	{
+		String trimmed = title.trim();
+		if (trimmed.isEmpty() && requirement == null)
+		{
+			return;
+		}
+
+		Goal goal = new Goal(trimmed);
+		goal.setNote(emptyToNull(note));
+		goal.setRequirement(requirement);
+		apply(tree -> tree.add(parentId, goal));
+	}
+
+	public void editGoal(String id, String title, @Nullable String note, @Nullable Requirement requirement)
+	{
+		String trimmed = title.trim();
+		if (trimmed.isEmpty() && requirement == null)
+		{
+			return;
+		}
+
+		apply(tree ->
+		{
+			Goal goal = tree.find(id);
+			if (goal == null)
+			{
+				return false;
+			}
+
+			// Ett nytt krav kan vara olöst, så då börjar målet om som ej klart.
+			if (!Objects.equals(goal.getRequirement(), requirement) && requirement != null)
+			{
+				goal.markCompleted(false, 0L);
+			}
+			goal.setTitle(trimmed);
+			goal.setNote(emptyToNull(note));
+			goal.setRequirement(requirement);
+			return true;
+		});
+	}
+
+	public void removeGoal(String id)
+	{
+		apply(tree -> tree.remove(id));
+	}
+
+	public void setCompleted(String id, boolean completed)
+	{
+		apply(tree -> tree.setCompleted(id, completed, System.currentTimeMillis()));
+	}
+
+	public void toggleExpanded(String id)
+	{
+		apply(tree ->
+		{
+			Goal goal = tree.find(id);
+			if (goal == null)
+			{
+				return false;
+			}
+			goal.setExpanded(!goal.isExpanded());
+			return true;
+		});
+	}
+
+	public void moveUp(String id)
+	{
+		apply(tree -> tree.moveUp(id));
+	}
+
+	public void moveDown(String id)
+	{
+		apply(tree -> tree.moveDown(id));
+	}
+
+	public void indent(String id)
+	{
+		apply(tree -> tree.indent(id));
+	}
+
+	public void outdent(String id)
+	{
+		apply(tree -> tree.outdent(id));
+	}
+
+	// Kör en ändring, och sparar och uppdaterar UI:t bara om något faktiskt ändrades.
+	// Mål som blir klara direkt av användarens ändring ger inget chattmeddelande.
+	private void apply(Predicate<GoalTree> change)
+	{
+		if (!isEditable())
+		{
+			return;
+		}
+
+		if (change.test(tree))
+		{
+			evaluate();
+			save();
+			listener.run();
+		}
+	}
+
+	/**
+	 * Utvärderar automatiska mål mot senaste spelläget, om det hör till aktuell profil.
+	 *
+	 * @return mål som just bockades av
+	 */
+	private List<Goal> evaluate()
+	{
+		if (!isEditable() || !Objects.equals(profileKey, gameDataProfileKey))
+		{
+			progress = Collections.emptyMap();
+			return Collections.emptyList();
+		}
+
+		GoalEvaluator.Result result = GoalEvaluator.evaluate(tree, gameData, System.currentTimeMillis());
+		progress = result.getProgress();
+		return result.getNewlyCompleted();
+	}
+
+	private void save()
+	{
+		if (!isEditable())
+		{
+			return;
+		}
+
+		// ConfigManager håller värdet i minnet och skriver till disk själv i bakgrunden.
+		configManager.setConfiguration(GielinorGoalsConfig.GROUP, profileKey, GOALS_KEY,
+			serializer.serialize(tree.getRoots()));
+		// En lyckad sparning ersätter korrupt data, så varningen behövs inte längre.
+		loadStatus = LoadResult.Status.OK;
+	}
+
+	@Nullable
+	private static String emptyToNull(@Nullable String value)
+	{
+		if (value == null)
+		{
+			return null;
+		}
+		String trimmed = value.trim();
+		return trimmed.isEmpty() ? null : trimmed;
+	}
+}

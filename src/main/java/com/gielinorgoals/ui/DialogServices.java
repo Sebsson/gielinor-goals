@@ -1,0 +1,76 @@
+/*
+ * Copyright (c) 2026, Sebas
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+package com.gielinorgoals.ui;
+
+import com.gielinorgoals.GoalManager;
+import com.gielinorgoals.model.GameData;
+import com.gielinorgoals.model.Requirement;
+import com.gielinorgoals.tracking.CompletionLookup;
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import lombok.Getter;
+
+/**
+ * Samlar tjänster som dialogerna och raderna behöver, så att de inte måste skickas en och en.
+ * Används på EDT.
+ */
+@Singleton
+public class DialogServices
+{
+	@Getter
+	private final ItemSearch itemSearch;
+	@Getter
+	private final CombatAchievementCatalog combatAchievements;
+	@Getter
+	private final CompletionLookup completionLookup;
+	@Getter
+	private final GoalIcons icons;
+	private final GoalManager goalManager;
+
+	@Inject
+	DialogServices(ItemSearch itemSearch, CombatAchievementCatalog combatAchievements,
+		CompletionLookup completionLookup, GoalIcons icons, GoalManager goalManager)
+	{
+		this.itemSearch = itemSearch;
+		this.combatAchievements = combatAchievements;
+		this.completionLookup = completionLookup;
+		this.icons = icons;
+		this.goalManager = goalManager;
+	}
+
+	/**
+	 * Senaste spelläget för den laddade profilen (XP, föremål), eller tomt om det inte är känt.
+	 */
+	public GameData currentGameData()
+	{
+		return goalManager.getCurrentGameData();
+	}
+
+	public boolean isDuplicate(Requirement requirement, @Nullable String exceptGoalId)
+	{
+		return goalManager.hasGoalWithRequirement(requirement, exceptGoalId);
+	}
+}
