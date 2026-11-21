@@ -118,6 +118,35 @@ public class GoalSerializerTest
 	}
 
 	@Test
+	public void version5LoadsIntoVersion6WithoutDataLoss()
+	{
+		String json = "{\"schemaVersion\":5,\"goals\":[{\"id\":\"a\",\"title\":\"Barrows gloves\",\"note\":\"RFD\","
+			+ "\"completed\":true,\"completedAt\":1700000000000,\"expanded\":false,\"children\":["
+			+ "{\"id\":\"b\",\"title\":\"\",\"completed\":false,\"expanded\":true,\"children\":[],"
+			+ "\"requirement\":{\"type\":\"SKILL\",\"skill\":\"COOKING\",\"mode\":\"LEVEL\",\"target\":70}}]}]}";
+
+		LoadResult result = serializer.deserialize(json);
+
+		assertEquals(LoadResult.Status.OK, result.getStatus());
+		assertTrue(result.isMigrated());
+		Goal parent = result.getGoals().get(0);
+		assertEquals("Barrows gloves", parent.getTitle());
+		assertEquals("RFD", parent.getNote());
+		assertTrue(parent.isCompleted());
+		assertEquals(Long.valueOf(1_700_000_000_000L), parent.getCompletedAt());
+		assertFalse(parent.isExpanded());
+		// Nya fält: inget datum hittas på för gamla mål.
+		assertNull(parent.getCreatedAt());
+		assertFalse(parent.isCompletedAtApprox());
+		Goal child = parent.getChildren().get(0);
+		assertEquals(SkillRequirement.level(Skill.COOKING, 70), child.getRequirement());
+		assertNull(child.getCreatedAt());
+
+		JsonObject saved = new Gson().fromJson(serializer.serialize(result.getGoals()), JsonObject.class);
+		assertEquals(6, saved.get("schemaVersion").getAsInt());
+	}
+
+	@Test
 	public void xpGainPastMaxXpIsDroppedAsInvalid()
 	{
 		String json = "{\"schemaVersion\":5,\"goals\":[{\"id\":\"a\",\"title\":\"x\",\"requirement\":"

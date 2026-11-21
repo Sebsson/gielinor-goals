@@ -64,6 +64,8 @@ class GoalRow extends JPanel
 	private static final int PROGRESS_STEPS = 1000;
 	// Plats för typikonen (föremål är 36 px breda, övriga 16 px).
 	private static final int ICON_WIDTH = 24;
+	// Bakgrund för målet som visas från Completed-fliken.
+	private static final Color HIGHLIGHT_COLOR = new Color(74, 60, 30);
 
 	private final Goal goal;
 	@Nullable
@@ -72,9 +74,10 @@ class GoalRow extends JPanel
 	private final GoalManager goalManager;
 	private final DialogServices services;
 	private final boolean editable;
+	private final Color baseBackground;
 
 	GoalRow(Goal goal, @Nullable GoalProgress progress, int depth, GoalTree tree, GoalManager goalManager,
-		DialogServices services, boolean editable)
+		DialogServices services, boolean editable, boolean highlighted)
 	{
 		this.goal = goal;
 		this.progress = progress;
@@ -82,9 +85,10 @@ class GoalRow extends JPanel
 		this.goalManager = goalManager;
 		this.services = services;
 		this.editable = editable;
+		this.baseBackground = highlighted ? HIGHLIGHT_COLOR : ColorScheme.DARKER_GRAY_COLOR;
 
 		setLayout(new BorderLayout(4, 0));
-		setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		setBackground(baseBackground);
 		// Indrag för delmål, sedan en färgad kant som visar status, sedan luft runt innehållet.
 		setBorder(new CompoundBorder(
 			new EmptyBorder(0, depth * INDENT_PX, 0, 0),
@@ -140,7 +144,7 @@ class GoalRow extends JPanel
 				// Musen kan ha gått in i en av radens egna komponenter.
 				if (getMousePosition(true) == null)
 				{
-					setBackground(ColorScheme.DARKER_GRAY_COLOR);
+					setBackground(baseBackground);
 				}
 			}
 		};

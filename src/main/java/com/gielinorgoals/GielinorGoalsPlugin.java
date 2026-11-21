@@ -30,6 +30,7 @@ import com.gielinorgoals.model.NextGoals;
 import com.gielinorgoals.tracking.AchievementTracker;
 import com.gielinorgoals.tracking.DiaryJournalParser;
 import com.gielinorgoals.tracking.GameSnapshot;
+import com.gielinorgoals.tracking.InitialSync;
 import com.gielinorgoals.tracking.ItemTracker;
 import com.gielinorgoals.tracking.SkillTracker;
 import com.gielinorgoals.tracking.WatchedAchievements;
@@ -126,6 +127,9 @@ public class GielinorGoalsPlugin extends Plugin
 	@Inject
 	private GoalCompletionNotifier completionNotifier;
 
+	@Inject
+	private InitialSync initialSync;
+
 	private GielinorGoalsPanel panel;
 	private NavigationButton navigationButton;
 
@@ -165,7 +169,7 @@ public class GielinorGoalsPlugin extends Plugin
 		overlayManager.add(goalCompletedOverlay);
 
 		// Mål som klarades medan pluginet var avstängt ska inte ge popups.
-		completionNotifier.startQuietPeriod();
+		initialSync.start();
 		// Om pluginet slås på medan man redan är inloggad finns profilen redan.
 		goalManager.loadProfile(configManager.getRSProfileKey());
 	}
@@ -199,7 +203,7 @@ public class GielinorGoalsPlugin extends Plugin
 		{
 			// Notiser från förra profilen visas inte, och första synken för den nya är tyst.
 			completionNotifier.clear();
-			completionNotifier.startQuietPeriod();
+			initialSync.start();
 			goalManager.loadProfile(newProfile);
 		});
 	}
@@ -220,7 +224,7 @@ public class GielinorGoalsPlugin extends Plugin
 		if (event.getGameState() == GameState.LOGGED_IN)
 		{
 			// Första synken efter inloggning (och världsbyte) ska bara bocka av tyst.
-			completionNotifier.startQuietPeriod();
+			initialSync.start();
 		}
 		else if (event.getGameState() == GameState.LOGIN_SCREEN)
 		{
@@ -379,7 +383,8 @@ public class GielinorGoalsPlugin extends Plugin
 	{
 		if (GielinorGoalsConfig.GROUP.equals(event.getGroup())
 			&& (GielinorGoalsConfig.HIDE_COMPLETED_KEY.equals(event.getKey())
-			|| GielinorGoalsConfig.OVERLAY_GOAL_COUNT_KEY.equals(event.getKey())))
+			|| GielinorGoalsConfig.OVERLAY_GOAL_COUNT_KEY.equals(event.getKey())
+			|| GielinorGoalsConfig.SHOW_TIME_TO_COMPLETE_KEY.equals(event.getKey())))
 		{
 			SwingUtilities.invokeLater(() ->
 			{

@@ -44,6 +44,11 @@ public class Goal
 	private boolean completed;
 	// Tidpunkt (epoch ms) då målet bockades av, null om det inte är klart.
 	private Long completedAt;
+	// True när completedAt bara är när målet upptäcktes som klart (första synken efter
+	// inloggning, profilbyte, eller redan uppfyllt när det lades till), inte när det klarades.
+	private boolean completedAtApprox;
+	// Tidpunkt (epoch ms) då målet skapades; null för mål från före schemaversion 6.
+	private Long createdAt;
 	private boolean expanded = true;
 	// Null betyder ett manuellt mål som bara bockas av för hand.
 	private Requirement requirement;
@@ -57,6 +62,7 @@ public class Goal
 	{
 		this.id = UUID.randomUUID().toString();
 		this.title = title;
+		this.createdAt = System.currentTimeMillis();
 	}
 
 	/**
@@ -76,9 +82,22 @@ public class Goal
 		return children != null && !children.isEmpty();
 	}
 
+	/**
+	 * Bockar av eller avmarkerar målet med ett exakt datum. Avmarkering nollställer
+	 * både datumet och approx-flaggan.
+	 */
 	public void markCompleted(boolean completed, long now)
+	{
+		markCompleted(completed, now, false);
+	}
+
+	/**
+	 * @param approx true om {@code now} bara är när målet upptäcktes som klart
+	 */
+	public void markCompleted(boolean completed, long now, boolean approx)
 	{
 		this.completed = completed;
 		this.completedAt = completed ? now : null;
+		this.completedAtApprox = completed && approx;
 	}
 }

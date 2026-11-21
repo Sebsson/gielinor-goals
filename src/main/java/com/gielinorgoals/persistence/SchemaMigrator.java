@@ -45,8 +45,10 @@ public class SchemaMigrator
 	 * 4 – kravtyperna QUEST, DIARY och COMBAT_ACHIEVEMENT (M4).
 	 * 5 – skill-läget XP_GAIN med fältet startXp. En äldre version känner inte igen
 	 *     läget och skulle annars göra målet manuellt.
+	 * 6 – valfria fält createdAt och completedAtApprox på mål (Completed-fliken).
+	 *     Gamla mål får null/false, inga datum hittas på.
 	 */
-	public static final int CURRENT_VERSION = 5;
+	public static final int CURRENT_VERSION = 6;
 	static final String VERSION_FIELD = "schemaVersion";
 
 	// Nyckel = versionen steget uppgraderar från.
@@ -58,7 +60,8 @@ public class SchemaMigrator
 			1, SchemaMigrator::noStructuralChange,
 			2, SchemaMigrator::noStructuralChange,
 			3, SchemaMigrator::noStructuralChange,
-			4, SchemaMigrator::noStructuralChange));
+			4, SchemaMigrator::noStructuralChange,
+			5, SchemaMigrator::noStructuralChange));
 	}
 
 	// För versioner som bara lägger till valfria fält eller nya kravtyper.

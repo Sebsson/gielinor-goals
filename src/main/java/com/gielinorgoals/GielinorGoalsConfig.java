@@ -38,6 +38,7 @@ public interface GielinorGoalsConfig extends Config
 	String GROUP = "gielinorgoals";
 	String HIDE_COMPLETED_KEY = "hideCompleted";
 	String OVERLAY_GOAL_COUNT_KEY = "overlayGoalCount";
+	String SHOW_TIME_TO_COMPLETE_KEY = "showTimeToComplete";
 
 	@ConfigItem(
 		keyName = HIDE_COMPLETED_KEY,
@@ -153,5 +154,24 @@ public interface GielinorGoalsConfig extends Config
 	default CompletionSound rootGoalSound()
 	{
 		return CompletionSound.FANFARE;
+	}
+
+	@ConfigSection(
+		name = "Completed",
+		description = "The Completed tab in the side panel",
+		position = 20
+	)
+	String completedSection = "completed";
+
+	@ConfigItem(
+		keyName = SHOW_TIME_TO_COMPLETE_KEY,
+		name = "Show time to complete",
+		description = "Show how many days each goal took, when both dates are known",
+		position = 21,
+		section = completedSection
+	)
+	default boolean showTimeToComplete()
+	{
+		return true;
 	}
 }

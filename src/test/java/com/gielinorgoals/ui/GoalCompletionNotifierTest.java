@@ -5,6 +5,7 @@ import com.gielinorgoals.GielinorGoalsConfig;
 import com.gielinorgoals.PopupLevel;
 import com.gielinorgoals.model.Goal;
 import com.gielinorgoals.model.GoalTree;
+import com.gielinorgoals.tracking.InitialSync;
 import java.util.ArrayList;
 import java.util.List;
 import static org.junit.Assert.assertEquals;
@@ -37,6 +38,7 @@ public class GoalCompletionNotifierTest
 	};
 
 	private NotificationQueue queue;
+	private InitialSync initialSync;
 	private GoalCompletionNotifier notifier;
 	private GoalTree tree;
 	private Goal diary;
@@ -46,9 +48,10 @@ public class GoalCompletionNotifierTest
 	public void setUp()
 	{
 		queue = new NotificationQueue();
+		initialSync = new InitialSync(() -> now);
 		notifier = new GoalCompletionNotifier(config, queue, (requirement, consumer) ->
 		{
-		}, () -> now);
+		}, initialSync);
 		tree = new GoalTree();
 		diary = new Goal("Varrock Easy");
 		task = new Goal("Mine some iron");
@@ -59,7 +62,7 @@ public class GoalCompletionNotifierTest
 	@Test
 	public void firstSyncAfterLoginIsQuiet()
 	{
-		notifier.startQuietPeriod();
+		initialSync.start();
 		task.markCompleted(true, now);
 
 		notifier.onAutoCompleted(tree, List.of(task));
@@ -70,8 +73,8 @@ public class GoalCompletionNotifierTest
 	@Test
 	public void popupsResumeAfterQuietPeriod()
 	{
-		notifier.startQuietPeriod();
-		now += GoalCompletionNotifier.QUIET_PERIOD_MS;
+		initialSync.start();
+		now += InitialSync.WINDOW_MS;
 		task.markCompleted(true, now);
 
 		notifier.onAutoCompleted(tree, List.of(task));

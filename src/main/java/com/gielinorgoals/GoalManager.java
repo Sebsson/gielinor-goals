@@ -35,6 +35,7 @@ import com.gielinorgoals.model.Requirement;
 import com.gielinorgoals.persistence.GoalSerializer;
 import com.gielinorgoals.persistence.LoadResult;
 import com.gielinorgoals.persistence.SchemaMigrator;
+import com.gielinorgoals.tracking.InitialSync;
 import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -63,8 +64,28 @@ public class GoalManager
 	// Kopia av datan som den såg ut före migrering till version N.
 	static final String MIGRATION_BACKUP_KEY_PREFIX = "goalsBackupBeforeV";
 
-	private final ConfigManager configManager;
+	/**
+	 * Var målen sparas per profil. I pluginet är det ConfigManager; tester använder en karta.
+	 */
+	interface Storage
+	{
+		@Nullable
+		String get(String profileKey, String key);
+
+		void set(String profileKey, String key, String value);
+	}
+
+	private final Storage storage;
 	private final GoalSerializer serializer;
+	private final InitialSync initialSync;
+
+	/**
+	 * Räknas upp varje gång målen sparas eller en profil laddas, men inte när bara
+	 * progressen ändras. Vyer som bara bryr sig om målen (t.ex. Completed-fliken)
+	 * kan jämföra den för att slippa bygga om vid varje tick.
+	 */
+	@Getter
+	private long revision;
 
 	// Profilen fångas vid laddning så att ändringar efter utloggning hamnar rätt.
 	@Getter
@@ -89,10 +110,29 @@ public class GoalManager
 	};
 
 	@Inject
-	GoalManager(ConfigManager configManager, Gson gson)
+	GoalManager(ConfigManager configManager, Gson gson, InitialSync initialSync)
 	{
-		this.configManager = configManager;
+		this(new Storage()
+		{
+			@Override
+			public String get(String profileKey, String key)
+			{
+				return configManager.getConfiguration(GielinorGoalsConfig.GROUP, profileKey, key);
+			}
+
+			@Override
+			public void set(String profileKey, String key, String value)
+			{
+				configManager.setConfiguration(GielinorGoalsConfig.GROUP, profileKey, key, value);
+			}
+		}, gson, initialSync);
+	}
+
+	GoalManager(Storage storage, Gson gson, InitialSync initialSync)
+	{
+		this.storage = storage;
 		this.serializer = new GoalSerializer(gson, new SchemaMigrator());
+		this.initialSync = initialSync;
 	}
 
 	public void setListener(Runnable listener)
@@ -174,7 +214,7 @@ public class GoalManager
 			return;
 		}
 
-		String json = configManager.getConfiguration(GielinorGoalsConfig.GROUP, newProfileKey, GOALS_KEY);
+		String json = storage.get(newProfileKey, GOALS_KEY);
 		LoadResult result = serializer.deserialize(json);
 		loadStatus = result.getStatus();
 		tree = new GoalTree(new ArrayList<>(result.getGoals()));
@@ -183,20 +223,21 @@ public class GoalManager
 		{
 			// Rådatan sparas undan innan något kan skriva över den.
 			log.warn("Could not read saved goals, keeping a backup");
-			configManager.setConfiguration(GielinorGoalsConfig.GROUP, newProfileKey, CORRUPT_BACKUP_KEY, json);
+			storage.set(newProfileKey, CORRUPT_BACKUP_KEY, json);
 		}
 		else if (result.isMigrated())
 		{
-			configManager.setConfiguration(GielinorGoalsConfig.GROUP, newProfileKey,
+			storage.set(newProfileKey,
 				MIGRATION_BACKUP_KEY_PREFIX + SchemaMigrator.CURRENT_VERSION, json);
 			save();
 		}
 
-		// Mål som nåtts medan pluginet var avstängt bockas av tyst.
-		if (!evaluate().isEmpty())
+		// Mål som nåtts medan pluginet var avstängt bockas av tyst, med ungefärligt datum.
+		if (markApprox(evaluate()))
 		{
 			save();
 		}
+		revision++;
 		listener.run();
 	}
 
@@ -206,6 +247,7 @@ public class GoalManager
 		tree = new GoalTree();
 		loadStatus = LoadResult.Status.OK;
 		progress = Collections.emptyMap();
+		revision++;
 		listener.run();
 	}
 
@@ -220,6 +262,11 @@ public class GoalManager
 		List<Goal> completed = evaluate();
 		if (!completed.isEmpty())
 		{
+			// I första synken upptäcks mål som klarades offline; då är datumet ungefärligt.
+			if (initialSync.isActive())
+			{
+				markApprox(completed);
+			}
 			save();
 			completionListener.accept(completed);
 		}
@@ -271,16 +318,17 @@ public class GoalManager
 				if (child == null)
 				{
 					child = new Goal(task.getText());
+					// Journalen säger bara att uppgiften är gjord, inte när.
 					if (task.isDone())
 					{
-						child.markCompleted(true, now);
+						child.markCompleted(true, now, true);
 					}
 					goal.getChildren().add(child);
 					added++;
 				}
 				else if (task.isDone() && !child.isCompleted())
 				{
-					child.markCompleted(true, now);
+					child.markCompleted(true, now, true);
 					ticked++;
 				}
 			}
@@ -298,7 +346,7 @@ public class GoalManager
 
 		if (changed)
 		{
-			evaluate();
+			markApprox(evaluate());
 			save();
 			listener.run();
 		}
@@ -384,6 +432,36 @@ public class GoalManager
 		});
 	}
 
+	/**
+	 * Fäller ut alla förfäder så att målet syns i trädet.
+	 *
+	 * @return false om målet inte finns
+	 */
+	public boolean reveal(String id)
+	{
+		if (tree.find(id) == null)
+		{
+			return false;
+		}
+		apply(tree -> expandAncestors(tree, id));
+		return true;
+	}
+
+	private static boolean expandAncestors(GoalTree tree, String id)
+	{
+		boolean changed = false;
+		for (Goal parent : tree.getParents(id))
+		{
+			if (!parent.isExpanded())
+			{
+				parent.setExpanded(true);
+				changed = true;
+			}
+			changed |= expandAncestors(tree, parent.getId());
+		}
+		return changed;
+	}
+
 	public void moveUp(String id)
 	{
 		apply(tree -> tree.moveUp(id));
@@ -415,7 +493,8 @@ public class GoalManager
 
 		if (change.test(tree))
 		{
-			evaluate();
+			// Ett mål som blir klart direkt av ändringen var redan uppfyllt när det lades till.
+			markApprox(evaluate());
 			save();
 			listener.run();
 		}
@@ -439,6 +518,20 @@ public class GoalManager
 		return result.getNewlyCompleted();
 	}
 
+	/**
+	 * Markerar datumet som ungefärligt på mål som just bockades av.
+	 *
+	 * @return true om listan inte var tom
+	 */
+	private static boolean markApprox(List<Goal> completed)
+	{
+		for (Goal goal : completed)
+		{
+			goal.setCompletedAtApprox(true);
+		}
+		return !completed.isEmpty();
+	}
+
 	private void save()
 	{
 		if (!isEditable())
@@ -447,8 +540,9 @@ public class GoalManager
 		}
 
 		// ConfigManager håller värdet i minnet och skriver till disk själv i bakgrunden.
-		configManager.setConfiguration(GielinorGoalsConfig.GROUP, profileKey, GOALS_KEY,
+		storage.set(profileKey, GOALS_KEY,
 			serializer.serialize(tree.getRoots()));
+		revision++;
 		// En lyckad sparning ersätter korrupt data, så varningen behövs inte längre.
 		loadStatus = LoadResult.Status.OK;
 	}

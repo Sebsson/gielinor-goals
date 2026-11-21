@@ -33,15 +33,18 @@ import com.gielinorgoals.persistence.LoadResult;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.util.List;
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.ui.ColorScheme;
@@ -49,10 +52,13 @@ import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.ui.components.ProgressBar;
+import net.runelite.client.ui.components.materialtabs.MaterialTab;
+import net.runelite.client.ui.components.materialtabs.MaterialTabGroup;
 
 /**
- * Sidopanelen: inmatning överst och målträdet under. Hela listan byggs om vid varje
- * ändring, vilket är enkelt och räcker gott för några hundra mål.
+ * Sidopanelen med två flikar: Active (inmatning och målträdet) och Completed (loggen
+ * över klara mål). Trädet byggs om vid varje ändring, vilket är enkelt och räcker gott
+ * för några hundra mål; Completed-fliken bygger bara om när målen faktiskt ändrats.
  */
 public class GielinorGoalsPanel extends PluginPanel
 {
@@ -69,6 +75,15 @@ public class GielinorGoalsPanel extends PluginPanel
 	private final JLabel statusLabel = new JLabel();
 	private final JLabel bankLabel = new JLabel();
 	private final JPanel listPanel = new JPanel(new DynamicGridLayout(0, 1, 0, 2));
+	private final CompletedTab completedTab;
+	private final MaterialTabGroup tabGroup;
+	private final MaterialTab activeTab;
+	private final MaterialTab completedTabButton;
+
+	// Målet som visas från Completed-fliken; markeras i trädet tills man byter flik.
+	@Nullable
+	private String highlightId;
+	private boolean scrollToHighlight;
 
 	@Inject
 	GielinorGoalsPanel(GoalManager goalManager, GielinorGoalsConfig config, ConfigManager configManager,
@@ -84,8 +99,34 @@ public class GielinorGoalsPanel extends PluginPanel
 		setBorder(new EmptyBorder(10, 10, 10, 10));
 		setBackground(ColorScheme.DARK_GRAY_COLOR);
 
-		add(buildHeader(), BorderLayout.NORTH);
-		add(buildList(), BorderLayout.CENTER);
+		JPanel activeContent = new JPanel(new BorderLayout(0, 6));
+		activeContent.setOpaque(false);
+		activeContent.add(buildActiveControls(), BorderLayout.NORTH);
+		activeContent.add(buildList(), BorderLayout.CENTER);
+		completedTab = new CompletedTab(goalManager, config, services, this::showInTree);
+
+		JPanel display = new JPanel(new BorderLayout());
+		display.setOpaque(false);
+		tabGroup = new MaterialTabGroup(display);
+		activeTab = new MaterialTab("Active", tabGroup, activeContent);
+		completedTabButton = new MaterialTab("Completed", tabGroup, completedTab);
+		completedTabButton.setOnSelectEvent(() ->
+		{
+			highlightId = null;
+			completedTab.refresh();
+			return true;
+		});
+		tabGroup.addTab(activeTab);
+		tabGroup.addTab(completedTabButton);
+		tabGroup.select(activeTab);
+
+		JPanel top = new JPanel(new BorderLayout(0, 6));
+		top.setOpaque(false);
+		top.add(buildHeader(), BorderLayout.NORTH);
+		top.add(tabGroup, BorderLayout.SOUTH);
+
+		add(top, BorderLayout.NORTH);
+		add(display, BorderLayout.CENTER);
 
 		rebuild();
 	}
@@ -118,6 +159,15 @@ public class GielinorGoalsPanel extends PluginPanel
 		titleRow.add(title, BorderLayout.WEST);
 		titleRow.add(summaryLabel, BorderLayout.EAST);
 
+		JPanel header = new JPanel(new DynamicGridLayout(0, 1, 0, 5));
+		header.setOpaque(false);
+		header.add(titleRow);
+		header.add(summaryBar);
+		return header;
+	}
+
+	private JPanel buildActiveControls()
+	{
 		hideCompletedBox.setOpaque(false);
 		hideCompletedBox.setFocusPainted(false);
 		hideCompletedBox.addActionListener(e -> configManager.setConfiguration(
@@ -128,16 +178,35 @@ public class GielinorGoalsPanel extends PluginPanel
 		bankLabel.setFont(FontManager.getRunescapeSmallFont());
 		bankLabel.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 
-		JPanel header = new JPanel(new DynamicGridLayout(0, 1, 0, 5));
-		header.setOpaque(false);
-		header.add(titleRow);
-		header.add(summaryBar);
-		header.add(addButton);
-		header.add(newGoalField);
-		header.add(hideCompletedBox);
-		header.add(statusLabel);
-		header.add(bankLabel);
-		return header;
+		JPanel controls = new JPanel(new DynamicGridLayout(0, 1, 0, 5));
+		controls.setOpaque(false);
+		controls.add(addButton);
+		controls.add(newGoalField);
+		controls.add(hideCompletedBox);
+		controls.add(statusLabel);
+		controls.add(bankLabel);
+		return controls;
+	}
+
+	/**
+	 * Byter till Active-fliken och markerar målet, med förfäderna utfällda.
+	 */
+	private void showInTree(String goalId)
+	{
+		if (config.hideCompleted())
+		{
+			JOptionPane.showMessageDialog(this,
+				"Completed goals are hidden in the tree. Untick \"Hide completed\" to see this goal there.",
+				"Show in tree", JOptionPane.INFORMATION_MESSAGE);
+			return;
+		}
+
+		tabGroup.select(activeTab);
+		highlightId = goalId;
+		scrollToHighlight = true;
+		// reveal() bygger om via lyssnaren bara om något fälldes ut, därför en egen rebuild.
+		goalManager.reveal(goalId);
+		rebuild();
 	}
 
 	private JScrollPane buildList()
@@ -188,17 +257,30 @@ public class GielinorGoalsPanel extends PluginPanel
 
 		listPanel.removeAll();
 		GoalTree tree = goalManager.getTree();
-		addRows(tree, tree.getRoots(), 0, editable);
+		GoalRow highlighted = addRows(tree, tree.getRoots(), 0, editable);
 
 		updateStatus(tree);
 		updateSummary(tree);
 		updateBankStatus(tree);
 		listPanel.revalidate();
 		listPanel.repaint();
+		completedTab.refresh();
+
+		if (scrollToHighlight && highlighted != null)
+		{
+			scrollToHighlight = false;
+			// Efter layouten, när raden har fått sin plats.
+			SwingUtilities.invokeLater(() -> listPanel.scrollRectToVisible(highlighted.getBounds()));
+		}
 	}
 
-	private void addRows(GoalTree tree, List<Goal> goals, int depth, boolean editable)
+	/**
+	 * @return raden för det markerade målet, om den lades till
+	 */
+	@Nullable
+	private GoalRow addRows(GoalTree tree, List<Goal> goals, int depth, boolean editable)
 	{
+		GoalRow highlighted = null;
 		for (Goal goal : goals)
 		{
 			if (config.hideCompleted() && goal.isCompleted())
@@ -206,13 +288,21 @@ public class GielinorGoalsPanel extends PluginPanel
 				continue;
 			}
 
-			listPanel.add(new GoalRow(goal, goalManager.getProgress(goal.getId()), depth, tree, goalManager,
-				services, editable));
+			boolean isHighlighted = goal.getId().equals(highlightId);
+			GoalRow row = new GoalRow(goal, goalManager.getProgress(goal.getId()), depth, tree, goalManager,
+				services, editable, isHighlighted);
+			listPanel.add(row);
+			if (isHighlighted)
+			{
+				highlighted = row;
+			}
 			if (goal.isExpanded())
 			{
-				addRows(tree, goal.getChildren(), depth + 1, editable);
+				GoalRow below = addRows(tree, goal.getChildren(), depth + 1, editable);
+				highlighted = highlighted != null ? highlighted : below;
 			}
 		}
+		return highlighted;
 	}
 
 	private void updateSummary(GoalTree tree)

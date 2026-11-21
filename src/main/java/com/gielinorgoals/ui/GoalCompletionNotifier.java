@@ -30,56 +30,42 @@ import com.gielinorgoals.model.CompletionFilter;
 import com.gielinorgoals.model.Goal;
 import com.gielinorgoals.model.GoalTree;
 import com.gielinorgoals.model.Requirement;
+import com.gielinorgoals.tracking.InitialSync;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.LongSupplier;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
  * Gör om automatiskt klarade mål till popup-notiser: filtrerar bort delmål vars
  * förfader klarades samtidigt, väljer ljud och förbereder all text.
- * Direkt efter inloggning eller profilbyte är den tyst en stund, så att mål som
- * klarades offline (och upptäcks i första synken) bara bockas av utan popup.
+ * Under första synken ({@link InitialSync}) är den tyst, så att mål som klarades
+ * offline bara bockas av utan popup.
  */
 @Singleton
 public class GoalCompletionNotifier
 {
-	// Första synken kommer i flera steg (skills, föremål, quests, diaries) under de
-	// första sekunderna, så tystnaden gäller en stund och inte bara en batch.
-	static final long QUIET_PERIOD_MS = 10_000;
-
 	private final GielinorGoalsConfig config;
 	private final NotificationQueue queue;
 	private final BiConsumer<Requirement, Consumer<BufferedImage>> iconLoader;
-	private final LongSupplier clock;
-
-	// Sätts från både klienttråden och EDT.
-	private volatile long quietUntil;
+	private final InitialSync initialSync;
 
 	@Inject
-	GoalCompletionNotifier(GielinorGoalsConfig config, NotificationQueue queue, GoalIcons icons)
+	GoalCompletionNotifier(GielinorGoalsConfig config, NotificationQueue queue, GoalIcons icons,
+		InitialSync initialSync)
 	{
-		this(config, queue, icons::loadImage, System::currentTimeMillis);
+		this(config, queue, icons::loadImage, initialSync);
 	}
 
 	GoalCompletionNotifier(GielinorGoalsConfig config, NotificationQueue queue,
-		BiConsumer<Requirement, Consumer<BufferedImage>> iconLoader, LongSupplier clock)
+		BiConsumer<Requirement, Consumer<BufferedImage>> iconLoader, InitialSync initialSync)
 	{
 		this.config = config;
 		this.queue = queue;
 		this.iconLoader = iconLoader;
-		this.clock = clock;
-	}
-
-	/**
-	 * Anropas vid inloggning, profilbyte och när pluginet startas.
-	 */
-	public void startQuietPeriod()
-	{
-		quietUntil = clock.getAsLong() + QUIET_PERIOD_MS;
+		this.initialSync = initialSync;
 	}
 
 	public void clear()
@@ -93,7 +79,7 @@ public class GoalCompletionNotifier
 	public void onAutoCompleted(GoalTree tree, List<Goal> completed)
 	{
 		PopupLevel level = config.popupLevel();
-		if (level == PopupLevel.OFF || completed.isEmpty() || clock.getAsLong() < quietUntil)
+		if (level == PopupLevel.OFF || completed.isEmpty() || initialSync.isActive())
 		{
 			return;
 		}
