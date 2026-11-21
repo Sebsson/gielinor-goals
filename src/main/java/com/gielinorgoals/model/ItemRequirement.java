@@ -123,4 +123,13 @@ public class ItemRequirement extends Requirement
 		String label = QuantityFormatter.quantityToStackSize(count) + "/" + QuantityFormatter.quantityToStackSize(quantity);
 		return new GoalProgress(count, quantity, count >= quantity, label);
 	}
+
+	@Override
+	public String describeProgress(GoalProgress progress)
+	{
+		long left = Math.max(0, progress.getTarget() - progress.getCurrent());
+		return "You have " + QuantityFormatter.formatNumber(progress.getCurrent()) + " / "
+			+ QuantityFormatter.formatNumber(progress.getTarget())
+			+ (progress.isComplete() ? "" : "\n" + QuantityFormatter.formatNumber(left) + " left");
+	}
 }

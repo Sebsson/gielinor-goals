@@ -49,4 +49,15 @@ public abstract class Requirement
 	 */
 	@Nullable
 	public abstract GoalProgress progress(GameData data);
+
+	/**
+	 * Exakta siffror för hover-texten i panelen, en rad per radbrytning.
+	 *
+	 * @return texten, eller null om kravet inte har några siffror att visa
+	 */
+	@Nullable
+	public String describeProgress(GoalProgress progress)
+	{
+		return null;
+	}
 }

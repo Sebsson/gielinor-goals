@@ -43,8 +43,10 @@ public class SchemaMigrator
 	 *     blir skrivskyddade i stället för att tyst kasta bort kraven.
 	 * 3 – kravtypen ITEM (M3). Samma skäl: en äldre version känner inte igen typen.
 	 * 4 – kravtyperna QUEST, DIARY och COMBAT_ACHIEVEMENT (M4).
+	 * 5 – skill-läget XP_GAIN med fältet startXp. En äldre version känner inte igen
+	 *     läget och skulle annars göra målet manuellt.
 	 */
-	public static final int CURRENT_VERSION = 4;
+	public static final int CURRENT_VERSION = 5;
 	static final String VERSION_FIELD = "schemaVersion";
 
 	// Nyckel = versionen steget uppgraderar från.
@@ -55,7 +57,8 @@ public class SchemaMigrator
 		this(Map.of(
 			1, SchemaMigrator::noStructuralChange,
 			2, SchemaMigrator::noStructuralChange,
-			3, SchemaMigrator::noStructuralChange));
+			3, SchemaMigrator::noStructuralChange,
+			4, SchemaMigrator::noStructuralChange));
 	}
 
 	// För versioner som bara lägger till valfria fält eller nya kravtyper.

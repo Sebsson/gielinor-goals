@@ -32,8 +32,9 @@ import net.runelite.api.Skill;
 import net.runelite.client.util.QuantityFormatter;
 
 /**
- * Nå en viss level (även virtuell, upp till 126) eller en viss mängd XP i en skill.
- * Levelmål jämförs mot XP-gränsen för leveln, så virtuella levels fungerar likadant.
+ * Nå en viss level (även virtuell, upp till 126), en viss total XP, eller tjäna en viss
+ * mängd XP räknat från när målet skapades. Levelmål jämförs mot XP-gränsen för leveln,
+ * så virtuella levels fungerar likadant.
  */
 @Getter
 @EqualsAndHashCode(callSuper = false)
@@ -42,7 +43,9 @@ public class SkillRequirement extends Requirement
 	public enum Mode
 	{
 		LEVEL,
-		XP
+		XP,
+		// Tjäna target XP räknat från startXp.
+		XP_GAIN
 	}
 
 	public static final int MIN_LEVEL = 2;
@@ -52,6 +55,8 @@ public class SkillRequirement extends Requirement
 	private Skill skill;
 	private Mode mode;
 	private long target;
+	// XP när ett XP_GAIN-mål skapades; används inte i de andra lägena.
+	private long startXp;
 
 	// För Gson.
 	SkillRequirement()
@@ -83,6 +88,20 @@ public class SkillRequirement extends Requirement
 		return new SkillRequirement(skill, Mode.XP, xp);
 	}
 
+	/**
+	 * Tjäna {@code gain} XP räknat från {@code startXp}, spelarens XP när målet skapas.
+	 */
+	public static SkillRequirement xpGain(Skill skill, long startXp, long gain)
+	{
+		if (startXp < 0 || gain < 1 || startXp + gain > MAX_XP)
+		{
+			throw new IllegalArgumentException("Start XP plus gain must be at most " + MAX_XP);
+		}
+		SkillRequirement requirement = new SkillRequirement(skill, Mode.XP_GAIN, gain);
+		requirement.startXp = startXp;
+		return requirement;
+	}
+
 	@Override
 	public RequirementType getType()
 	{
@@ -96,6 +115,10 @@ public class SkillRequirement extends Requirement
 		{
 			return target + " " + skill.getName();
 		}
+		if (mode == Mode.XP_GAIN)
+		{
+			return "Gain " + QuantityFormatter.formatNumber(target) + " " + skill.getName() + " XP";
+		}
 		return QuantityFormatter.formatNumber(target) + " " + skill.getName() + " XP";
 	}
 
@@ -108,9 +131,15 @@ public class SkillRequirement extends Requirement
 		{
 			return false;
 		}
-		return mode == Mode.LEVEL
-			? target >= MIN_LEVEL && target <= MAX_LEVEL
-			: target >= 1 && target <= MAX_XP;
+		switch (mode)
+		{
+			case LEVEL:
+				return target >= MIN_LEVEL && target <= MAX_LEVEL;
+			case XP_GAIN:
+				return startXp >= 0 && target >= 1 && startXp + target <= MAX_XP;
+			default:
+				return target >= 1 && target <= MAX_XP;
+		}
 	}
 
 	/**
@@ -118,7 +147,15 @@ public class SkillRequirement extends Requirement
 	 */
 	public long targetXp()
 	{
-		return mode == Mode.LEVEL ? Experience.getXpForLevel((int) target) : target;
+		switch (mode)
+		{
+			case LEVEL:
+				return Experience.getXpForLevel((int) target);
+			case XP_GAIN:
+				return startXp + target;
+			default:
+				return target;
+		}
 	}
 
 	@Nullable
@@ -139,7 +176,41 @@ public class SkillRequirement extends Requirement
 			return new GoalProgress(xp, targetXp(), complete, label);
 		}
 
+		if (mode == Mode.XP_GAIN)
+		{
+			// Progress räknas som tjänad XP, så att baren börjar på noll.
+			long gained = Math.max(0, xp - startXp);
+			String label = QuantityFormatter.quantityToStackSize(gained) + "/"
+				+ QuantityFormatter.quantityToStackSize(target) + " gained";
+			return new GoalProgress(gained, target, complete, label);
+		}
+
 		String label = QuantityFormatter.quantityToStackSize(xp) + "/" + QuantityFormatter.quantityToStackSize(target);
 		return new GoalProgress(xp, target, complete, label);
+	}
+
+	@Override
+	public String describeProgress(GoalProgress progress)
+	{
+		long left = Math.max(0, progress.getTarget() - progress.getCurrent());
+		String leftText = progress.isComplete() ? "Done" : QuantityFormatter.formatNumber(left) + " XP left";
+		switch (mode)
+		{
+			case LEVEL:
+			{
+				int level = Experience.getLevelForXp((int) Math.min(progress.getCurrent(), MAX_XP));
+				return "Level " + level + " / " + target + "\n"
+					+ QuantityFormatter.formatNumber(progress.getCurrent()) + " / "
+					+ QuantityFormatter.formatNumber(progress.getTarget()) + " XP\n" + leftText;
+			}
+			case XP_GAIN:
+				return "Gained " + QuantityFormatter.formatNumber(progress.getCurrent()) + " / "
+					+ QuantityFormatter.formatNumber(target) + " XP\n" + leftText + "\n"
+					+ "Started at " + QuantityFormatter.formatNumber(startXp) + " XP, done at "
+					+ QuantityFormatter.formatNumber(targetXp()) + " XP";
+			default:
+				return QuantityFormatter.formatNumber(progress.getCurrent()) + " / "
+					+ QuantityFormatter.formatNumber(target) + " XP\n" + leftText;
+		}
 	}
 }

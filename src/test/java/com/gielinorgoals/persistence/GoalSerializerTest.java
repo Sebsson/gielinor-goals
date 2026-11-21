@@ -103,6 +103,30 @@ public class GoalSerializerTest
 	}
 
 	@Test
+	public void xpGainRequirementKeepsStartXp()
+	{
+		Goal goal = new Goal("");
+		goal.setRequirement(SkillRequirement.xpGain(Skill.MINING, 1_234_567L, 500_000L));
+
+		List<Goal> loaded = serializer.deserialize(serializer.serialize(List.of(goal))).getGoals();
+
+		SkillRequirement requirement = (SkillRequirement) loaded.get(0).getRequirement();
+		assertEquals(SkillRequirement.Mode.XP_GAIN, requirement.getMode());
+		assertEquals(1_234_567L, requirement.getStartXp());
+		assertEquals(500_000L, requirement.getTarget());
+		assertEquals("Gain 500,000 Mining XP", loaded.get(0).getDisplayTitle());
+	}
+
+	@Test
+	public void xpGainPastMaxXpIsDroppedAsInvalid()
+	{
+		String json = "{\"schemaVersion\":5,\"goals\":[{\"id\":\"a\",\"title\":\"x\",\"requirement\":"
+			+ "{\"type\":\"SKILL\",\"skill\":\"MINING\",\"mode\":\"XP_GAIN\",\"target\":2,\"startXp\":200000000}}]}";
+
+		assertEquals(null, serializer.deserialize(json).getGoals().get(0).getRequirement());
+	}
+
+	@Test
 	public void itemRequirementRoundTrips()
 	{
 		Goal goal = new Goal("");

@@ -75,6 +75,60 @@ public class SkillRequirementTest
 		SkillRequirement.xp(Skill.AGILITY, 200_000_001L);
 	}
 
+	@Test
+	public void xpGainCountsOnlyXpAfterStart()
+	{
+		SkillRequirement requirement = SkillRequirement.xpGain(Skill.MINING, 1_000_000, 500_000);
+
+		GoalProgress halfway = requirement.progress(xp(Skill.MINING, 1_250_000));
+		assertEquals(250_000, halfway.getCurrent());
+		assertEquals(500_000, halfway.getTarget());
+		assertEquals("250K/500K gained", halfway.getLabel());
+		assertFalse(halfway.isComplete());
+
+		assertTrue(requirement.progress(xp(Skill.MINING, 1_500_000)).isComplete());
+		assertEquals(1_500_000, requirement.targetXp());
+	}
+
+	@Test
+	public void xpGainNeverShowsNegativeProgress()
+	{
+		// T.ex. om startpunkten sattes på ett annat konto med mer XP.
+		GoalProgress progress = SkillRequirement.xpGain(Skill.MINING, 1_000_000, 500_000)
+			.progress(xp(Skill.MINING, 900_000));
+
+		assertEquals(0, progress.getCurrent());
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void xpGainPastMaxXpIsRejected()
+	{
+		SkillRequirement.xpGain(Skill.MINING, 199_999_999L, 2);
+	}
+
+	@Test
+	public void sameGainFromDifferentStartIsNotEqual()
+	{
+		assertFalse(SkillRequirement.xpGain(Skill.MINING, 0, 500).equals(SkillRequirement.xpGain(Skill.MINING, 10, 500)));
+		assertFalse(SkillRequirement.xpGain(Skill.MINING, 0, 500).equals(SkillRequirement.xp(Skill.MINING, 500)));
+	}
+
+	@Test
+	public void describeProgressShowsExactNumbers()
+	{
+		SkillRequirement level = SkillRequirement.level(Skill.AGILITY, 70);
+		assertEquals("Level 60 / 70\n273,742 / 737,627 XP\n463,885 XP left",
+			level.describeProgress(level.progress(xp(Skill.AGILITY, 273_742))));
+
+		SkillRequirement total = SkillRequirement.xp(Skill.AGILITY, 13_034_431);
+		assertEquals("1,000,000 / 13,034,431 XP\n12,034,431 XP left",
+			total.describeProgress(total.progress(xp(Skill.AGILITY, 1_000_000))));
+
+		SkillRequirement gain = SkillRequirement.xpGain(Skill.MINING, 1_000_000, 500_000);
+		assertEquals("Gained 250,000 / 500,000 XP\n250,000 XP left\nStarted at 1,000,000 XP, done at 1,500,000 XP",
+			gain.describeProgress(gain.progress(xp(Skill.MINING, 1_250_000))));
+	}
+
 	static GameData xp(Skill skill, long xp)
 	{
 		Map<Skill, Long> map = new EnumMap<>(Skill.class);

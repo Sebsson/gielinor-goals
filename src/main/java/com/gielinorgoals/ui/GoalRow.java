@@ -95,12 +95,19 @@ class GoalRow extends JPanel
 		left.add(buildExpandToggle(), BorderLayout.WEST);
 		left.add(buildCheckBox(), BorderLayout.CENTER);
 
+		// Samma hover-text på hela raden, så att siffrorna syns var man än håller musen.
+		String tooltip = buildTooltip();
+		setToolTipText(tooltip);
+
 		JPanel center = new JPanel(new BorderLayout(0, 3));
 		center.setOpaque(false);
-		center.add(buildTitle(depth), BorderLayout.CENTER);
+		center.setToolTipText(tooltip);
+		center.add(buildTitle(depth, tooltip), BorderLayout.CENTER);
 		if (progress != null && !goal.isCompleted())
 		{
-			center.add(buildProgressBar(progress), BorderLayout.SOUTH);
+			ProgressBar bar = buildProgressBar(progress);
+			bar.setToolTipText(tooltip);
+			center.add(bar, BorderLayout.SOUTH);
 		}
 
 		add(left, BorderLayout.WEST);
@@ -215,7 +222,7 @@ class GoalRow extends JPanel
 		return bar;
 	}
 
-	private JLabel buildTitle(int depth)
+	private JLabel buildTitle(int depth, String tooltip)
 	{
 		int width = Math.max(MIN_TEXT_WIDTH, BASE_TEXT_WIDTH - depth * INDENT_PX);
 		String text = escapeHtml(goal.getDisplayTitle());
@@ -238,15 +245,7 @@ class GoalRow extends JPanel
 		services.getIcons().apply(goal.getRequirement(), title);
 		title.setFont(FontManager.getRunescapeSmallFont());
 		title.setForeground(goal.isCompleted() ? ColorScheme.MEDIUM_GRAY_COLOR : Color.WHITE);
-		if (goal.getRequirement() instanceof DiaryRequirement && !goal.hasChildren() && !goal.isCompleted())
-		{
-			title.setToolTipText("Open the " + ((DiaryRequirement) goal.getRequirement()).getArea().getDisplayName()
-				+ " diary journal in game to add its tasks as sub-goals.");
-		}
-		if (goal.getNote() != null)
-		{
-			title.setToolTipText("<html>" + escapeHtml(goal.getNote()).replace("\n", "<br>") + "</html>");
-		}
+		title.setToolTipText(tooltip);
 
 		title.addMouseListener(new MouseAdapter()
 		{
@@ -357,6 +356,35 @@ class GoalRow extends JPanel
 			}
 		}
 		goalManager.removeGoal(goal.getId());
+	}
+
+	/**
+	 * Hover-text: målets fulla namn, exakta siffror för progressen, diary-tips och anteckning.
+	 * Byggs en gång när raden skapas.
+	 */
+	private String buildTooltip()
+	{
+		StringBuilder html = new StringBuilder("<html><b>").append(escapeHtml(goal.getDisplayTitle())).append("</b>");
+
+		String numbers = progress != null && goal.getRequirement() != null
+			? goal.getRequirement().describeProgress(progress)
+			: null;
+		if (numbers != null)
+		{
+			html.append("<br>").append(escapeHtml(numbers).replace("\n", "<br>"));
+		}
+
+		if (goal.getRequirement() instanceof DiaryRequirement && !goal.hasChildren() && !goal.isCompleted())
+		{
+			html.append("<br><i>Open the ")
+				.append(escapeHtml(((DiaryRequirement) goal.getRequirement()).getArea().getDisplayName()))
+				.append(" diary journal in game to add its tasks as sub-goals.</i>");
+		}
+		if (goal.getNote() != null)
+		{
+			html.append("<br><br>").append(escapeHtml(goal.getNote()).replace("\n", "<br>"));
+		}
+		return html.append("</html>").toString();
 	}
 
 	// Användarens text får inte tolkas som HTML i JLabel.

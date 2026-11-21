@@ -163,6 +163,8 @@ final class GoalEditDialog
 	private final JLabel targetLabel = new JLabel();
 	private final JTextField targetField = new JTextField(20);
 	private final JLabel currentSkillLabel = hintLabel();
+	// Av: målet är en total XP. På: målet är XP att tjäna räknat från nu.
+	private final JCheckBox gainBox = new JCheckBox("Count XP gained from now");
 
 	// Föremålskortet.
 	private final SearchPanel<ItemSearch.ItemOption> itemPanel;
@@ -214,6 +216,7 @@ final class GoalEditDialog
 		prefill(requirement);
 		kindBox.addActionListener(e -> updateFields());
 		skillBox.addActionListener(e -> updateCurrentSkill());
+		gainBox.addActionListener(e -> updateFields());
 		updateFields();
 		updateCurrentSkill();
 
@@ -273,6 +276,7 @@ final class GoalEditDialog
 		{
 			SkillRequirement skill = (SkillRequirement) requirement;
 			kindBox.setSelectedItem(skill.getMode() == SkillRequirement.Mode.LEVEL ? GoalKind.SKILL_LEVEL : GoalKind.SKILL_XP);
+			gainBox.setSelected(skill.getMode() == SkillRequirement.Mode.XP_GAIN);
 			skillBox.setSelectedItem(skill.getSkill());
 			targetField.setText(String.valueOf(skill.getTarget()));
 		}
@@ -354,6 +358,8 @@ final class GoalEditDialog
 		card.add(new JLabel("Skill"));
 		card.add(skillBox);
 		card.add(currentSkillLabel);
+		gainBox.setToolTipText("Off: reach a total amount of XP. On: gain this much XP starting from your XP now.");
+		card.add(gainBox);
 		card.add(targetLabel);
 		card.add(targetField);
 		return northAligned(card);
@@ -395,9 +401,19 @@ final class GoalEditDialog
 			? "What do you want to do?"
 			: "Optional - named after the goal if empty");
 		titleField.repaint();
-		targetLabel.setText(kind == GoalKind.SKILL_XP
-			? "Target XP (e.g. 13034431 or 13m)"
-			: "Target level (" + SkillRequirement.MIN_LEVEL + "-" + SkillRequirement.MAX_LEVEL + ")");
+		if (kind != GoalKind.SKILL_XP)
+		{
+			targetLabel.setText("Target level (" + SkillRequirement.MIN_LEVEL + "-" + SkillRequirement.MAX_LEVEL + ")");
+		}
+		else if (gainBox.isSelected())
+		{
+			targetLabel.setText("XP to gain (e.g. 500k or 1.5m)");
+		}
+		else
+		{
+			targetLabel.setText("Target total XP (e.g. 13034431 or 13m)");
+		}
+		gainBox.setVisible(kind == GoalKind.SKILL_XP);
 
 		// Level och XP delar samma kort.
 		GoalKind card = kind == GoalKind.SKILL_XP ? GoalKind.SKILL_LEVEL : kind;
@@ -469,7 +485,12 @@ final class GoalEditDialog
 			case SKILL_XP:
 			{
 				Skill skill = (Skill) skillBox.getSelectedItem();
-				SkillRequirement requirement = SkillRequirement.xp(skill, parseXp(targetField.getText().trim()));
+				long amount = parseXp(targetField.getText().trim());
+				if (gainBox.isSelected())
+				{
+					return buildGain(skill, amount);
+				}
+				SkillRequirement requirement = SkillRequirement.xp(skill, amount);
 				rejectIfReached(requirement, "You already have that much " + skill.getName() + " XP.");
 				return requirement;
 			}
@@ -502,6 +523,37 @@ final class GoalEditDialog
 				}
 				return null;
 		}
+	}
+
+	private SkillRequirement buildGain(Skill skill, long gain)
+	{
+		// Vid redigering behålls startpunkten om det redan var ett XP-gain-mål i samma skill,
+		// annars räknas det från spelarens XP just nu.
+		long startXp;
+		if (originalRequirement instanceof SkillRequirement
+			&& ((SkillRequirement) originalRequirement).getMode() == SkillRequirement.Mode.XP_GAIN
+			&& ((SkillRequirement) originalRequirement).getSkill() == skill)
+		{
+			startXp = ((SkillRequirement) originalRequirement).getStartXp();
+		}
+		else
+		{
+			startXp = services.currentGameData().getXp(skill);
+			if (startXp < 0)
+			{
+				throw new IllegalArgumentException("Log in first, so the goal can start from your current "
+					+ skill.getName() + " XP.");
+			}
+		}
+
+		if (startXp + gain > SkillRequirement.MAX_XP)
+		{
+			throw new IllegalArgumentException("You can gain at most "
+				+ QuantityFormatter.formatNumber(SkillRequirement.MAX_XP - startXp) + " more " + skill.getName() + " XP.");
+		}
+		SkillRequirement requirement = SkillRequirement.xpGain(skill, startXp, gain);
+		rejectIfReached(requirement, "You have already gained that much " + skill.getName() + " XP.");
+		return requirement;
 	}
 
 	// Ett skill-mål som redan är nått vore klart direkt, så det stoppas med en vänlig förklaring.
