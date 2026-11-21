@@ -209,6 +209,52 @@ public class GoalTree
 		visit(roots, visitor);
 	}
 
+	/**
+	 * Alla mål som har målet som direkt delmål. I dagens träd är det högst ett, men
+	 * anropare ska inte förutsätta det: delmål ska längre fram kunna ha flera föräldrar.
+	 */
+	public List<Goal> getParents(String id)
+	{
+		List<Goal> parents = new ArrayList<>();
+		forEach(goal ->
+		{
+			for (Goal child : goal.getChildren())
+			{
+				if (child.getId().equals(id))
+				{
+					parents.add(goal);
+					return;
+				}
+			}
+		});
+		return parents;
+	}
+
+	/**
+	 * @return true om {@code goalId} ligger någonstans under {@code ancestorId}, på valfritt djup
+	 */
+	public boolean isAncestor(String ancestorId, String goalId)
+	{
+		if (ancestorId.equals(goalId))
+		{
+			return false;
+		}
+		Goal ancestor = find(ancestorId);
+		return ancestor != null && containsBelow(ancestor.getChildren(), goalId);
+	}
+
+	private static boolean containsBelow(List<Goal> goals, String id)
+	{
+		for (Goal goal : goals)
+		{
+			if (goal.getId().equals(id) || containsBelow(goal.getChildren(), id))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public int size()
 	{
 		return flatten().size();

@@ -34,6 +34,8 @@ import com.gielinorgoals.tracking.ItemTracker;
 import com.gielinorgoals.tracking.SkillTracker;
 import com.gielinorgoals.tracking.WatchedAchievements;
 import com.gielinorgoals.ui.GielinorGoalsPanel;
+import com.gielinorgoals.ui.GoalCompletedOverlay;
+import com.gielinorgoals.ui.GoalCompletionNotifier;
 import com.gielinorgoals.ui.NextGoalOverlay;
 import com.google.inject.Provides;
 import java.awt.image.BufferedImage;
@@ -118,6 +120,12 @@ public class GielinorGoalsPlugin extends Plugin
 	@Inject
 	private NextGoalOverlay nextGoalOverlay;
 
+	@Inject
+	private GoalCompletedOverlay goalCompletedOverlay;
+
+	@Inject
+	private GoalCompletionNotifier completionNotifier;
+
 	private GielinorGoalsPanel panel;
 	private NavigationButton navigationButton;
 
@@ -154,7 +162,10 @@ public class GielinorGoalsPlugin extends Plugin
 			.build();
 		clientToolbar.addNavigation(navigationButton);
 		overlayManager.add(nextGoalOverlay);
+		overlayManager.add(goalCompletedOverlay);
 
+		// Mål som klarades medan pluginet var avstängt ska inte ge popups.
+		completionNotifier.startQuietPeriod();
 		// Om pluginet slås på medan man redan är inloggad finns profilen redan.
 		goalManager.loadProfile(configManager.getRSProfileKey());
 	}
@@ -164,6 +175,8 @@ public class GielinorGoalsPlugin extends Plugin
 	{
 		clientToolbar.removeNavigation(navigationButton);
 		overlayManager.remove(nextGoalOverlay);
+		overlayManager.remove(goalCompletedOverlay);
+		completionNotifier.clear();
 		nextGoalOverlay.setEntries(Collections.emptyList());
 		goalManager.setListener(() ->
 		{
@@ -182,7 +195,13 @@ public class GielinorGoalsPlugin extends Plugin
 	{
 		// Eventet kan komma från klienttråden; modellen ägs av EDT.
 		String newProfile = event.getNewProfile();
-		SwingUtilities.invokeLater(() -> goalManager.loadProfile(newProfile));
+		SwingUtilities.invokeLater(() ->
+		{
+			// Notiser från förra profilen visas inte, och första synken för den nya är tyst.
+			completionNotifier.clear();
+			completionNotifier.startQuietPeriod();
+			goalManager.loadProfile(newProfile);
+		});
 	}
 
 	@Subscribe
@@ -197,6 +216,16 @@ public class GielinorGoalsPlugin extends Plugin
 		skillTracker.onGameStateChanged(event.getGameState());
 		itemTracker.onGameStateChanged(event.getGameState());
 		achievementTracker.onGameStateChanged(event.getGameState());
+
+		if (event.getGameState() == GameState.LOGGED_IN)
+		{
+			// Första synken efter inloggning (och världsbyte) ska bara bocka av tyst.
+			completionNotifier.startQuietPeriod();
+		}
+		else if (event.getGameState() == GameState.LOGIN_SCREEN)
+		{
+			completionNotifier.clear();
+		}
 	}
 
 	/**
@@ -320,8 +349,10 @@ public class GielinorGoalsPlugin extends Plugin
 			: Collections.emptyList());
 	}
 
+	// Anropas bara för automatiskt klarade mål; manuella bockar i panelen går inte hit.
 	private void announceCompleted(List<Goal> goals)
 	{
+		completionNotifier.onAutoCompleted(goalManager.getTree(), goals);
 		if (!config.notifyOnCompletion())
 		{
 			return;

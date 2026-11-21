@@ -33,6 +33,7 @@ import com.gielinorgoals.model.SkillRequirement;
 import java.awt.image.BufferedImage;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -43,6 +44,7 @@ import net.runelite.api.gameval.SpriteID;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.SkillIconManager;
 import net.runelite.client.game.SpriteManager;
+import net.runelite.client.util.AsyncBufferedImage;
 import net.runelite.client.util.ImageUtil;
 
 /**
@@ -98,6 +100,35 @@ public class GoalIcons
 		}
 	}
 
+	/**
+	 * Hämtar ikonen som bild, t.ex. för overlays. {@code consumer} kan anropas direkt
+	 * eller senare från en annan tråd när bilden har laddats. Manuella mål ger ingen bild.
+	 */
+	public void loadImage(@Nullable Requirement requirement, Consumer<BufferedImage> consumer)
+	{
+		if (requirement instanceof SkillRequirement)
+		{
+			consumer.accept(skillIconManager.getSkillImage(((SkillRequirement) requirement).getSkill(), true));
+		}
+		else if (requirement instanceof ItemRequirement)
+		{
+			AsyncBufferedImage image = itemManager.getImage(((ItemRequirement) requirement).getItemId());
+			image.onLoaded(() -> consumer.accept(image));
+		}
+		else if (requirement instanceof QuestRequirement)
+		{
+			loadSprite(SpriteID.SideIcons.QUEST, consumer);
+		}
+		else if (requirement instanceof DiaryRequirement)
+		{
+			loadSprite(SpriteID.SideIcons.ACHIEVEMENT_DIARIES, consumer);
+		}
+		else if (requirement instanceof CombatAchievementRequirement)
+		{
+			loadSprite(SpriteID.SideIcons.COMBAT, consumer);
+		}
+	}
+
 	public void applyItem(int itemId, JLabel label)
 	{
 		itemManager.getImage(itemId).addTo(label);
@@ -112,6 +143,18 @@ public class GoalIcons
 			return;
 		}
 
+		loadSprite(spriteId, resized -> SwingUtilities.invokeLater(() -> label.setIcon(new ImageIcon(resized))));
+	}
+
+	private void loadSprite(int spriteId, Consumer<BufferedImage> consumer)
+	{
+		BufferedImage cached = sprites.get(spriteId);
+		if (cached != null)
+		{
+			consumer.accept(cached);
+			return;
+		}
+
 		spriteManager.getSpriteAsync(spriteId, 0, image ->
 		{
 			if (image == null)
@@ -120,7 +163,7 @@ public class GoalIcons
 			}
 			BufferedImage resized = ImageUtil.resizeImage(image, SIZE, SIZE);
 			sprites.put(spriteId, resized);
-			SwingUtilities.invokeLater(() -> label.setIcon(new ImageIcon(resized)));
+			consumer.accept(resized);
 		});
 	}
 }

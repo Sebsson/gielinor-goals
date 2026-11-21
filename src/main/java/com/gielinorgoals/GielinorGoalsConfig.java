@@ -27,7 +27,9 @@ package com.gielinorgoals;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
+import net.runelite.client.config.ConfigSection;
 import net.runelite.client.config.Range;
+import net.runelite.client.config.Units;
 
 @ConfigGroup(GielinorGoalsConfig.GROUP)
 public interface GielinorGoalsConfig extends Config
@@ -80,5 +82,76 @@ public interface GielinorGoalsConfig extends Config
 	default int overlayGoalCount()
 	{
 		return 3;
+	}
+
+	@ConfigSection(
+		name = "Notifications",
+		description = "Popup and sound when goals are completed automatically",
+		position = 10
+	)
+	String notificationsSection = "notifications";
+
+	// Enum-värdena sparas med sina namn, så konstanterna i PopupLevel och
+	// CompletionSound får inte bytas namn utan migrering.
+	@ConfigItem(
+		keyName = "popupLevel",
+		name = "Popup",
+		description = "Which automatically completed goals show a popup at the top of the screen",
+		position = 11,
+		section = notificationsSection
+	)
+	default PopupLevel popupLevel()
+	{
+		return PopupLevel.ALL;
+	}
+
+	@Range(min = 2, max = 10)
+	@Units(Units.SECONDS)
+	@ConfigItem(
+		keyName = "popupDuration",
+		name = "Popup duration",
+		description = "How long each popup stays on screen",
+		position = 12,
+		section = notificationsSection
+	)
+	default int popupDuration()
+	{
+		return 4;
+	}
+
+	@ConfigItem(
+		keyName = "soundEnabled",
+		name = "Play sound",
+		description = "Play a game sound effect with each popup (uses the in-game sound effect volume)",
+		position = 13,
+		section = notificationsSection
+	)
+	default boolean soundEnabled()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		keyName = "goalSound",
+		name = "Sub-goal sound",
+		description = "Sound for goals that are part of a bigger goal",
+		position = 14,
+		section = notificationsSection
+	)
+	default CompletionSound goalSound()
+	{
+		return CompletionSound.TROPHY_DING;
+	}
+
+	@ConfigItem(
+		keyName = "rootGoalSound",
+		name = "Main goal sound",
+		description = "Sound for top-level goals",
+		position = 15,
+		section = notificationsSection
+	)
+	default CompletionSound rootGoalSound()
+	{
+		return CompletionSound.FANFARE;
 	}
 }
