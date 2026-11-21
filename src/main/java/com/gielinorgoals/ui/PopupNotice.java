@@ -76,6 +76,18 @@ public class PopupNotice
 		this.icon = icon;
 	}
 
+	/**
+	 * Håller notisen helt synlig: flyttar starttiden så att den ligger kvar i början av
+	 * visningstiden, efter intoningen. Används medan muspekaren är över den.
+	 */
+	void hold(long now)
+	{
+		if (now - shownAt > NotificationQueue.FADE_IN_MS)
+		{
+			shownAt = now - NotificationQueue.FADE_IN_MS;
+		}
+	}
+
 	void markShown(long now)
 	{
 		shownAt = now;

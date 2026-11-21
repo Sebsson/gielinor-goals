@@ -31,6 +31,7 @@ import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -96,6 +97,22 @@ public final class CompletedLog
 		String parents;
 	}
 
+	/**
+	 * Sammanfattning över alla klara mål, oavsett filter.
+	 */
+	@Value
+	public static class Stats
+	{
+		int total;
+		int thisMonth;
+		// Senast klara målet med datum; null om inget finns.
+		@Nullable
+		Goal latest;
+		// Snittid från skapad till klar, bara mål med exakt datum och createdAt; null utan data.
+		@Nullable
+		Long averageMs;
+	}
+
 	@Value
 	public static class Section
 	{
@@ -156,6 +173,85 @@ public final class CompletedLog
 			sections.add(new Section(UNKNOWN_DATE, undated));
 		}
 		return sections;
+	}
+
+	public static Stats stats(GoalTree tree, long now, ZoneId zone)
+	{
+		YearMonth currentMonth = YearMonth.from(Instant.ofEpochMilli(now).atZone(zone));
+		int total = 0;
+		int thisMonth = 0;
+		Goal latest = null;
+		long durationSum = 0;
+		int durations = 0;
+		for (Goal goal : tree.flatten())
+		{
+			if (!goal.isCompleted())
+			{
+				continue;
+			}
+			total++;
+
+			Long completedAt = goal.getCompletedAt();
+			if (completedAt == null)
+			{
+				continue;
+			}
+			if (YearMonth.from(Instant.ofEpochMilli(completedAt).atZone(zone)).equals(currentMonth))
+			{
+				thisMonth++;
+			}
+			if (latest == null || completedAt > latest.getCompletedAt())
+			{
+				latest = goal;
+			}
+			if (!goal.isCompletedAtApprox() && goal.getCreatedAt() != null)
+			{
+				durationSum += Math.max(0, completedAt - goal.getCreatedAt());
+				durations++;
+			}
+		}
+		return new Stats(total, thisMonth, latest, durations == 0 ? null : durationSum / durations);
+	}
+
+	/**
+	 * Hur länge sedan ett datum var, räknat i kalenderdagar: "today", "yesterday", "3 days ago".
+	 * Räknas i dagar så att texten stämmer så länge listan inte byggts om (den byggs om när dagen byts).
+	 */
+	public static String daysAgo(long millis, long now, ZoneId zone)
+	{
+		LocalDate date = Instant.ofEpochMilli(millis).atZone(zone).toLocalDate();
+		LocalDate today = Instant.ofEpochMilli(now).atZone(zone).toLocalDate();
+		long days = Math.max(0, ChronoUnit.DAYS.between(date, today));
+		if (days == 0)
+		{
+			return "today";
+		}
+		return days == 1 ? "yesterday" : days + " days ago";
+	}
+
+	/**
+	 * Snittid i läsbar form: "under an hour", "5 hours", "1.5 days", "12 days".
+	 */
+	public static String formatDuration(long millis)
+	{
+		long hourMs = 60L * 60 * 1000;
+		if (millis < hourMs)
+		{
+			return "under an hour";
+		}
+		if (millis < DAY_MS)
+		{
+			long hours = millis / hourMs;
+			return hours + (hours == 1 ? " hour" : " hours");
+		}
+		double days = (double) millis / DAY_MS;
+		if (days < 10)
+		{
+			long tenths = Math.round(days * 10);
+			return (tenths % 10 == 0 ? String.valueOf(tenths / 10) : (tenths / 10) + "." + (tenths % 10))
+				+ (tenths == 10 ? " day" : " days");
+		}
+		return Math.round(days) + " days";
 	}
 
 	/**

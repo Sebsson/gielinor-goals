@@ -61,6 +61,38 @@ public class NotificationQueueTest
 	}
 
 	@Test
+	public void hoveredNoticeStaysUntilMouseLeaves()
+	{
+		PopupNotice first = notice("A", false);
+		PopupNotice second = notice("B", false);
+		queue.offer(first);
+		queue.offer(second);
+		queue.current(0);
+
+		// Musen över notisen långt efter att den skulle ha tonat ut.
+		assertSame(first, queue.current(TOTAL * 3, true));
+		assertEquals(1f, NotificationQueue.alpha(first, TOTAL * 3), 0.001);
+
+		// När musen lämnar visas den hela visningstiden och tonar sedan ut.
+		long left = TOTAL * 3;
+		assertSame(first, queue.current(left + HOLD, false));
+		assertSame(second, queue.current(left + HOLD + NotificationQueue.FADE_OUT_MS, false));
+	}
+
+	@Test
+	public void hoverDuringFadeOutBringsNoticeBack()
+	{
+		PopupNotice notice = notice("A", false);
+		queue.offer(notice);
+		queue.current(0);
+		long fadingOut = NotificationQueue.FADE_IN_MS + HOLD + NotificationQueue.FADE_OUT_MS / 2;
+
+		queue.current(fadingOut, true);
+
+		assertEquals(1f, NotificationQueue.alpha(notice, fadingOut), 0.001);
+	}
+
+	@Test
 	public void clearEmptiesQueue()
 	{
 		queue.offer(notice("A", false));

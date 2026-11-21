@@ -79,6 +79,7 @@ class CompletedTab extends JPanel
 	private final JComboBox<String> sortBox = new JComboBox<>(new String[]{"Newest first", "Oldest first"});
 	private final JCheckBox rootsOnlyBox = new JCheckBox("Only main goals");
 	private final JPanel listPanel = new JPanel(new DynamicGridLayout(0, 1, 0, 2));
+	private final JLabel statsLabel = new JLabel();
 
 	// Vad listan senast byggdes från, för att slippa bygga om i onödan.
 	private Object builtFrom;
@@ -97,7 +98,14 @@ class CompletedTab extends JPanel
 		setLayout(new BorderLayout(0, 6));
 		setOpaque(false);
 
-		add(buildFilters(), BorderLayout.NORTH);
+		statsLabel.setFont(FontManager.getRunescapeSmallFont());
+		statsLabel.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+		JPanel top = new JPanel(new BorderLayout(0, 6));
+		top.setOpaque(false);
+		top.add(statsLabel, BorderLayout.NORTH);
+		top.add(buildFilters(), BorderLayout.CENTER);
+
+		add(top, BorderLayout.NORTH);
 		add(buildList(), BorderLayout.CENTER);
 	}
 
@@ -156,6 +164,7 @@ class CompletedTab extends JPanel
 		List<CompletedLog.Section> sections = CompletedLog.build(goalManager.getTree(),
 			(CompletedLog.TypeFilter) typeBox.getSelectedItem(), rootsOnlyBox.isSelected(),
 			sortBox.getSelectedIndex() == 0, now, zone);
+		updateStats(CompletedLog.stats(goalManager.getTree(), now, zone), now, zone);
 
 		listPanel.removeAll();
 		if (sections.isEmpty())
@@ -180,6 +189,32 @@ class CompletedTab extends JPanel
 		}
 		listPanel.revalidate();
 		listPanel.repaint();
+	}
+
+	// "42 goals done · 7 this month · Latest: Fire cape (2 days ago)" och snittid om den finns.
+	private void updateStats(CompletedLog.Stats stats, long now, ZoneId zone)
+	{
+		if (stats.getTotal() == 0)
+		{
+			statsLabel.setVisible(false);
+			return;
+		}
+
+		StringBuilder text = new StringBuilder("<html>")
+			.append(stats.getTotal()).append(stats.getTotal() == 1 ? " goal done" : " goals done")
+			.append(" \u00b7 ").append(stats.getThisMonth()).append(" this month");
+		Goal latest = stats.getLatest();
+		if (latest != null)
+		{
+			text.append(" \u00b7 Latest: ").append(escapeHtml(latest.getDisplayTitle()))
+				.append(" (").append(CompletedLog.daysAgo(latest.getCompletedAt(), now, zone)).append(")");
+		}
+		if (stats.getAverageMs() != null)
+		{
+			text.append("<br>Average time per goal: ").append(CompletedLog.formatDuration(stats.getAverageMs()));
+		}
+		statsLabel.setText(text.append("</html>").toString());
+		statsLabel.setVisible(true);
 	}
 
 	private JPanel buildRow(CompletedLog.Entry entry, ZoneId zone)

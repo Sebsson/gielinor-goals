@@ -88,6 +88,19 @@ public class NotificationQueue
 	@Nullable
 	public synchronized PopupNotice current(long now)
 	{
+		return current(now, false);
+	}
+
+	/**
+	 * @param hovered om muspekaren är över notisen; då stannar den kvar och tonas inte ut
+	 */
+	@Nullable
+	public synchronized PopupNotice current(long now, boolean hovered)
+	{
+		if (current != null && hovered)
+		{
+			current.hold(now);
+		}
 		if (current != null && now - current.getShownAt() >= totalMs(current))
 		{
 			current = null;

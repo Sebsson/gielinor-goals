@@ -152,6 +152,78 @@ public class CompletedLogTest
 	}
 
 	@Test
+	public void statsCountAllCompletedGoals()
+	{
+		long now = at(2026, 12, 3, 12, 0, 0);
+		GoalTree tree = new GoalTree();
+		Goal exact = new Goal("Fire cape");
+		exact.setCreatedAt(at(2026, 11, 29, 12, 0, 0));
+		exact.markCompleted(true, at(2026, 12, 1, 12, 0, 0));
+		Goal approx = new Goal("Old quest");
+		approx.setCreatedAt(at(2026, 1, 1, 12, 0, 0));
+		approx.markCompleted(true, at(2026, 12, 2, 12, 0, 0), true);
+		Goal lastMonth = new Goal("Barrows gloves");
+		lastMonth.setCreatedAt(at(2026, 11, 1, 12, 0, 0));
+		lastMonth.markCompleted(true, at(2026, 11, 5, 12, 0, 0));
+		Goal noCreatedAt = new Goal("Legacy");
+		noCreatedAt.setCreatedAt(null);
+		noCreatedAt.markCompleted(true, at(2026, 10, 1, 12, 0, 0));
+		Goal undated = new Goal("Undated");
+		undated.setCompleted(true);
+		Goal open = new Goal("Open");
+		for (Goal goal : List.of(exact, approx, lastMonth, noCreatedAt, undated, open))
+		{
+			tree.add(null, goal);
+		}
+
+		CompletedLog.Stats stats = CompletedLog.stats(tree, now, ZONE);
+
+		assertEquals(5, stats.getTotal());
+		assertEquals(2, stats.getThisMonth());
+		assertEquals("Old quest", stats.getLatest().getTitle());
+		// Bara exakta mål med createdAt: 2 dagar och 4 dagar.
+		assertEquals(Long.valueOf(3 * CompletedLog.DAY_MS), stats.getAverageMs());
+	}
+
+	@Test
+	public void statsWithoutDurationsHaveNoAverage()
+	{
+		GoalTree tree = new GoalTree();
+		Goal approx = new Goal("Old quest");
+		approx.markCompleted(true, 1000L, true);
+		tree.add(null, approx);
+
+		CompletedLog.Stats stats = CompletedLog.stats(tree, 2000L, ZONE);
+
+		assertEquals(1, stats.getTotal());
+		assertNull(stats.getAverageMs());
+		assertEquals(0, CompletedLog.stats(new GoalTree(), 2000L, ZONE).getTotal());
+	}
+
+	@Test
+	public void daysAgoCountsCalendarDays()
+	{
+		long now = at(2026, 12, 3, 0, 0, 10);
+
+		assertEquals("today", CompletedLog.daysAgo(at(2026, 12, 3, 0, 0, 0), now, ZONE));
+		assertEquals("yesterday", CompletedLog.daysAgo(at(2026, 12, 2, 23, 59, 59), now, ZONE));
+		assertEquals("2 days ago", CompletedLog.daysAgo(at(2026, 12, 1, 0, 0, 0), now, ZONE));
+	}
+
+	@Test
+	public void formatDurationPicksReadableUnit()
+	{
+		long hour = 60L * 60 * 1000;
+		assertEquals("under an hour", CompletedLog.formatDuration(10 * 60 * 1000));
+		assertEquals("1 hour", CompletedLog.formatDuration(hour));
+		assertEquals("5 hours", CompletedLog.formatDuration(5 * hour + 59 * 60 * 1000));
+		assertEquals("1 day", CompletedLog.formatDuration(CompletedLog.DAY_MS));
+		assertEquals("1.5 days", CompletedLog.formatDuration(CompletedLog.DAY_MS * 3 / 2));
+		assertEquals("3 days", CompletedLog.formatDuration(3 * CompletedLog.DAY_MS));
+		assertEquals("12 days", CompletedLog.formatDuration(12 * CompletedLog.DAY_MS + 3 * hour));
+	}
+
+	@Test
 	public void formatDateUsesShortMonth()
 	{
 		assertEquals("12 Nov 2026", CompletedLog.formatDate(at(2026, 11, 12, 23, 30, 0), ZONE));

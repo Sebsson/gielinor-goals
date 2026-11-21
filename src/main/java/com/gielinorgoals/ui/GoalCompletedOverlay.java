@@ -32,6 +32,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.image.BufferedImage;
@@ -39,6 +40,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
+import net.runelite.api.Point;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.overlay.Overlay;
@@ -90,7 +92,7 @@ public class GoalCompletedOverlay extends Overlay
 		}
 
 		long now = System.currentTimeMillis();
-		PopupNotice notice = queue.current(now);
+		PopupNotice notice = queue.current(now, isHovered());
 		if (notice == null)
 		{
 			return null;
@@ -156,6 +158,15 @@ public class GoalCompletedOverlay extends Overlay
 		graphics.setStroke(oldStroke);
 		graphics.setComposite(oldComposite);
 		return new Dimension(width, height);
+	}
+
+	// Notisen stannar kvar medan musen är över den, så att man hinner läsa.
+	// Ytan från förra framen räcker; notisen flyttar sig inte medan den visas.
+	private boolean isHovered()
+	{
+		Rectangle bounds = getBounds();
+		Point mouse = client.getMouseCanvasPosition();
+		return bounds != null && mouse != null && !bounds.isEmpty() && bounds.contains(mouse.getX(), mouse.getY());
 	}
 
 	// Räknas ut en gång per notis; texten ändras inte medan den visas.
