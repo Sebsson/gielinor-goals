@@ -81,8 +81,9 @@ public final class NextGoals
 
 			int before = entries.size();
 			collect(tree, tree.getChildren(goal), progressById, limit, entries, visited);
-			// Inga ej klara delmål hittades, så målet självt är nästa steg.
-			if (entries.size() == before && !hasIncompleteChild(tree, goal))
+			// Inga ej klara delmål hittades, så målet självt är nästa steg. Ett aggregat
+			// föreslås aldrig själv, så att nästa mål alltid är något konkret.
+			if (entries.size() == before && !hasIncompleteChild(tree, goal) && !goal.isAggregate())
 			{
 				GoalProgress progress = progressById.apply(goal.getId());
 				entries.add(new Entry(goal.getDisplayTitle(),

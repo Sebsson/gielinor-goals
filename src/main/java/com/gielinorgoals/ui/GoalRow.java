@@ -27,16 +27,25 @@ package com.gielinorgoals.ui;
 import com.gielinorgoals.GoalManager;
 import com.gielinorgoals.model.DiaryRequirement;
 import com.gielinorgoals.model.Goal;
+import com.gielinorgoals.model.GoalEvaluator;
 import com.gielinorgoals.model.GoalProgress;
 import com.gielinorgoals.model.GoalTree;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.BasicStroke;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.Nullable;
+import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -66,6 +75,8 @@ class GoalRow extends JPanel
 	private static final int ICON_WIDTH = 24;
 	// Bakgrund för målet som visas från Completed-fliken.
 	private static final Color HIGHLIGHT_COLOR = new Color(74, 60, 30);
+	// Liten länkikon för delmål som finns under flera föräldrar; ritas en gång.
+	private static final ImageIcon LINK_ICON = new ImageIcon(drawLinkIcon());
 
 	private final Goal goal;
 	// Föräldern raden visas under och dess förälder; null betyder rotnivå.
@@ -80,6 +91,11 @@ class GoalRow extends JPanel
 	private final DialogServices services;
 	private final boolean editable;
 	private final Color baseBackground;
+	// Alla föräldrar till målet, inte bara den raden visas under.
+	private final List<Goal> parents;
+	// Räknaren för ett aggregerat mål ("142/170"), annars null.
+	@Nullable
+	private final GoalProgress counter;
 
 	GoalRow(Goal goal, @Nullable String parentId, @Nullable String grandparentId, @Nullable GoalProgress progress,
 		int depth, GoalTree tree, GoalManager goalManager, DialogServices services, boolean editable,
@@ -94,6 +110,8 @@ class GoalRow extends JPanel
 		this.services = services;
 		this.editable = editable;
 		this.baseBackground = highlighted ? HIGHLIGHT_COLOR : ColorScheme.DARKER_GRAY_COLOR;
+		this.parents = tree.getParents(goal.getId());
+		this.counter = goal.isAggregate() ? GoalEvaluator.aggregateProgress(tree, goal) : null;
 
 		setLayout(new BorderLayout(4, 0));
 		setBackground(baseBackground);
@@ -115,16 +133,28 @@ class GoalRow extends JPanel
 		center.setOpaque(false);
 		center.setToolTipText(tooltip);
 		center.add(buildTitle(depth, tooltip), BorderLayout.CENTER);
-		if (progress != null && !goal.isCompleted())
+		// Räknarmål visar hur många delmål som är klara i stället för kravets progress.
+		GoalProgress shown = counter != null ? counter : progress;
+		if (shown != null && !goal.isCompleted())
 		{
-			ProgressBar bar = buildProgressBar(progress);
+			ProgressBar bar = buildProgressBar(shown, counter != null);
 			bar.setToolTipText(tooltip);
 			center.add(bar, BorderLayout.SOUTH);
 		}
 
+		JPanel right = new JPanel(new BorderLayout(3, 0));
+		right.setOpaque(false);
+		if (parents.size() > 1)
+		{
+			JLabel link = new JLabel(LINK_ICON);
+			link.setToolTipText("Also under: " + otherParentTitles());
+			right.add(link, BorderLayout.WEST);
+		}
+		right.add(buildMenuButton(), BorderLayout.EAST);
+
 		add(left, BorderLayout.WEST);
 		add(center, BorderLayout.CENTER);
-		add(buildMenuButton(), BorderLayout.EAST);
+		add(right, BorderLayout.EAST);
 
 		MouseAdapter rowMouse = new MouseAdapter()
 		{
@@ -218,7 +248,10 @@ class GoalRow extends JPanel
 		return checkBox;
 	}
 
-	private static ProgressBar buildProgressBar(GoalProgress progress)
+	/**
+	 * @param counterColors räknarmål färgas som overlayen (vitt, gult, grönt)
+	 */
+	private static ProgressBar buildProgressBar(GoalProgress progress, boolean counterColors)
 	{
 		ProgressBar bar = new ProgressBar();
 		bar.setMaximumValue(PROGRESS_STEPS);
@@ -226,9 +259,16 @@ class GoalRow extends JPanel
 		bar.setCenterLabel(progress.getLabel());
 		bar.setLeftLabel("");
 		bar.setRightLabel("");
-		bar.setForeground(progress.isComplete()
-			? ColorScheme.PROGRESS_COMPLETE_COLOR
-			: ColorScheme.PROGRESS_INPROGRESS_COLOR);
+		if (counterColors)
+		{
+			bar.setForeground(ProgressColors.forFraction(progress.fraction()));
+		}
+		else
+		{
+			bar.setForeground(progress.isComplete()
+				? ColorScheme.PROGRESS_COMPLETE_COLOR
+				: ColorScheme.PROGRESS_INPROGRESS_COLOR);
+		}
 		bar.setBackground(ColorScheme.DARK_GRAY_COLOR);
 		bar.setPreferredSize(new Dimension(0, 12));
 		return bar;
@@ -238,7 +278,8 @@ class GoalRow extends JPanel
 	{
 		int width = Math.max(MIN_TEXT_WIDTH, BASE_TEXT_WIDTH - depth * INDENT_PX);
 		String text = escapeHtml(goal.getDisplayTitle());
-		if (goal.hasChildren())
+		// Räknarmål har siffrorna i progressbaren i stället.
+		if (goal.hasChildren() && counter == null)
 		{
 			text += " <font color='#a0a0a0'>(" + countCompletedChildren() + "/" + goal.getChildIds().size() + ")</font>";
 		}
@@ -325,8 +366,58 @@ class GoalRow extends JPanel
 		menu.add(item("Move out one level", tree.canOutdent(grandparentId, parentId, id),
 			() -> goalManager.outdent(grandparentId, parentId, id)));
 		menu.addSeparator();
+		menu.add(item("Link to another goal...", true, this::linkToAnotherGoal));
+		if (parentId != null && parents.size() > 1)
+		{
+			Goal parent = tree.find(parentId);
+			menu.add(item("Remove from " + (parent == null ? "this goal" : parent.getDisplayTitle()), true,
+				() -> goalManager.unlink(parentId, id)));
+		}
+		JCheckBoxMenuItem counterItem = new JCheckBoxMenuItem("Show as counter", goal.isAggregate());
+		counterItem.setToolTipText("Show how many sub-goals are done, e.g. 142/170, and collapse the list");
+		counterItem.addActionListener(e -> goalManager.setAggregate(id, counterItem.isSelected()));
+		menu.add(counterItem);
+		menu.addSeparator();
 		menu.add(item("Delete", true, this::delete));
 		return menu;
+	}
+
+	private void linkToAnotherGoal()
+	{
+		String newParentId = LinkGoalDialog.show(this, tree, goal);
+		if (newParentId != null)
+		{
+			goalManager.link(newParentId, goal.getId());
+		}
+	}
+
+	// Föräldrarna utom den raden visas under, t.ex. "Barrows gloves, Quest cape".
+	private String otherParentTitles()
+	{
+		List<String> titles = new ArrayList<>();
+		for (Goal parent : parents)
+		{
+			if (!parent.getId().equals(parentId))
+			{
+				titles.add(parent.getDisplayTitle());
+			}
+		}
+		return String.join(", ", titles);
+	}
+
+	private static BufferedImage drawLinkIcon()
+	{
+		BufferedImage image = new BufferedImage(12, 12, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g = image.createGraphics();
+		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g.setColor(ColorScheme.LIGHT_GRAY_COLOR);
+		g.setStroke(new BasicStroke(1.6f));
+		// Två länkar i en kedja, snett över varandra.
+		g.rotate(-Math.PI / 4, 6, 6);
+		g.drawRoundRect(0, 4, 7, 4, 4, 4);
+		g.drawRoundRect(5, 4, 7, 4, 4, 4);
+		g.dispose();
+		return image;
 	}
 
 	private static JMenuItem item(String text, boolean enabled, Runnable action)
@@ -339,30 +430,44 @@ class GoalRow extends JPanel
 
 	private void addSubGoal()
 	{
-		GoalEditDialog.Result result = GoalEditDialog.show(this, services, "Add sub-goal", null, "", null, null);
+		GoalEditDialog.Result result = GoalEditDialog.show(this, services, "Add sub-goal", null, "", null, null, false);
 		if (result != null)
 		{
-			goalManager.addGoal(goal.getId(), result.getTitle(), result.getNote(), result.getRequirement());
+			goalManager.addGoal(goal.getId(), result.getTitle(), result.getNote(), result.getRequirement(),
+				result.isAggregate());
 		}
 	}
 
 	private void edit()
 	{
 		GoalEditDialog.Result result = GoalEditDialog.show(this, services, "Edit goal", goal.getId(), goal.getTitle(), goal.getNote(),
-			goal.getRequirement());
+			goal.getRequirement(), goal.isAggregate());
 		if (result != null)
 		{
-			goalManager.editGoal(goal.getId(), result.getTitle(), result.getNote(), result.getRequirement());
+			goalManager.editGoal(goal.getId(), result.getTitle(), result.getNote(), result.getRequirement(),
+				result.isAggregate());
 		}
 	}
 
 	private void delete()
 	{
-		// Bekräfta bara när delmål försvinner också; ett enskilt mål är lätt att skapa igen.
-		if (goal.hasChildren())
+		// Bekräfta när mer än den här raden försvinner: andra föräldrar eller delmål.
+		// Ett enskilt mål utan delmål är lätt att skapa igen.
+		boolean shared = parents.size() > 1;
+		if (shared || goal.hasChildren())
 		{
-			int choice = JOptionPane.showConfirmDialog(this,
-				"Delete \"" + goal.getDisplayTitle() + "\" and its " + goal.getChildIds().size() + " sub-goal(s)?",
+			StringBuilder message = new StringBuilder("<html>Delete \"")
+				.append(escapeHtml(goal.getDisplayTitle())).append("\" completely?");
+			if (shared)
+			{
+				message.append("<br>It is under ").append(parents.size())
+					.append(" goals and will be removed from all of them.");
+			}
+			if (goal.hasChildren())
+			{
+				message.append("<br>Its sub-goals are deleted too, except those that are also under another goal.");
+			}
+			int choice = JOptionPane.showConfirmDialog(this, message.append("</html>").toString(),
 				"Delete goal", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 			if (choice != JOptionPane.YES_OPTION)
 			{
@@ -383,9 +488,17 @@ class GoalRow extends JPanel
 		String numbers = progress != null && goal.getRequirement() != null
 			? goal.getRequirement().describeProgress(progress)
 			: null;
+		if (counter != null)
+		{
+			html.append("<br>").append(counter.getLabel()).append(" sub-goals done");
+		}
 		if (numbers != null)
 		{
 			html.append("<br>").append(escapeHtml(numbers).replace("\n", "<br>"));
+		}
+		if (parents.size() > 1)
+		{
+			html.append("<br><i>Also under: ").append(escapeHtml(otherParentTitles())).append("</i>");
 		}
 
 		if (goal.getRequirement() instanceof DiaryRequirement && !goal.hasChildren() && !goal.isCompleted())

@@ -99,4 +99,87 @@ public class GoalEvaluatorTest
 		assertEquals(1, result.getNewlyCompleted().size());
 		assertEquals(agility, result.getNewlyCompleted().get(0));
 	}
+
+	@Test
+	public void aggregateCountsDirectChildrenAndCompletesWhenAllDone()
+	{
+		Goal cape = new Goal("Quest cape");
+		cape.setAggregate(true);
+		Goal q1 = new Goal("Quest 1");
+		Goal q2 = new Goal("Quest 2");
+		Goal deep = new Goal("Step of quest 2");
+		tree.add(null, cape);
+		tree.add(cape.getId(), q1);
+		tree.add(cape.getId(), q2);
+		tree.add(q2.getId(), deep);
+		q1.markCompleted(true, 1L);
+
+		GoalEvaluator.Result first = GoalEvaluator.evaluate(tree, GameData.EMPTY, 1000L);
+		GoalProgress counter = first.getProgress().get(cape.getId());
+		assertEquals("1/2", counter.getLabel());
+		assertFalse(counter.isComplete());
+		assertFalse(cape.isCompleted());
+
+		// Bara direkta delmål räknas; det djupa delmålet påverkar inte räknaren.
+		q2.markCompleted(true, 2L);
+		GoalEvaluator.Result second = GoalEvaluator.evaluate(tree, GameData.EMPTY, 2000L);
+		assertTrue(cape.isCompleted());
+		assertEquals(Long.valueOf(2000L), cape.getCompletedAt());
+		assertEquals(java.util.List.of(cape), second.getNewlyCompleted());
+		assertEquals("2/2", second.getProgress().get(cape.getId()).getLabel());
+	}
+
+	@Test
+	public void nestedAggregatesCompleteInOneEvaluationEvenWhenShared()
+	{
+		// A har X och Y, och X är även delmål till Y. Alla tre är räknarmål.
+		Goal a = new Goal("A");
+		Goal x = new Goal("X");
+		Goal y = new Goal("Y");
+		Goal leaf = new Goal("Leaf");
+		for (Goal goal : java.util.List.of(a, x, y))
+		{
+			goal.setAggregate(true);
+		}
+		tree.add(null, a);
+		tree.add(a.getId(), x);
+		tree.add(a.getId(), y);
+		tree.link(y.getId(), x.getId());
+		tree.add(x.getId(), leaf);
+		leaf.markCompleted(true, 1L);
+
+		GoalEvaluator.Result result = GoalEvaluator.evaluate(tree, GameData.EMPTY, 1000L);
+
+		assertTrue(x.isCompleted());
+		assertTrue(y.isCompleted());
+		assertTrue(a.isCompleted());
+		assertEquals(3, result.getNewlyCompleted().size());
+	}
+
+	@Test
+	public void aggregateWithRequirementIsNotCompletedByChildren()
+	{
+		manual.setAggregate(true);
+		manual.setRequirement(SkillRequirement.level(Skill.MINING, 99));
+		agility.markCompleted(true, 1L);
+
+		GoalEvaluator.Result result = GoalEvaluator.evaluate(tree, SkillRequirementTest.xp(Skill.MINING, 0), 1000L);
+
+		// Alla delmål är klara, men med eget krav styr kravet när målet är klart,
+		// och kravets progress visas (level 1 av 99).
+		assertFalse(manual.isCompleted());
+		assertEquals("1/99", result.getProgress().get(manual.getId()).getLabel());
+	}
+
+	@Test
+	public void emptyAggregateIsNeverCompleted()
+	{
+		Goal empty = new Goal("Empty");
+		empty.setAggregate(true);
+		tree.add(null, empty);
+
+		GoalEvaluator.evaluate(tree, GameData.EMPTY, 1000L);
+
+		assertFalse(empty.isCompleted());
+	}
 }

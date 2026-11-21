@@ -368,6 +368,15 @@ public class GoalManager
 
 	public void addGoal(@Nullable String parentId, String title, @Nullable String note, @Nullable Requirement requirement)
 	{
+		addGoal(parentId, title, note, requirement, false);
+	}
+
+	/**
+	 * @param aggregate visa målet som räknare över sina delmål ("X/Y")
+	 */
+	public void addGoal(@Nullable String parentId, String title, @Nullable String note, @Nullable Requirement requirement,
+		boolean aggregate)
+	{
 		String trimmed = title.trim();
 		if (trimmed.isEmpty() && requirement == null)
 		{
@@ -377,10 +386,18 @@ public class GoalManager
 		Goal goal = new Goal(trimmed);
 		goal.setNote(emptyToNull(note));
 		goal.setRequirement(requirement);
+		goal.setAggregate(aggregate);
 		apply(tree -> tree.add(parentId, goal));
 	}
 
 	public void editGoal(String id, String title, @Nullable String note, @Nullable Requirement requirement)
+	{
+		Goal goal = tree.find(id);
+		editGoal(id, title, note, requirement, goal != null && goal.isAggregate());
+	}
+
+	public void editGoal(String id, String title, @Nullable String note, @Nullable Requirement requirement,
+		boolean aggregate)
 	{
 		String trimmed = title.trim();
 		if (trimmed.isEmpty() && requirement == null)
@@ -404,8 +421,52 @@ public class GoalManager
 			goal.setTitle(trimmed);
 			goal.setNote(emptyToNull(note));
 			goal.setRequirement(requirement);
+			applyAggregate(goal, aggregate);
 			return true;
 		});
+	}
+
+	/**
+	 * Slår på eller av räknarvisningen. Påslagen fälls målet ihop, eftersom poängen är
+	 * att se "142/170" i stället för alla delmål.
+	 */
+	public void setAggregate(String id, boolean aggregate)
+	{
+		apply(tree ->
+		{
+			Goal goal = tree.find(id);
+			if (goal == null || goal.isAggregate() == aggregate)
+			{
+				return false;
+			}
+			applyAggregate(goal, aggregate);
+			return true;
+		});
+	}
+
+	private static void applyAggregate(Goal goal, boolean aggregate)
+	{
+		if (aggregate && !goal.isAggregate())
+		{
+			goal.setExpanded(false);
+		}
+		goal.setAggregate(aggregate);
+	}
+
+	/**
+	 * Kopplar ett befintligt mål under ytterligare en förälder. Vägrar om det skulle bli en cykel.
+	 */
+	public void link(String parentId, String childId)
+	{
+		apply(tree -> tree.link(parentId, childId));
+	}
+
+	/**
+	 * Tar bort kopplingen till en förälder; utan föräldrar kvar blir målet ett rotmål.
+	 */
+	public void unlink(String parentId, String childId)
+	{
+		apply(tree -> tree.unlink(parentId, childId));
 	}
 
 	public void removeGoal(String id)
@@ -495,9 +556,22 @@ public class GoalManager
 
 		if (change.test(tree))
 		{
-			// Ett mål som blir klart direkt av ändringen var redan uppfyllt när det lades till.
-			markApprox(evaluate());
+			// Ett mål med krav som blir klart direkt av ändringen var redan uppfyllt när det
+			// lades till, så datumet är ungefärligt. Ett räknarmål som blir klart för att
+			// användaren bockade av sista delmålet klarades däremot just nu, och får popup.
+			List<Goal> completed = evaluate();
+			List<Goal> counters = new ArrayList<>();
+			List<Goal> others = new ArrayList<>();
+			for (Goal goal : completed)
+			{
+				(goal.isAggregate() && goal.getRequirement() == null ? counters : others).add(goal);
+			}
+			markApprox(others);
 			save();
+			if (!counters.isEmpty())
+			{
+				completionListener.accept(counters);
+			}
 			listener.run();
 		}
 	}
@@ -509,13 +583,16 @@ public class GoalManager
 	 */
 	private List<Goal> evaluate()
 	{
-		if (!isEditable() || !Objects.equals(profileKey, gameDataProfileKey))
+		if (!isEditable())
 		{
 			progress = Collections.emptyMap();
 			return Collections.emptyList();
 		}
 
-		GoalEvaluator.Result result = GoalEvaluator.evaluate(tree, gameData, System.currentTimeMillis());
+		// Utan spelläge för profilen ger kraven ingen progress, men räknarmål räknas ändå,
+		// eftersom de bara beror på delmålen.
+		GameData data = Objects.equals(profileKey, gameDataProfileKey) ? gameData : GameData.EMPTY;
+		GoalEvaluator.Result result = GoalEvaluator.evaluate(tree, data, System.currentTimeMillis());
 		progress = result.getProgress();
 		return result.getNewlyCompleted();
 	}

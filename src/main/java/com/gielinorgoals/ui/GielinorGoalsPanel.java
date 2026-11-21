@@ -237,10 +237,11 @@ public class GielinorGoalsPanel extends PluginPanel
 	{
 		// Text som redan skrivits i fältet följer med som titel.
 		GoalEditDialog.Result result = GoalEditDialog.show(this, services, "New goal", null,
-			newGoalField.getText().trim(), null, null);
+			newGoalField.getText().trim(), null, null, false);
 		if (result != null)
 		{
-			goalManager.addGoal(null, result.getTitle(), result.getNote(), result.getRequirement());
+			goalManager.addGoal(null, result.getTitle(), result.getNote(), result.getRequirement(),
+				result.isAggregate());
 			newGoalField.setText("");
 		}
 	}

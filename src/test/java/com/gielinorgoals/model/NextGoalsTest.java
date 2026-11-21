@@ -88,4 +88,24 @@ public class NextGoalsTest
 
 		assertEquals(List.of("Recipe for Disaster", "Dragon Slayer II"), titles(NextGoals.select(tree, id -> null, 5)));
 	}
+
+	@Test
+	public void aggregateIsNeverSuggestedItself()
+	{
+		GoalTree tree = new GoalTree();
+		Goal cape = new Goal("Quest cape");
+		cape.setAggregate(true);
+		Goal done = new Goal("Cook's Assistant");
+		done.markCompleted(true, 1L);
+		tree.add(null, cape);
+		tree.add(cape.getId(), done);
+		tree.add(cape.getId(), new Goal("Dragon Slayer II"));
+		tree.add(null, new Goal("Fire cape"));
+
+		assertEquals(List.of("Dragon Slayer II", "Fire cape"), titles(NextGoals.select(tree, id -> null, 5)));
+
+		// Med alla delmål klara men utan att vara klart självt (t.ex. eget krav) föreslås det ändå inte.
+		tree.getChildren(cape).forEach(goal -> goal.markCompleted(true, 1L));
+		assertEquals(List.of("Fire cape"), titles(NextGoals.select(tree, id -> null, 5)));
+	}
 }

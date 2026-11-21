@@ -50,6 +50,9 @@ public class Goal
 	// Tidpunkt (epoch ms) då målet skapades; null för mål från före schemaversion 6.
 	private Long createdAt;
 	private boolean expanded = true;
+	// Visas som räknare "X/Y" över de direkta delmålen. Utan eget krav blir målet klart
+	// när alla direkta delmål är klara. Valfritt fält, false för äldre data.
+	private boolean aggregate;
 	// Null betyder ett manuellt mål som bara bockas av för hand.
 	private Requirement requirement;
 	// Delmålens id:n i användarens ordning. Målen själva ligger i GoalTree, så att ett

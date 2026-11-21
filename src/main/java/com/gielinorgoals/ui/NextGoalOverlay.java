@@ -26,7 +26,6 @@ package com.gielinorgoals.ui;
 
 import com.gielinorgoals.GielinorGoalsConfig;
 import com.gielinorgoals.model.NextGoals;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.util.Collections;
@@ -91,23 +90,9 @@ public class NextGoalOverlay extends OverlayPanel
 			panelComponent.getChildren().add(LineComponent.builder()
 				.left(entry.getTitle())
 				.right(entry.getProgressLabel() == null ? "" : entry.getProgressLabel())
-				.rightColor(colorFor(entry.getFraction()))
+				.rightColor(ProgressColors.forFraction(entry.getFraction()))
 				.build());
 		}
 		return super.render(graphics);
-	}
-
-	// Från vitt mot grönt ju närmare målet man är.
-	private static Color colorFor(double fraction)
-	{
-		if (fraction >= 0.75)
-		{
-			return Color.GREEN;
-		}
-		if (fraction >= 0.4)
-		{
-			return Color.YELLOW;
-		}
-		return Color.WHITE;
 	}
 }

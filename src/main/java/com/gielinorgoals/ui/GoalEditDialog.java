@@ -113,6 +113,8 @@ final class GoalEditDialog
 		String note;
 		@Nullable
 		Requirement requirement;
+		// Visa som räknare över delmålen ("X/Y").
+		boolean aggregate;
 	}
 
 	@Value
@@ -155,6 +157,7 @@ final class GoalEditDialog
 	private final JComboBox<GoalKind> kindBox = new JComboBox<>(GoalKind.values());
 	private final JTextField titleField = new JTextField(20);
 	private final JTextArea noteArea = new JTextArea(3, 20);
+	private final JCheckBox aggregateBox = new JCheckBox("Show as counter (sub-goals done, e.g. 142/170)");
 	private final CardLayout cards = new CardLayout();
 	private final JPanel cardPanel = new JPanel(cards);
 
@@ -179,9 +182,12 @@ final class GoalEditDialog
 	private final SearchPanel<CombatAchievementCatalog.Task> caPanel;
 
 	private GoalEditDialog(DialogServices services, @Nullable String editingGoalId, String title,
-		@Nullable String note, @Nullable Requirement requirement)
+		@Nullable String note, @Nullable Requirement requirement, boolean aggregate)
 	{
 		this.services = services;
+		aggregateBox.setSelected(aggregate);
+		aggregateBox.setToolTipText("Shows how many sub-goals are done and collapses the list. Without a requirement"
+			+ " of its own, the goal is completed when all its sub-goals are.");
 		this.editingGoalId = editingGoalId;
 		this.originalRequirement = requirement;
 		titleField.setText(title);
@@ -230,9 +236,9 @@ final class GoalEditDialog
 	 */
 	@Nullable
 	static Result show(Component parent, DialogServices services, String dialogTitle, @Nullable String editingGoalId,
-		String title, @Nullable String note, @Nullable Requirement requirement)
+		String title, @Nullable String note, @Nullable Requirement requirement, boolean aggregate)
 	{
-		GoalEditDialog dialog = new GoalEditDialog(services, editingGoalId, title, note, requirement);
+		GoalEditDialog dialog = new GoalEditDialog(services, editingGoalId, title, note, requirement, aggregate);
 		JPanel content = dialog.buildContent();
 
 		// Visa dialogen igen tills värdena är giltiga eller användaren avbryter.
@@ -330,6 +336,7 @@ final class GoalEditDialog
 		JPanel bottom = new JPanel(new BorderLayout(0, 4));
 		bottom.add(titlePanel, BorderLayout.NORTH);
 		bottom.add(noteScroll, BorderLayout.CENTER);
+		bottom.add(aggregateBox, BorderLayout.SOUTH);
 
 		JPanel content = new JPanel(new BorderLayout(0, 10));
 		content.add(top, BorderLayout.NORTH);
@@ -467,7 +474,7 @@ final class GoalEditDialog
 		{
 			throw new IllegalArgumentException("You already have this goal in your list.");
 		}
-		return new Result(title, note, requirement);
+		return new Result(title, note, requirement, aggregateBox.isSelected());
 	}
 
 	@Nullable

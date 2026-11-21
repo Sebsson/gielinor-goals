@@ -158,4 +158,63 @@ public class GoalManagerTest
 	{
 		return skill -> skill == Skill.COOKING ? xp : 0;
 	}
+
+	@Test
+	public void showAsCounterCollapsesAndIsSaved()
+	{
+		manager.addGoal(null, "Quest cape", null, null);
+		Goal cape = manager.getTree().getRoots().get(0);
+		assertTrue(cape.isExpanded());
+
+		manager.setAggregate(cape.getId(), true);
+
+		assertTrue(cape.isAggregate());
+		assertFalse(cape.isExpanded());
+		manager.loadProfile(PROFILE);
+		assertTrue(manager.getTree().getRoots().get(0).isAggregate());
+	}
+
+	@Test
+	public void tickingLastSubGoalCompletesCounterWithPopupAndExactDate()
+	{
+		manager.addGoal(null, "Quest cape", null, null, true);
+		Goal cape = manager.getTree().getRoots().get(0);
+		manager.addGoal(cape.getId(), "Quest 1", null, null);
+		manager.addGoal(cape.getId(), "Quest 2", null, null);
+		List<Goal> quests = manager.getTree().getChildren(cape);
+
+		manager.setCompleted(quests.get(0).getId(), true);
+		assertFalse(cape.isCompleted());
+		assertEquals("1/2", manager.getProgress(cape.getId()).getLabel());
+
+		// Utan speldata, eftersom räknaren bara beror på delmålen.
+		manager.setCompleted(quests.get(1).getId(), true);
+
+		assertTrue(cape.isCompleted());
+		assertFalse(cape.isCompletedAtApprox());
+		assertEquals(List.of(List.of(cape)), announced);
+	}
+
+	@Test
+	public void linkAndUnlinkAreSavedAndCyclesRefused()
+	{
+		manager.addGoal(null, "Barrows gloves", null, null);
+		manager.addGoal(null, "Quest cape", null, null);
+		Goal gloves = manager.getTree().getRoots().get(0);
+		Goal cape = manager.getTree().getRoots().get(1);
+		manager.addGoal(gloves.getId(), "Recipe for Disaster", null, null);
+		Goal rfd = manager.getTree().getChildren(gloves).get(0);
+
+		manager.link(cape.getId(), rfd.getId());
+		manager.link(rfd.getId(), gloves.getId());
+		manager.loadProfile(PROFILE);
+
+		assertEquals(2, manager.getTree().getParents(rfd.getId()).size());
+		assertTrue(manager.getTree().getChildren(manager.getTree().find(rfd.getId())).isEmpty());
+
+		manager.unlink(gloves.getId(), rfd.getId());
+		manager.loadProfile(PROFILE);
+		assertEquals(List.of(cape.getId()),
+			List.of(manager.getTree().getParents(rfd.getId()).get(0).getId()));
+	}
 }
