@@ -217,7 +217,7 @@ public class GoalManager
 		String json = storage.get(newProfileKey, GOALS_KEY);
 		LoadResult result = serializer.deserialize(json);
 		loadStatus = result.getStatus();
-		tree = new GoalTree(new ArrayList<>(result.getGoals()));
+		tree = result.getTree();
 
 		if (result.getStatus() == LoadResult.Status.CORRUPT)
 		{
@@ -323,7 +323,7 @@ public class GoalManager
 					{
 						child.markCompleted(true, now, true);
 					}
-					goal.getChildren().add(child);
+					tree.add(goal.getId(), child);
 					added++;
 				}
 				else if (task.isDone() && !child.isCompleted())
@@ -354,9 +354,9 @@ public class GoalManager
 	}
 
 	@Nullable
-	private static Goal findChildByTitle(Goal parent, String title)
+	private Goal findChildByTitle(Goal parent, String title)
 	{
-		for (Goal child : parent.getChildren())
+		for (Goal child : tree.getChildren(parent))
 		{
 			if (title.equalsIgnoreCase(child.getTitle()))
 			{
@@ -462,24 +462,26 @@ public class GoalManager
 		return changed;
 	}
 
-	public void moveUp(String id)
+	// Flyttningarna gäller bara kopplingen i föräldern raden visas under (null = rotnivå).
+
+	public void moveUp(@Nullable String parentId, String id)
 	{
-		apply(tree -> tree.moveUp(id));
+		apply(tree -> tree.moveUp(parentId, id));
 	}
 
-	public void moveDown(String id)
+	public void moveDown(@Nullable String parentId, String id)
 	{
-		apply(tree -> tree.moveDown(id));
+		apply(tree -> tree.moveDown(parentId, id));
 	}
 
-	public void indent(String id)
+	public void indent(@Nullable String parentId, String id)
 	{
-		apply(tree -> tree.indent(id));
+		apply(tree -> tree.indent(parentId, id));
 	}
 
-	public void outdent(String id)
+	public void outdent(@Nullable String grandparentId, String parentId, String id)
 	{
-		apply(tree -> tree.outdent(id));
+		apply(tree -> tree.outdent(grandparentId, parentId, id));
 	}
 
 	// Kör en ändring, och sparar och uppdaterar UI:t bara om något faktiskt ändrades.
@@ -541,7 +543,7 @@ public class GoalManager
 
 		// ConfigManager håller värdet i minnet och skriver till disk själv i bakgrunden.
 		storage.set(profileKey, GOALS_KEY,
-			serializer.serialize(tree.getRoots()));
+			serializer.serialize(tree));
 		revision++;
 		// En lyckad sparning ersätter korrupt data, så varningen behövs inte längre.
 		loadStatus = LoadResult.Status.OK;

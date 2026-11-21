@@ -24,10 +24,14 @@
  */
 package com.gielinorgoals.persistence;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.UUID;
 import java.util.function.UnaryOperator;
+import javax.annotation.Nullable;
 
 /**
  * Uppgraderar sparad JSON steg för steg till aktuell schemaversion.
@@ -47,9 +51,17 @@ public class SchemaMigrator
 	 *     läget och skulle annars göra målet manuellt.
 	 * 6 – valfria fält createdAt och completedAtApprox på mål (Completed-fliken).
 	 *     Gamla mål får null/false, inga datum hittas på.
+	 * 7 – från träd till graf: "goals" blir en platt lista där varje mål har
+	 *     "childIds" i stället för nästlade "children", plus en ordnad "rootIds".
+	 *     Så kan ett delmål ha flera föräldrar men lagras en gång.
 	 */
-	public static final int CURRENT_VERSION = 6;
+	public static final int CURRENT_VERSION = 7;
 	static final String VERSION_FIELD = "schemaVersion";
+	private static final String GOALS_FIELD = GoalSerializer.GOALS_FIELD;
+	private static final String ROOT_IDS_FIELD = GoalSerializer.ROOT_IDS_FIELD;
+	private static final String ID_FIELD = "id";
+	private static final String CHILDREN_FIELD = "children";
+	private static final String CHILD_IDS_FIELD = "childIds";
 
 	// Nyckel = versionen steget uppgraderar från.
 	private final Map<Integer, UnaryOperator<JsonObject>> steps;
@@ -61,7 +73,72 @@ public class SchemaMigrator
 			2, SchemaMigrator::noStructuralChange,
 			3, SchemaMigrator::noStructuralChange,
 			4, SchemaMigrator::noStructuralChange,
-			5, SchemaMigrator::noStructuralChange));
+			5, SchemaMigrator::noStructuralChange,
+			6, SchemaMigrator::v6ToV7));
+	}
+
+	/**
+	 * Plattar ut det nästlade trädet. Ordningen behålls: rootIds i samma ordning som
+	 * rotmålen, childIds i samma ordning som barnen, och målen listas förälder före barn.
+	 * Alla andra fält följer med orörda. Mål utan id får ett, eftersom kopplingarna går via id.
+	 */
+	static JsonObject v6ToV7(JsonObject root)
+	{
+		JsonArray flat = new JsonArray();
+		JsonArray rootIds = new JsonArray();
+		JsonElement goals = root.get(GOALS_FIELD);
+		if (goals != null && !goals.isJsonNull() && !goals.isJsonArray())
+		{
+			// Trasig data ska rapporteras som korrupt (och sparas undan), inte bli en tom lista.
+			throw new IllegalStateException("goals is not a list");
+		}
+		if (goals != null && goals.isJsonArray())
+		{
+			for (JsonElement goal : goals.getAsJsonArray())
+			{
+				String id = flatten(goal, flat);
+				if (id != null)
+				{
+					rootIds.add(id);
+				}
+			}
+		}
+		root.add(GOALS_FIELD, flat);
+		root.add(ROOT_IDS_FIELD, rootIds);
+		return root;
+	}
+
+	@Nullable
+	private static String flatten(JsonElement element, JsonArray flat)
+	{
+		if (element == null || !element.isJsonObject())
+		{
+			return null;
+		}
+		JsonObject goal = element.getAsJsonObject();
+		JsonElement idElement = goal.get(ID_FIELD);
+		if (idElement == null || !idElement.isJsonPrimitive() || idElement.getAsString().isEmpty())
+		{
+			goal.addProperty(ID_FIELD, UUID.randomUUID().toString());
+		}
+		String id = goal.get(ID_FIELD).getAsString();
+
+		JsonElement children = goal.remove(CHILDREN_FIELD);
+		JsonArray childIds = new JsonArray();
+		flat.add(goal);
+		if (children != null && children.isJsonArray())
+		{
+			for (JsonElement child : children.getAsJsonArray())
+			{
+				String childId = flatten(child, flat);
+				if (childId != null)
+				{
+					childIds.add(childId);
+				}
+			}
+		}
+		goal.add(CHILD_IDS_FIELD, childIds);
+		return id;
 	}
 
 	// För versioner som bara lägger till valfria fält eller nya kravtyper.

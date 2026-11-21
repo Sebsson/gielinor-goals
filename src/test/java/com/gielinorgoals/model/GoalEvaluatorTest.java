@@ -86,4 +86,17 @@ public class GoalEvaluatorTest
 	{
 		return SkillRequirementTest.xp(Skill.AGILITY, Experience.getXpForLevel(level));
 	}
+
+	@Test
+	public void sharedGoalIsEvaluatedAndReportedOnce()
+	{
+		Goal other = new Goal("Quest cape");
+		tree.add(null, other);
+		tree.link(other.getId(), agility.getId());
+
+		GoalEvaluator.Result result = GoalEvaluator.evaluate(tree, agilityXp(50), 1000L);
+
+		assertEquals(1, result.getNewlyCompleted().size());
+		assertEquals(agility, result.getNewlyCompleted().get(0));
+	}
 }

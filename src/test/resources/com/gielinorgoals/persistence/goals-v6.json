@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 6,
+  "goals": [
+    {
+      "id": "gloves",
+      "title": "Barrows gloves",
+      "note": "Cooking and RFD subquests first",
+      "completed": false,
+      "completedAtApprox": false,
+      "createdAt": 1762000000000,
+      "expanded": true,
+      "children": [
+        {
+          "id": "rfd",
+          "title": "",
+          "completed": false,
+          "completedAtApprox": false,
+          "createdAt": 1762000001000,
+          "expanded": false,
+          "requirement": {"type": "QUEST", "questId": 159, "questName": "Recipe for Disaster"},
+          "children": [
+            {
+              "id": "cooking",
+              "title": "",
+              "completed": true,
+              "completedAt": 1763000000000,
+              "completedAtApprox": true,
+              "createdAt": 1762000002000,
+              "expanded": true,
+              "requirement": {"type": "SKILL", "skill": "COOKING", "mode": "LEVEL", "target": 70},
+              "children": []
+            },
+            {
+              "id": "dt",
+              "title": "Desert Treasure I",
+              "completed": true,
+              "completedAt": 1763500000000,
+              "completedAtApprox": false,
+              "createdAt": 1762000003000,
+              "expanded": true,
+              "requirement": {"type": "QUEST", "questId": 47, "questName": "Desert Treasure I"},
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "qp",
+          "title": "175 quest points",
+          "completed": false,
+          "completedAtApprox": false,
+          "expanded": true,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "firecape",
+      "title": "",
+      "note": "Bring stamina potions",
+      "completed": false,
+      "completedAtApprox": false,
+      "createdAt": 1762100000000,
+      "expanded": false,
+      "requirement": {"type": "ITEM", "itemId": 6570, "itemName": "Fire cape", "quantity": 1, "includeVariants": true},
+      "children": [
+        {
+          "id": "ranged",
+          "title": "Ranged XP for Jad",
+          "completed": false,
+          "completedAtApprox": false,
+          "createdAt": 1762100001000,
+          "expanded": true,
+          "requirement": {"type": "SKILL", "skill": "RANGED", "mode": "XP_GAIN", "target": 500000, "startXp": 1234567},
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "karamja",
+      "title": "",
+      "completed": false,
+      "completedAtApprox": false,
+      "createdAt": 1762200000000,
+      "expanded": true,
+      "requirement": {"type": "DIARY", "area": "KARAMJA", "tier": "ELITE"},
+      "children": [
+        {
+          "id": "karamja-task",
+          "title": "Craft 56 Nature runes simultaneously from Essence.",
+          "completed": true,
+          "completedAt": 1763600000000,
+          "completedAtApprox": true,
+          "createdAt": 1763600000000,
+          "expanded": true,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "noxious",
+      "title": "",
+      "completed": true,
+      "completedAt": 1763700000000,
+      "completedAtApprox": false,
+      "createdAt": 1762300000000,
+      "expanded": true,
+      "requirement": {"type": "COMBAT_ACHIEVEMENT", "taskId": 17, "taskName": "Noxious Foe", "tierName": "Easy"}
+    },
+    {
+      "id": "legacy",
+      "title": "Old goal from milestone 1",
+      "completed": true,
+      "completedAt": 1700000000000,
+      "expanded": true,
+      "children": []
+    }
+  ]
+}

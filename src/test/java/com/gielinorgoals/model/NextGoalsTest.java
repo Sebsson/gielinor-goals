@@ -72,4 +72,20 @@ public class NextGoalsTest
 		entries.forEach(entry -> titles.add(entry.getTitle()));
 		return titles;
 	}
+
+	@Test
+	public void sharedGoalIsSuggestedOnce()
+	{
+		GoalTree tree = new GoalTree();
+		Goal gloves = new Goal("Barrows gloves");
+		Goal questCape = new Goal("Quest cape");
+		Goal rfd = new Goal("Recipe for Disaster");
+		tree.add(null, gloves);
+		tree.add(null, questCape);
+		tree.add(gloves.getId(), rfd);
+		tree.link(questCape.getId(), rfd.getId());
+		tree.add(questCape.getId(), new Goal("Dragon Slayer II"));
+
+		assertEquals(List.of("Recipe for Disaster", "Dragon Slayer II"), titles(NextGoals.select(tree, id -> null, 5)));
+	}
 }

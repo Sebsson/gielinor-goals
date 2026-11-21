@@ -137,4 +137,36 @@ public class CompletionFilterTest
 			goal.markCompleted(true, 1L);
 		}
 	}
+
+	@Test
+	public void sharedGoalGivesOnePopupAndCountsInParent()
+	{
+		Goal questCape = new Goal("Quest cape");
+		tree.add(null, questCape);
+		tree.link(questCape.getId(), quest.getId());
+		complete(quest);
+
+		List<CompletionFilter.Entry> entries = CompletionFilter.filter(tree, List.of(quest), false);
+
+		assertEquals(1, entries.size());
+		assertFalse(entries.get(0).isRoot());
+		// Första oklara föräldern används för progressraden.
+		assertSame(gloves, entries.get(0).getOpenParent());
+		assertEquals(List.of(gloves, questCape), tree.getParents(quest.getId()));
+	}
+
+	@Test
+	public void sharedSubGoalIsHiddenWhenEitherAncestorCompletes()
+	{
+		Goal questCape = new Goal("Quest cape");
+		tree.add(null, questCape);
+		tree.link(questCape.getId(), subQuest.getId());
+		complete(questCape, subQuest);
+
+		List<CompletionFilter.Entry> entries = CompletionFilter.filter(tree, List.of(questCape, subQuest), false);
+
+		assertEquals(1, entries.size());
+		assertSame(questCape, entries.get(0).getGoal());
+		assertEquals(1, entries.get(0).getHiddenDescendants());
+	}
 }

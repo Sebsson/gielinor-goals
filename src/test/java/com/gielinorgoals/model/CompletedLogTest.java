@@ -260,4 +260,25 @@ public class CompletedLogTest
 		sections.forEach(section -> section.getEntries().forEach(e -> titles.add(e.getGoal().getDisplayTitle())));
 		return titles;
 	}
+
+	@Test
+	public void sharedGoalListsAllParentsOnce()
+	{
+		long now = at(2026, 12, 3, 12, 0, 0);
+		GoalTree tree = new GoalTree();
+		Goal gloves = new Goal("Barrows gloves");
+		Goal questCape = new Goal("Quest cape");
+		Goal rfd = new Goal("Recipe for Disaster");
+		tree.add(null, gloves);
+		tree.add(null, questCape);
+		tree.add(gloves.getId(), rfd);
+		tree.link(questCape.getId(), rfd.getId());
+		rfd.markCompleted(true, now);
+
+		List<CompletedLog.Section> sections = CompletedLog.build(tree, CompletedLog.TypeFilter.ALL, false, true, now, ZONE);
+
+		assertEquals(1, sections.get(0).getEntries().size());
+		assertEquals("Barrows gloves, Quest cape", sections.get(0).getEntries().get(0).getParents());
+		assertEquals(1, CompletedLog.stats(tree, now, ZONE).getTotal());
+	}
 }

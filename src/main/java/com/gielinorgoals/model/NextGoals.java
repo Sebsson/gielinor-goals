@@ -26,7 +26,9 @@ package com.gielinorgoals.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 import lombok.Value;
@@ -58,12 +60,13 @@ public final class NextGoals
 	public static List<Entry> select(GoalTree tree, Function<String, GoalProgress> progressById, int limit)
 	{
 		List<Entry> entries = new ArrayList<>();
-		collect(tree.getRoots(), progressById, limit, entries);
+		collect(tree, tree.getRoots(), progressById, limit, entries, new HashSet<>());
 		return Collections.unmodifiableList(entries);
 	}
 
-	private static void collect(List<Goal> goals, Function<String, GoalProgress> progressById, int limit,
-		List<Entry> entries)
+	// Ett delat delmål kan nås via flera föräldrar men föreslås bara en gång.
+	private static void collect(GoalTree tree, List<Goal> goals, Function<String, GoalProgress> progressById,
+		int limit, List<Entry> entries, Set<String> visited)
 	{
 		for (Goal goal : goals)
 		{
@@ -71,15 +74,15 @@ public final class NextGoals
 			{
 				return;
 			}
-			if (goal.isCompleted())
+			if (goal.isCompleted() || !visited.add(goal.getId()))
 			{
 				continue;
 			}
 
 			int before = entries.size();
-			collect(goal.getChildren(), progressById, limit, entries);
+			collect(tree, tree.getChildren(goal), progressById, limit, entries, visited);
 			// Inga ej klara delmål hittades, så målet självt är nästa steg.
-			if (entries.size() == before && !hasIncompleteChild(goal))
+			if (entries.size() == before && !hasIncompleteChild(tree, goal))
 			{
 				GoalProgress progress = progressById.apply(goal.getId());
 				entries.add(new Entry(goal.getDisplayTitle(),
@@ -89,9 +92,9 @@ public final class NextGoals
 		}
 	}
 
-	private static boolean hasIncompleteChild(Goal goal)
+	private static boolean hasIncompleteChild(GoalTree tree, Goal goal)
 	{
-		for (Goal child : goal.getChildren())
+		for (Goal child : tree.getChildren(goal))
 		{
 			if (!child.isCompleted())
 			{

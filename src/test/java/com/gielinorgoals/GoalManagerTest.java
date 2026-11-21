@@ -138,7 +138,7 @@ public class GoalManagerTest
 		manager.addGoal(null, "Parent", null, null);
 		Goal parent = manager.getTree().getRoots().get(0);
 		manager.addGoal(parent.getId(), "Child", null, null);
-		Goal child = parent.getChildren().get(0);
+		Goal child = manager.getTree().getChildren(parent).get(0);
 		manager.toggleExpanded(parent.getId());
 		assertFalse(parent.isExpanded());
 

@@ -93,7 +93,7 @@ public final class CompletionFilter
 				if (!parent.isCompleted())
 				{
 					openParent = parent;
-					for (Goal sibling : parent.getChildren())
+					for (Goal sibling : tree.getChildren(parent))
 					{
 						if (sibling.isCompleted())
 						{
@@ -105,7 +105,7 @@ public final class CompletionFilter
 			}
 
 			entries.add(new Entry(goal, hidden, root, openParent, done,
-				openParent == null ? 0 : openParent.getChildren().size()));
+				openParent == null ? 0 : openParent.getChildIds().size()));
 		}
 		return entries;
 	}

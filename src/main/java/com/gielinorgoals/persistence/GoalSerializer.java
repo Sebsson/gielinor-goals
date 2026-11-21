@@ -25,6 +25,7 @@
 package com.gielinorgoals.persistence;
 
 import com.gielinorgoals.model.Goal;
+import com.gielinorgoals.model.GoalTree;
 import com.gielinorgoals.model.Requirement;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -39,12 +40,17 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 /**
- * Översätter mellan målträdet och det versionerade JSON-formatet
- * {@code {"schemaVersion":1,"goals":[...]}}.
+ * Översätter mellan målgrafen och det versionerade JSON-formatet
+ * {@code {"schemaVersion":7,"rootIds":[...],"goals":[...]}}, där {@code goals} är en
+ * platt lista och varje mål pekar ut sina delmål med {@code childIds}.
  */
 public class GoalSerializer
 {
-	private static final String GOALS_FIELD = "goals";
+	static final String GOALS_FIELD = "goals";
+	static final String ROOT_IDS_FIELD = "rootIds";
+	private static final Type ROOT_IDS_TYPE = new TypeToken<List<String>>()
+	{
+	}.getType();
 	private static final Type GOAL_LIST_TYPE = new TypeToken<List<Goal>>()
 	{
 	}.getType();
@@ -61,11 +67,13 @@ public class GoalSerializer
 		this.migrator = migrator;
 	}
 
-	public String serialize(List<Goal> goals)
+	public String serialize(GoalTree tree)
 	{
 		JsonObject root = new JsonObject();
 		root.addProperty(SchemaMigrator.VERSION_FIELD, SchemaMigrator.CURRENT_VERSION);
-		root.add(GOALS_FIELD, gson.toJsonTree(goals, GOAL_LIST_TYPE));
+		root.add(ROOT_IDS_FIELD, gson.toJsonTree(tree.getRootIds(), ROOT_IDS_TYPE));
+		// Varje mål en gång, i visningsordning, så att filen är lätt att läsa.
+		root.add(GOALS_FIELD, gson.toJsonTree(tree.flatten(), GOAL_LIST_TYPE));
 		return gson.toJson(root);
 	}
 
@@ -73,7 +81,7 @@ public class GoalSerializer
 	{
 		if (json == null || json.trim().isEmpty())
 		{
-			return new LoadResult(LoadResult.Status.OK, new ArrayList<>(), false);
+			return new LoadResult(LoadResult.Status.OK, new GoalTree(), false);
 		}
 
 		try
@@ -106,8 +114,10 @@ public class GoalSerializer
 			{
 				goals = new ArrayList<>();
 			}
+			List<String> rootIds = gson.fromJson(root.get(ROOT_IDS_FIELD), ROOT_IDS_TYPE);
 			sanitize(goals);
-			return new LoadResult(status, goals, migrated);
+			// load() lagar trasiga kopplingar och gör mål utan förälder till rötter.
+			return new LoadResult(status, GoalTree.load(rootIds, goals), migrated);
 		}
 		catch (JsonParseException | IllegalStateException | UnsupportedOperationException | NumberFormatException e)
 		{
@@ -117,7 +127,7 @@ public class GoalSerializer
 
 	private static LoadResult corrupt()
 	{
-		return new LoadResult(LoadResult.Status.CORRUPT, new ArrayList<>(), false);
+		return new LoadResult(LoadResult.Status.CORRUPT, new GoalTree(), false);
 	}
 
 	// Gson hoppar över konstruktorn, så saknade fält och null-poster rättas till här.
@@ -141,11 +151,10 @@ public class GoalSerializer
 			{
 				goal.setTitle("");
 			}
-			if (goal.getChildren() == null)
+			if (goal.getChildIds() == null)
 			{
-				goal.setChildren(new ArrayList<>());
+				goal.setChildIds(new ArrayList<>());
 			}
-			sanitize(goal.getChildren());
 		}
 	}
 }

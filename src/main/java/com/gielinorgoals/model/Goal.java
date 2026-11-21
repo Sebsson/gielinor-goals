@@ -31,7 +31,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Ett mål i trädet. Ordningen i {@link #children} är användarens egen sortering.
+ * Ett mål i grafen. Ordningen i {@link #childIds} är användarens egen sortering.
  * Fälten serialiseras direkt med Gson, så namnen får inte bytas utan migrering.
  */
 @Getter
@@ -52,7 +52,9 @@ public class Goal
 	private boolean expanded = true;
 	// Null betyder ett manuellt mål som bara bockas av för hand.
 	private Requirement requirement;
-	private List<Goal> children = new ArrayList<>();
+	// Delmålens id:n i användarens ordning. Målen själva ligger i GoalTree, så att ett
+	// delmål kan finnas under flera föräldrar men bara lagras en gång.
+	private List<String> childIds = new ArrayList<>();
 
 	public Goal()
 	{
@@ -79,7 +81,7 @@ public class Goal
 
 	public boolean hasChildren()
 	{
-		return children != null && !children.isEmpty();
+		return childIds != null && !childIds.isEmpty();
 	}
 
 	/**

@@ -68,6 +68,11 @@ class GoalRow extends JPanel
 	private static final Color HIGHLIGHT_COLOR = new Color(74, 60, 30);
 
 	private final Goal goal;
+	// Föräldern raden visas under och dess förälder; null betyder rotnivå.
+	@Nullable
+	private final String parentId;
+	@Nullable
+	private final String grandparentId;
 	@Nullable
 	private final GoalProgress progress;
 	private final GoalTree tree;
@@ -76,10 +81,13 @@ class GoalRow extends JPanel
 	private final boolean editable;
 	private final Color baseBackground;
 
-	GoalRow(Goal goal, @Nullable GoalProgress progress, int depth, GoalTree tree, GoalManager goalManager,
-		DialogServices services, boolean editable, boolean highlighted)
+	GoalRow(Goal goal, @Nullable String parentId, @Nullable String grandparentId, @Nullable GoalProgress progress,
+		int depth, GoalTree tree, GoalManager goalManager, DialogServices services, boolean editable,
+		boolean highlighted)
 	{
 		this.goal = goal;
+		this.parentId = parentId;
+		this.grandparentId = grandparentId;
 		this.progress = progress;
 		this.tree = tree;
 		this.goalManager = goalManager;
@@ -232,7 +240,7 @@ class GoalRow extends JPanel
 		String text = escapeHtml(goal.getDisplayTitle());
 		if (goal.hasChildren())
 		{
-			text += " <font color='#a0a0a0'>(" + countCompletedChildren() + "/" + goal.getChildren().size() + ")</font>";
+			text += " <font color='#a0a0a0'>(" + countCompletedChildren() + "/" + goal.getChildIds().size() + ")</font>";
 		}
 		if (goal.isCompleted())
 		{
@@ -310,10 +318,12 @@ class GoalRow extends JPanel
 		menu.add(item("Add sub-goal", true, this::addSubGoal));
 		menu.add(item("Edit", true, this::edit));
 		menu.addSeparator();
-		menu.add(item("Move up", tree.canMoveUp(id), () -> goalManager.moveUp(id)));
-		menu.add(item("Move down", tree.canMoveDown(id), () -> goalManager.moveDown(id)));
-		menu.add(item("Make sub-goal of goal above", tree.canIndent(id), () -> goalManager.indent(id)));
-		menu.add(item("Move out one level", tree.canOutdent(id), () -> goalManager.outdent(id)));
+		menu.add(item("Move up", tree.canMoveUp(parentId, id), () -> goalManager.moveUp(parentId, id)));
+		menu.add(item("Move down", tree.canMoveDown(parentId, id), () -> goalManager.moveDown(parentId, id)));
+		menu.add(item("Make sub-goal of goal above", tree.canIndent(parentId, id),
+			() -> goalManager.indent(parentId, id)));
+		menu.add(item("Move out one level", tree.canOutdent(grandparentId, parentId, id),
+			() -> goalManager.outdent(grandparentId, parentId, id)));
 		menu.addSeparator();
 		menu.add(item("Delete", true, this::delete));
 		return menu;
@@ -352,7 +362,7 @@ class GoalRow extends JPanel
 		if (goal.hasChildren())
 		{
 			int choice = JOptionPane.showConfirmDialog(this,
-				"Delete \"" + goal.getDisplayTitle() + "\" and its " + goal.getChildren().size() + " sub-goal(s)?",
+				"Delete \"" + goal.getDisplayTitle() + "\" and its " + goal.getChildIds().size() + " sub-goal(s)?",
 				"Delete goal", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 			if (choice != JOptionPane.YES_OPTION)
 			{
@@ -403,7 +413,7 @@ class GoalRow extends JPanel
 	private int countCompletedChildren()
 	{
 		int count = 0;
-		for (Goal child : goal.getChildren())
+		for (Goal child : tree.getChildren(goal))
 		{
 			if (child.isCompleted())
 			{

@@ -25,6 +25,7 @@
 package com.gielinorgoals.persistence;
 
 import com.gielinorgoals.model.Goal;
+import com.gielinorgoals.model.GoalTree;
 import java.util.List;
 import lombok.Value;
 
@@ -45,8 +46,16 @@ public class LoadResult
 	}
 
 	Status status;
-	List<Goal> goals;
+	GoalTree tree;
 	boolean migrated;
+
+	/**
+	 * Rotmålen, för enkel åtkomst i tester och kod som bara bryr sig om översta nivån.
+	 */
+	public List<Goal> getGoals()
+	{
+		return tree.getRoots();
+	}
 
 	public boolean isReadOnly()
 	{

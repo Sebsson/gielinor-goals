@@ -257,7 +257,7 @@ public class GielinorGoalsPanel extends PluginPanel
 
 		listPanel.removeAll();
 		GoalTree tree = goalManager.getTree();
-		GoalRow highlighted = addRows(tree, tree.getRoots(), 0, editable);
+		GoalRow highlighted = addRows(tree, tree.getRoots(), null, null, 0, editable);
 
 		updateStatus(tree);
 		updateSummary(tree);
@@ -275,10 +275,14 @@ public class GielinorGoalsPanel extends PluginPanel
 	}
 
 	/**
-	 * @return raden för det markerade målet, om den lades till
+	 * Ett delat delmål visas under varje förälder; raden får veta vilken förälder (och
+	 * förälderns förälder) den visas under, så att flyttningar bara gäller den kopplingen.
+	 *
+	 * @return första raden för det markerade målet, om den lades till
 	 */
 	@Nullable
-	private GoalRow addRows(GoalTree tree, List<Goal> goals, int depth, boolean editable)
+	private GoalRow addRows(GoalTree tree, List<Goal> goals, @Nullable String parentId,
+		@Nullable String grandparentId, int depth, boolean editable)
 	{
 		GoalRow highlighted = null;
 		for (Goal goal : goals)
@@ -289,16 +293,16 @@ public class GielinorGoalsPanel extends PluginPanel
 			}
 
 			boolean isHighlighted = goal.getId().equals(highlightId);
-			GoalRow row = new GoalRow(goal, goalManager.getProgress(goal.getId()), depth, tree, goalManager,
-				services, editable, isHighlighted);
+			GoalRow row = new GoalRow(goal, parentId, grandparentId, goalManager.getProgress(goal.getId()), depth,
+				tree, goalManager, services, editable, isHighlighted && highlighted == null);
 			listPanel.add(row);
-			if (isHighlighted)
+			if (isHighlighted && highlighted == null)
 			{
 				highlighted = row;
 			}
 			if (goal.isExpanded())
 			{
-				GoalRow below = addRows(tree, goal.getChildren(), depth + 1, editable);
+				GoalRow below = addRows(tree, tree.getChildren(goal), goal.getId(), parentId, depth + 1, editable);
 				highlighted = highlighted != null ? highlighted : below;
 			}
 		}

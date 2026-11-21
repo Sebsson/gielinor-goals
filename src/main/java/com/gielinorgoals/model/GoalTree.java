@@ -25,56 +25,160 @@
 package com.gielinorgoals.model;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 
 /**
- * Trädet av mål för en profil. Alla operationer på strukturen samlas här så att
- * UI:t aldrig ändrar listorna direkt. Klassen är inte trådsäker och används bara på EDT.
+ * Målen för en profil som en riktad acyklisk graf: varje mål lagras en gång (id → mål)
+ * och har en ordnad lista med delmålens id:n, så ett delmål kan ha flera föräldrar.
+ * Rötterna är en egen ordnad lista. Namnet är kvar från när det var ett träd.
+ *
+ * <p>Operationer som flyttar ett mål (upp, ner, indrag, utdrag) gäller bara kopplingen
+ * i en viss förälder, den som raden visas under. {@code parentId == null} betyder
+ * rotlistan. Klassen är inte trådsäker och används bara på EDT.
  */
 public class GoalTree
 {
-	private final List<Goal> roots;
+	private final Map<String, Goal> goals = new LinkedHashMap<>();
+	private final List<String> rootIds = new ArrayList<>();
 
 	public GoalTree()
 	{
-		this(new ArrayList<>());
 	}
 
-	public GoalTree(List<Goal> roots)
+	/**
+	 * Bygger grafen från sparad data och lagar det som inte håller ihop: dubbla id:n,
+	 * kopplingar till mål som saknas, cykler, och mål som inte nås från någon rot
+	 * (de blir rötter, så att inget försvinner tyst).
+	 */
+	public static GoalTree load(List<String> rootIds, Collection<Goal> goals)
 	{
-		this.roots = roots;
+		GoalTree tree = new GoalTree();
+		for (Goal goal : goals)
+		{
+			if (goal != null && goal.getId() != null && !tree.goals.containsKey(goal.getId()))
+			{
+				if (goal.getChildIds() == null)
+				{
+					goal.setChildIds(new ArrayList<>());
+				}
+				tree.goals.put(goal.getId(), goal);
+			}
+		}
+
+		for (Goal goal : tree.goals.values())
+		{
+			// Ta bort saknade och dubbla kopplingar, men behåll ordningen.
+			Set<String> seen = new HashSet<>();
+			goal.getChildIds().removeIf(id -> id == null || !tree.goals.containsKey(id)
+				|| id.equals(goal.getId()) || !seen.add(id));
+		}
+		tree.breakCycles();
+
+		Set<String> seenRoots = new HashSet<>();
+		for (String id : rootIds == null ? Collections.<String>emptyList() : rootIds)
+		{
+			if (id != null && tree.goals.containsKey(id) && seenRoots.add(id))
+			{
+				tree.rootIds.add(id);
+			}
+		}
+
+		// Ett mål med förälder ska inte också vara rot; ett mål utan förälder måste vara rot.
+		Set<String> hasParent = new HashSet<>();
+		for (Goal goal : tree.goals.values())
+		{
+			hasParent.addAll(goal.getChildIds());
+		}
+		tree.rootIds.removeIf(hasParent::contains);
+		for (String id : tree.goals.keySet())
+		{
+			if (!hasParent.contains(id) && !tree.rootIds.contains(id))
+			{
+				tree.rootIds.add(id);
+			}
+		}
+		return tree;
+	}
+
+	// Tar bort kopplingar som skulle ge en cykel (bara möjligt i trasig sparad data).
+	private void breakCycles()
+	{
+		Set<String> done = new HashSet<>();
+		for (String id : new ArrayList<>(goals.keySet()))
+		{
+			breakCycles(id, new HashSet<>(), done);
+		}
+	}
+
+	private void breakCycles(String id, Set<String> path, Set<String> done)
+	{
+		if (done.contains(id))
+		{
+			return;
+		}
+		path.add(id);
+		Goal goal = goals.get(id);
+		goal.getChildIds().removeIf(child -> path.contains(child));
+		for (String child : new ArrayList<>(goal.getChildIds()))
+		{
+			breakCycles(child, path, done);
+		}
+		path.remove(id);
+		done.add(id);
 	}
 
 	public List<Goal> getRoots()
 	{
-		return Collections.unmodifiableList(roots);
+		return resolve(rootIds);
+	}
+
+	public List<String> getRootIds()
+	{
+		return Collections.unmodifiableList(rootIds);
+	}
+
+	/**
+	 * Målets direkta delmål i användarens ordning.
+	 */
+	public List<Goal> getChildren(Goal goal)
+	{
+		return resolve(goal.getChildIds());
 	}
 
 	public boolean isEmpty()
 	{
-		return roots.isEmpty();
+		return goals.isEmpty();
 	}
 
 	@Nullable
 	public Goal find(String id)
 	{
-		Location location = locate(id);
-		return location == null ? null : location.goal;
+		return goals.get(id);
 	}
 
 	/**
-	 * Lägger till ett mål sist, antingen på rotnivå eller som delmål.
+	 * Lägger till ett nytt mål sist, antingen på rotnivå eller som delmål.
 	 *
-	 * @return false om föräldern inte finns
+	 * @return false om föräldern inte finns eller målets id redan används
 	 */
 	public boolean add(@Nullable String parentId, Goal goal)
 	{
+		if (goals.containsKey(goal.getId()))
+		{
+			return false;
+		}
 		if (parentId == null)
 		{
-			roots.add(goal);
+			goals.put(goal.getId(), goal);
+			rootIds.add(goal.getId());
 			return true;
 		}
 
@@ -83,110 +187,179 @@ public class GoalTree
 		{
 			return false;
 		}
-
-		parent.getChildren().add(goal);
+		goals.put(goal.getId(), goal);
+		parent.getChildIds().add(goal.getId());
 		parent.setExpanded(true);
 		return true;
 	}
 
+	/**
+	 * @return om {@code childId} kan kopplas under {@code parentId} utan att skapa en cykel
+	 */
+	public boolean canLink(String parentId, String childId)
+	{
+		Goal parent = find(parentId);
+		return parent != null && find(childId) != null && !parentId.equals(childId)
+			&& !parent.getChildIds().contains(childId) && !isAncestor(childId, parentId);
+	}
+
+	/**
+	 * Kopplar ett befintligt mål under ytterligare en förälder. Ett rotmål slutar vara rot.
+	 *
+	 * @return false om kopplingen redan finns, något mål saknas, eller det skulle bli en cykel
+	 */
+	public boolean link(String parentId, String childId)
+	{
+		if (!canLink(parentId, childId))
+		{
+			return false;
+		}
+		find(parentId).getChildIds().add(childId);
+		rootIds.remove(childId);
+		return true;
+	}
+
+	/**
+	 * Tar bort kopplingen mellan förälder och delmål. Saknar målet då föräldrar blir det
+	 * ett rotmål, så det försvinner aldrig.
+	 */
+	public boolean unlink(String parentId, String childId)
+	{
+		Goal parent = find(parentId);
+		if (parent == null || !parent.getChildIds().remove(childId))
+		{
+			return false;
+		}
+		if (getParents(childId).isEmpty() && !rootIds.contains(childId))
+		{
+			rootIds.add(childId);
+		}
+		return true;
+	}
+
+	/**
+	 * Tar bort målet helt, från alla föräldrar. Delmål som bara hade det här målet som
+	 * förälder tas också bort; delmål med andra föräldrar ligger kvar.
+	 */
 	public boolean remove(String id)
 	{
-		Location location = locate(id);
-		if (location == null)
+		Goal goal = goals.remove(id);
+		if (goal == null)
 		{
 			return false;
 		}
+		rootIds.remove(id);
+		for (Goal other : goals.values())
+		{
+			other.getChildIds().remove(id);
+		}
 
-		location.siblings.remove(location.index);
+		for (String childId : goal.getChildIds())
+		{
+			if (goals.containsKey(childId) && !rootIds.contains(childId) && getParents(childId).isEmpty())
+			{
+				remove(childId);
+			}
+		}
 		return true;
 	}
 
-	public boolean moveUp(String id)
+	public boolean moveUp(@Nullable String parentId, String id)
 	{
-		Location location = locate(id);
-		if (location == null || location.index == 0)
+		List<String> siblings = siblings(parentId);
+		int index = siblings == null ? -1 : siblings.indexOf(id);
+		if (index <= 0)
 		{
 			return false;
 		}
-
-		Collections.swap(location.siblings, location.index, location.index - 1);
+		Collections.swap(siblings, index, index - 1);
 		return true;
 	}
 
-	public boolean moveDown(String id)
+	public boolean moveDown(@Nullable String parentId, String id)
 	{
-		Location location = locate(id);
-		if (location == null || location.index >= location.siblings.size() - 1)
+		List<String> siblings = siblings(parentId);
+		int index = siblings == null ? -1 : siblings.indexOf(id);
+		if (index < 0 || index >= siblings.size() - 1)
 		{
 			return false;
 		}
-
-		Collections.swap(location.siblings, location.index, location.index + 1);
+		Collections.swap(siblings, index, index + 1);
 		return true;
 	}
 
 	/**
 	 * Gör målet till sista delmålet under syskonet ovanför (som Tab i en punktlista).
+	 * Bara kopplingen i {@code parentId} flyttas; andra föräldrar påverkas inte.
 	 */
-	public boolean indent(String id)
+	public boolean indent(@Nullable String parentId, String id)
 	{
-		Location location = locate(id);
-		if (location == null || location.index == 0)
+		if (!canIndent(parentId, id))
 		{
 			return false;
 		}
-
-		Goal newParent = location.siblings.get(location.index - 1);
-		location.siblings.remove(location.index);
-		newParent.getChildren().add(location.goal);
+		List<String> siblings = siblings(parentId);
+		int index = siblings.indexOf(id);
+		Goal newParent = find(siblings.get(index - 1));
+		siblings.remove(index);
+		if (!newParent.getChildIds().contains(id))
+		{
+			newParent.getChildIds().add(id);
+		}
 		newParent.setExpanded(true);
 		return true;
 	}
 
 	/**
-	 * Flyttar ut målet en nivå, direkt efter sin nuvarande förälder (som Shift+Tab).
+	 * Flyttar ut målet en nivå, direkt efter föräldern i listan föräldern visas i (som
+	 * Shift+Tab). {@code grandparentId} är förälderns förälder i den raden, null för rotnivå.
 	 */
-	public boolean outdent(String id)
+	public boolean outdent(@Nullable String grandparentId, String parentId, String id)
 	{
-		Location location = locate(id);
-		if (location == null || location.parent == null)
+		if (!canOutdent(grandparentId, parentId, id))
 		{
 			return false;
 		}
-
-		Location parentLocation = locate(location.parent.getId());
-		if (parentLocation == null)
+		List<String> parentSiblings = siblings(grandparentId);
+		find(parentId).getChildIds().remove(id);
+		if (!parentSiblings.contains(id))
 		{
-			return false;
+			parentSiblings.add(parentSiblings.indexOf(parentId) + 1, id);
 		}
-
-		location.siblings.remove(location.index);
-		parentLocation.siblings.add(parentLocation.index + 1, location.goal);
 		return true;
 	}
 
-	public boolean canIndent(String id)
+	public boolean canIndent(@Nullable String parentId, String id)
 	{
-		Location location = locate(id);
-		return location != null && location.index > 0;
+		List<String> siblings = siblings(parentId);
+		int index = siblings == null ? -1 : siblings.indexOf(id);
+		// Målet får inte hamna under ett av sina egna delmål.
+		return index > 0 && !isAncestor(id, siblings.get(index - 1));
 	}
 
-	public boolean canOutdent(String id)
+	public boolean canOutdent(@Nullable String grandparentId, @Nullable String parentId, String id)
 	{
-		Location location = locate(id);
-		return location != null && location.parent != null;
+		if (parentId == null)
+		{
+			return false;
+		}
+		Goal parent = find(parentId);
+		List<String> parentSiblings = siblings(grandparentId);
+		return parent != null && parent.getChildIds().contains(id)
+			&& parentSiblings != null && parentSiblings.contains(parentId);
 	}
 
-	public boolean canMoveUp(String id)
+	public boolean canMoveUp(@Nullable String parentId, String id)
 	{
-		Location location = locate(id);
-		return location != null && location.index > 0;
+		List<String> siblings = siblings(parentId);
+		return siblings != null && siblings.indexOf(id) > 0;
 	}
 
-	public boolean canMoveDown(String id)
+	public boolean canMoveDown(@Nullable String parentId, String id)
 	{
-		Location location = locate(id);
-		return location != null && location.index < location.siblings.size() - 1;
+		List<String> siblings = siblings(parentId);
+		int index = siblings == null ? -1 : siblings.indexOf(id);
+		return index >= 0 && index < siblings.size() - 1;
 	}
 
 	public boolean setCompleted(String id, boolean completed, long now)
@@ -202,31 +375,18 @@ public class GoalTree
 	}
 
 	/**
-	 * Besöker alla mål i visningsordning (förälder före barn).
-	 */
-	public void forEach(Consumer<Goal> visitor)
-	{
-		visit(roots, visitor);
-	}
-
-	/**
-	 * Alla mål som har målet som direkt delmål. I dagens träd är det högst ett, men
-	 * anropare ska inte förutsätta det: delmål ska längre fram kunna ha flera föräldrar.
+	 * Alla mål som har målet som direkt delmål, i lagringsordning.
 	 */
 	public List<Goal> getParents(String id)
 	{
 		List<Goal> parents = new ArrayList<>();
-		forEach(goal ->
+		for (Goal goal : goals.values())
 		{
-			for (Goal child : goal.getChildren())
+			if (goal.getChildIds().contains(id))
 			{
-				if (child.getId().equals(id))
-				{
-					parents.add(goal);
-					return;
-				}
+				parents.add(goal);
 			}
-		});
+		}
 		return parents;
 	}
 
@@ -240,14 +400,19 @@ public class GoalTree
 			return false;
 		}
 		Goal ancestor = find(ancestorId);
-		return ancestor != null && containsBelow(ancestor.getChildren(), goalId);
+		return ancestor != null && reaches(ancestor, goalId, new HashSet<>());
 	}
 
-	private static boolean containsBelow(List<Goal> goals, String id)
+	private boolean reaches(Goal from, String targetId, Set<String> visited)
 	{
-		for (Goal goal : goals)
+		for (String childId : from.getChildIds())
 		{
-			if (goal.getId().equals(id) || containsBelow(goal.getChildren(), id))
+			if (childId.equals(targetId))
+			{
+				return true;
+			}
+			Goal child = goals.get(childId);
+			if (child != null && visited.add(childId) && reaches(child, targetId, visited))
 			{
 				return true;
 			}
@@ -255,13 +420,40 @@ public class GoalTree
 		return false;
 	}
 
+	/**
+	 * Besöker varje mål en gång i visningsordning (förälder före barn). Ett delat
+	 * delmål besöks där det först dyker upp.
+	 */
+	public void forEach(Consumer<Goal> visitor)
+	{
+		Set<String> visited = new HashSet<>();
+		for (String id : rootIds)
+		{
+			visit(id, visitor, visited);
+		}
+	}
+
+	private void visit(String id, Consumer<Goal> visitor, Set<String> visited)
+	{
+		Goal goal = goals.get(id);
+		if (goal == null || !visited.add(id))
+		{
+			return;
+		}
+		visitor.accept(goal);
+		for (String childId : goal.getChildIds())
+		{
+			visit(childId, visitor, visited);
+		}
+	}
+
 	public int size()
 	{
-		return flatten().size();
+		return goals.size();
 	}
 
 	/**
-	 * Alla mål i visningsordning (förälder före barn).
+	 * Alla mål, varje mål en gång, i visningsordning (förälder före barn).
 	 */
 	public List<Goal> flatten()
 	{
@@ -270,56 +462,28 @@ public class GoalTree
 		return all;
 	}
 
-	private static void visit(List<Goal> goals, Consumer<Goal> visitor)
+	@Nullable
+	private List<String> siblings(@Nullable String parentId)
 	{
-		for (Goal goal : goals)
+		if (parentId == null)
 		{
-			visitor.accept(goal);
-			visit(goal.getChildren(), visitor);
+			return rootIds;
 		}
+		Goal parent = find(parentId);
+		return parent == null ? null : parent.getChildIds();
 	}
 
-	@Nullable
-	private Location locate(String id)
+	private List<Goal> resolve(List<String> ids)
 	{
-		return locate(roots, null, id);
-	}
-
-	@Nullable
-	private static Location locate(List<Goal> siblings, @Nullable Goal parent, String id)
-	{
-		for (int i = 0; i < siblings.size(); i++)
+		List<Goal> resolved = new ArrayList<>(ids.size());
+		for (String id : ids)
 		{
-			Goal goal = siblings.get(i);
-			if (goal.getId().equals(id))
+			Goal goal = goals.get(id);
+			if (goal != null)
 			{
-				return new Location(goal, parent, siblings, i);
-			}
-
-			Location found = locate(goal.getChildren(), goal, id);
-			if (found != null)
-			{
-				return found;
+				resolved.add(goal);
 			}
 		}
-		return null;
-	}
-
-	// Var i trädet ett mål ligger: listan det ligger i, dess index och föräldern.
-	private static final class Location
-	{
-		private final Goal goal;
-		@Nullable
-		private final Goal parent;
-		private final List<Goal> siblings;
-		private final int index;
-
-		private Location(Goal goal, @Nullable Goal parent, List<Goal> siblings, int index)
-		{
-			this.goal = goal;
-			this.parent = parent;
-			this.siblings = siblings;
-			this.index = index;
-		}
+		return Collections.unmodifiableList(resolved);
 	}
 }
