@@ -67,11 +67,13 @@ public class AchievementTracker
 	public static class Achievements
 	{
 		public static final Achievements NONE = new Achievements(
-			Collections.emptyMap(), Collections.emptyMap(), Collections.emptyMap());
+			Collections.emptyMap(), Collections.emptyMap(), Collections.emptyMap(), -1);
 
 		Map<Integer, QuestState> quests;
 		Map<Integer, Integer> varbits;
 		Map<Integer, Boolean> combatAchievements;
+		// Quest points från spelets varp, -1 om de inte är lästa.
+		int questPoints;
 	}
 
 	private static final Map<Integer, Quest> QUESTS_BY_ID = new HashMap<>();
@@ -160,7 +162,9 @@ public class AchievementTracker
 		}
 		lastWatched = current;
 
-		Achievements achievements = new Achievements(questStates, readVarbits(current), readCombatAchievements(current));
+		// Quest points är en enda varp och läses alltid, så att QP-mål inte behöver bevakas.
+		Achievements achievements = new Achievements(questStates, readVarbits(current), readCombatAchievements(current),
+			client.getVarpValue(VarPlayerID.QP));
 		if (achievements.equals(last))
 		{
 			return null;

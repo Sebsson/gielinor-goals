@@ -25,14 +25,18 @@
 package com.gielinorgoals.ui;
 
 import com.gielinorgoals.model.CombatAchievementRequirement;
+import com.gielinorgoals.model.CombatLevelRequirement;
 import com.gielinorgoals.model.DiaryArea;
 import com.gielinorgoals.model.DiaryRequirement;
 import com.gielinorgoals.model.DiaryTier;
 import com.gielinorgoals.model.GameData;
+import com.gielinorgoals.model.GoalProgress;
 import com.gielinorgoals.model.ItemRequirement;
+import com.gielinorgoals.model.QuestPointsRequirement;
 import com.gielinorgoals.model.QuestRequirement;
 import com.gielinorgoals.model.Requirement;
 import com.gielinorgoals.model.SkillRequirement;
+import com.gielinorgoals.model.TotalLevelRequirement;
 import com.gielinorgoals.tracking.AchievementTracker;
 import com.gielinorgoals.tracking.CompletionStatus;
 import com.gielinorgoals.tracking.SkillTracker;
@@ -45,6 +49,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
@@ -90,7 +95,15 @@ final class GoalEditDialog
 		ITEM("Item"),
 		QUEST("Quest"),
 		DIARY("Achievement diary"),
-		COMBAT_ACHIEVEMENT("Combat achievement");
+		COMBAT_ACHIEVEMENT("Combat achievement"),
+		TOTAL_LEVEL("Total level"),
+		COMBAT_LEVEL("Combat level"),
+		QUEST_POINTS("Quest points");
+
+		boolean isAccountLevel()
+		{
+			return this == TOTAL_LEVEL || this == COMBAT_LEVEL || this == QUEST_POINTS;
+		}
 
 		private final String label;
 
@@ -169,6 +182,12 @@ final class GoalEditDialog
 	// Av: målet är en total XP. På: målet är XP att tjäna räknat från nu.
 	private final JCheckBox gainBox = new JCheckBox("Count XP gained from now");
 
+	// Kortet för total level, combat level och quest points: ett nummer med gränser.
+	private static final String ACCOUNT_CARD = "ACCOUNT";
+	private final JLabel accountTargetLabel = new JLabel();
+	private final JTextField accountTargetField = new JTextField(20);
+	private final JLabel accountCurrentLabel = hintLabel();
+
 	// Föremålskortet.
 	private final SearchPanel<ItemSearch.ItemOption> itemPanel;
 	private final JTextField quantityField = new JTextField("1", 20);
@@ -214,6 +233,7 @@ final class GoalEditDialog
 		cardPanel.add(questPanel, GoalKind.QUEST.name());
 		cardPanel.add(diaryPanel, GoalKind.DIARY.name());
 		cardPanel.add(caPanel, GoalKind.COMBAT_ACHIEVEMENT.name());
+		cardPanel.add(buildAccountCard(), ACCOUNT_CARD);
 
 		questPanel.setHint("Loading your quests...");
 		diaryPanel.setHint("Loading your diaries...");
@@ -307,6 +327,21 @@ final class GoalEditDialog
 			kindBox.setSelectedItem(GoalKind.DIARY);
 			diaryPanel.preselect(new DiaryOption(diary.getArea(), diary.getTier()));
 		}
+		else if (requirement instanceof TotalLevelRequirement)
+		{
+			kindBox.setSelectedItem(GoalKind.TOTAL_LEVEL);
+			accountTargetField.setText(String.valueOf(((TotalLevelRequirement) requirement).getTarget()));
+		}
+		else if (requirement instanceof CombatLevelRequirement)
+		{
+			kindBox.setSelectedItem(GoalKind.COMBAT_LEVEL);
+			accountTargetField.setText(String.valueOf(((CombatLevelRequirement) requirement).getTarget()));
+		}
+		else if (requirement instanceof QuestPointsRequirement)
+		{
+			kindBox.setSelectedItem(GoalKind.QUEST_POINTS);
+			accountTargetField.setText(String.valueOf(((QuestPointsRequirement) requirement).getTarget()));
+		}
 		else if (requirement instanceof CombatAchievementRequirement)
 		{
 			CombatAchievementRequirement task = (CombatAchievementRequirement) requirement;
@@ -372,6 +407,15 @@ final class GoalEditDialog
 		return northAligned(card);
 	}
 
+	private JPanel buildAccountCard()
+	{
+		JPanel card = new JPanel(new DynamicGridLayout(0, 1, 0, 4));
+		card.add(accountCurrentLabel);
+		card.add(accountTargetLabel);
+		card.add(accountTargetField);
+		return northAligned(card);
+	}
+
 	private JPanel buildItemCard()
 	{
 		JPanel options = new JPanel(new DynamicGridLayout(0, 1, 0, 4));
@@ -422,9 +466,56 @@ final class GoalEditDialog
 		}
 		gainBox.setVisible(kind == GoalKind.SKILL_XP);
 
+		if (kind.isAccountLevel())
+		{
+			int[] range = accountRange(kind);
+			accountTargetLabel.setText("Target " + kind.toString().toLowerCase(Locale.ROOT)
+				+ " (" + range[0] + "-" + range[1] + ")");
+			accountCurrentLabel.setText(accountCurrentText(kind));
+			cards.show(cardPanel, ACCOUNT_CARD);
+			return;
+		}
+
 		// Level och XP delar samma kort.
 		GoalKind card = kind == GoalKind.SKILL_XP ? GoalKind.SKILL_LEVEL : kind;
 		cards.show(cardPanel, card.name());
+	}
+
+	private static int[] accountRange(GoalKind kind)
+	{
+		switch (kind)
+		{
+			case TOTAL_LEVEL:
+				return new int[]{TotalLevelRequirement.MIN, TotalLevelRequirement.MAX};
+			case COMBAT_LEVEL:
+				return new int[]{CombatLevelRequirement.MIN, CombatLevelRequirement.MAX};
+			default:
+				return new int[]{QuestPointsRequirement.MIN, QuestPointsRequirement.MAX};
+		}
+	}
+
+	private static Requirement accountRequirement(GoalKind kind, int target)
+	{
+		switch (kind)
+		{
+			case TOTAL_LEVEL:
+				return new TotalLevelRequirement(target);
+			case COMBAT_LEVEL:
+				return new CombatLevelRequirement(target);
+			default:
+				return new QuestPointsRequirement(target);
+		}
+	}
+
+	// Nuvarande värde räknas på samma sätt som kravet, med lägsta målet som sond.
+	private String accountCurrentText(GoalKind kind)
+	{
+		GoalProgress progress = accountRequirement(kind, accountRange(kind)[0]).progress(services.currentGameData());
+		if (progress == null)
+		{
+			return "Log in to see your current " + kind.toString().toLowerCase(Locale.ROOT) + ".";
+		}
+		return "You have " + QuantityFormatter.formatNumber(progress.getCurrent()) + " now.";
 	}
 
 	private void updateCurrentSkill()
@@ -516,6 +607,15 @@ final class GoalEditDialog
 			{
 				DiaryOption diary = requireSelected(diaryPanel, "Pick a diary in the list.");
 				return new DiaryRequirement(diary.getArea(), diary.getTier());
+			}
+			case TOTAL_LEVEL:
+			case COMBAT_LEVEL:
+			case QUEST_POINTS:
+			{
+				// Ett redan uppnått mål är tillåtet; det bockas av med ungefärligt datum.
+				int[] range = accountRange(kind);
+				return accountRequirement(kind, parseInRange(accountTargetField.getText().trim(), range[0], range[1],
+					kind.toString().toLowerCase(Locale.ROOT)));
 			}
 			case COMBAT_ACHIEVEMENT:
 			{
@@ -650,6 +750,23 @@ final class GoalEditDialog
 			}
 		}
 		return SearchRanking.rank(all, DiaryOption::toString, query, MAX_LIST_RESULTS);
+	}
+
+	static int parseInRange(String text, int min, int max, String what)
+	{
+		try
+		{
+			long value = parseAmount(text);
+			if (value >= min && value <= max)
+			{
+				return (int) value;
+			}
+		}
+		catch (IllegalArgumentException e)
+		{
+			// Faller igenom till meddelandet nedan.
+		}
+		throw new IllegalArgumentException("Enter a " + what + " between " + min + " and " + max + ".");
 	}
 
 	static int parseLevel(String text)

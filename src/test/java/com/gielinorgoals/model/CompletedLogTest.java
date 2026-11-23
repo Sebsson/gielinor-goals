@@ -281,4 +281,29 @@ public class CompletedLogTest
 		assertEquals("Barrows gloves, Quest cape", sections.get(0).getEntries().get(0).getParents());
 		assertEquals(1, CompletedLog.stats(tree, now, ZONE).getTotal());
 	}
+
+	@Test
+	public void levelsAndQuestPointsShareOneFilter()
+	{
+		long now = at(2026, 12, 3, 12, 0, 0);
+		GoalTree tree = new GoalTree();
+		Goal total = new Goal("");
+		total.setRequirement(new TotalLevelRequirement(1500));
+		Goal combat = new Goal("");
+		combat.setRequirement(new CombatLevelRequirement(100));
+		Goal qp = new Goal("");
+		qp.setRequirement(new QuestPointsRequirement(150));
+		Goal quest = new Goal("A quest");
+		quest.setRequirement(new QuestRequirement(1, "A quest"));
+		for (Goal goal : List.of(total, combat, qp, quest))
+		{
+			tree.add(null, goal);
+			goal.markCompleted(true, now);
+		}
+
+		assertEquals(List.of("Total level 1500", "Combat level 100", "150 quest points"),
+			titles(CompletedLog.build(tree, CompletedLog.TypeFilter.ACCOUNT, false, false, now, ZONE)));
+		assertEquals(List.of("A quest"),
+			titles(CompletedLog.build(tree, CompletedLog.TypeFilter.QUEST, false, false, now, ZONE)));
+	}
 }

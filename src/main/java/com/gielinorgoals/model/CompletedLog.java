@@ -63,6 +63,8 @@ public final class CompletedLog
 		DIARY("Diaries"),
 		ITEM("Items"),
 		COMBAT_ACHIEVEMENT("Combat achievements"),
+		// Total level, combat level och quest points i en kategori, så att listan får plats.
+		ACCOUNT("Levels & quest points"),
 		MANUAL("Manual goals");
 
 		private final String label;
@@ -76,6 +78,10 @@ public final class CompletedLog
 					return true;
 				case MANUAL:
 					return requirement == null;
+				case ACCOUNT:
+					return requirement != null && (requirement.getType() == RequirementType.TOTAL_LEVEL
+						|| requirement.getType() == RequirementType.COMBAT_LEVEL
+						|| requirement.getType() == RequirementType.QUEST_POINTS);
 				default:
 					return requirement != null && requirement.getType().name().equals(name());
 			}

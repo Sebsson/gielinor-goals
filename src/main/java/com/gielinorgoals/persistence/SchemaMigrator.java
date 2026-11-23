@@ -54,8 +54,11 @@ public class SchemaMigrator
 	 * 7 – från träd till graf: "goals" blir en platt lista där varje mål har
 	 *     "childIds" i stället för nästlade "children", plus en ordnad "rootIds".
 	 *     Så kan ett delmål ha flera föräldrar men lagras en gång.
+	 * 8 – kravtyperna TOTAL_LEVEL, COMBAT_LEVEL och QUEST_POINTS. Ingen dataändring;
+	 *     höjd så att äldre versioner blir skrivskyddade i stället för att göra
+	 *     målen manuella när de inte känner igen typerna.
 	 */
-	public static final int CURRENT_VERSION = 7;
+	public static final int CURRENT_VERSION = 8;
 	static final String VERSION_FIELD = "schemaVersion";
 	private static final String GOALS_FIELD = GoalSerializer.GOALS_FIELD;
 	private static final String ROOT_IDS_FIELD = GoalSerializer.ROOT_IDS_FIELD;
@@ -74,7 +77,8 @@ public class SchemaMigrator
 			3, SchemaMigrator::noStructuralChange,
 			4, SchemaMigrator::noStructuralChange,
 			5, SchemaMigrator::noStructuralChange,
-			6, SchemaMigrator::v6ToV7));
+			6, SchemaMigrator::v6ToV7,
+			7, SchemaMigrator::noStructuralChange));
 	}
 
 	/**

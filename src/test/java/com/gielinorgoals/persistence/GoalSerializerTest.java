@@ -1,5 +1,8 @@
 package com.gielinorgoals.persistence;
 
+import com.gielinorgoals.model.TotalLevelRequirement;
+import com.gielinorgoals.model.QuestPointsRequirement;
+import com.gielinorgoals.model.CombatLevelRequirement;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -370,5 +373,83 @@ public class GoalSerializerTest
 		assertEquals(3, new Gson().fromJson(json, JsonObject.class).getAsJsonArray("goals").size());
 		assertEquals(2, loaded.getParents(rfd.getId()).size());
 		assertEquals(List.of(gloves.getId(), questCape.getId()), loaded.getRootIds());
+	}
+
+	@Test
+	public void accountLevelRequirementsRoundTrip()
+	{
+		List<Requirement> requirements = List.of(
+			new TotalLevelRequirement(1500),
+			new CombatLevelRequirement(100),
+			new QuestPointsRequirement(150));
+		GoalTree tree = new GoalTree();
+		for (Requirement requirement : requirements)
+		{
+			Goal goal = new Goal("");
+			goal.setRequirement(requirement);
+			tree.add(null, goal);
+		}
+
+		String json = serializer.serialize(tree);
+		List<Goal> loaded = serializer.deserialize(json).getGoals();
+
+		assertTrue(json.contains("\"type\":\"TOTAL_LEVEL\""));
+		assertTrue(json.contains("\"type\":\"COMBAT_LEVEL\""));
+		assertTrue(json.contains("\"type\":\"QUEST_POINTS\""));
+		for (int i = 0; i < requirements.size(); i++)
+		{
+			assertEquals(requirements.get(i), loaded.get(i).getRequirement());
+		}
+		assertEquals("Total level 1500", loaded.get(0).getDisplayTitle());
+	}
+
+	@Test
+	public void accountLevelRequirementsAreReadFromJson()
+	{
+		String json = "{\"schemaVersion\":8,\"rootIds\":[\"a\",\"b\",\"c\",\"d\"],\"goals\":["
+			+ "{\"id\":\"a\",\"title\":\"\",\"requirement\":{\"type\":\"TOTAL_LEVEL\",\"target\":2000}},"
+			+ "{\"id\":\"b\",\"title\":\"\",\"requirement\":{\"type\":\"COMBAT_LEVEL\",\"target\":126}},"
+			+ "{\"id\":\"c\",\"title\":\"\",\"requirement\":{\"type\":\"QUEST_POINTS\",\"target\":1}},"
+			// Utanför gränserna: blir ett manuellt mål i stället för att försvinna.
+			+ "{\"id\":\"d\",\"title\":\"Bad\",\"requirement\":{\"type\":\"COMBAT_LEVEL\",\"target\":200}}]}";
+
+		LoadResult result = serializer.deserialize(json);
+
+		assertEquals(LoadResult.Status.OK, result.getStatus());
+		assertFalse(result.isMigrated());
+		assertEquals(new TotalLevelRequirement(2000), result.getTree().find("a").getRequirement());
+		assertEquals(new CombatLevelRequirement(126), result.getTree().find("b").getRequirement());
+		assertEquals(new QuestPointsRequirement(1), result.getTree().find("c").getRequirement());
+		assertNull(result.getTree().find("d").getRequirement());
+	}
+
+	@Test
+	public void version7LoadsIntoVersion8WithoutDataLoss()
+	{
+		String json = "{\"schemaVersion\":7,\"rootIds\":[\"cape\"],\"goals\":["
+			+ "{\"id\":\"cape\",\"title\":\"Quest cape\",\"note\":\"All quests\",\"aggregate\":true,"
+			+ "\"expanded\":false,\"createdAt\":1762000000000,\"childIds\":[\"rfd\"]},"
+			+ "{\"id\":\"rfd\",\"title\":\"\",\"completed\":true,\"completedAt\":1763000000000,"
+			+ "\"completedAtApprox\":true,\"childIds\":[],"
+			+ "\"requirement\":{\"type\":\"QUEST\",\"questId\":159,\"questName\":\"Recipe for Disaster\"}}]}";
+
+		LoadResult result = serializer.deserialize(json);
+
+		assertEquals(LoadResult.Status.OK, result.getStatus());
+		assertTrue(result.isMigrated());
+		Goal cape = result.getTree().find("cape");
+		assertEquals("Quest cape", cape.getTitle());
+		assertEquals("All quests", cape.getNote());
+		assertTrue(cape.isAggregate());
+		assertFalse(cape.isExpanded());
+		assertEquals(Long.valueOf(1_762_000_000_000L), cape.getCreatedAt());
+		assertEquals(List.of("rfd"), cape.getChildIds());
+		Goal rfd = result.getTree().find("rfd");
+		assertTrue(rfd.isCompleted());
+		assertTrue(rfd.isCompletedAtApprox());
+		assertEquals(new QuestRequirement(159, "Recipe for Disaster"), rfd.getRequirement());
+
+		JsonObject saved = new Gson().fromJson(serializer.serialize(result.getTree()), JsonObject.class);
+		assertEquals(8, saved.get("schemaVersion").getAsInt());
 	}
 }

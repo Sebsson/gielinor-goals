@@ -76,6 +76,12 @@ public class GameSnapshot implements GameData
 		return achievements.getVarbits().getOrDefault(varbitId, -1);
 	}
 
+	@Override
+	public int getQuestPoints()
+	{
+		return achievements.getQuestPoints();
+	}
+
 	@Nullable
 	@Override
 	public Boolean isCombatAchievementComplete(int taskId)

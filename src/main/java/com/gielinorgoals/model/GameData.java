@@ -81,6 +81,14 @@ public interface GameData
 	}
 
 	/**
+	 * @return antal quest points, eller -1 om det inte är läst
+	 */
+	default int getQuestPoints()
+	{
+		return -1;
+	}
+
+	/**
 	 * @return om uppgiften är klar, eller null om det inte är läst
 	 */
 	@Nullable

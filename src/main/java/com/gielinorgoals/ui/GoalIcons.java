@@ -25,11 +25,14 @@
 package com.gielinorgoals.ui;
 
 import com.gielinorgoals.model.CombatAchievementRequirement;
+import com.gielinorgoals.model.CombatLevelRequirement;
 import com.gielinorgoals.model.DiaryRequirement;
 import com.gielinorgoals.model.ItemRequirement;
+import com.gielinorgoals.model.QuestPointsRequirement;
 import com.gielinorgoals.model.QuestRequirement;
 import com.gielinorgoals.model.Requirement;
 import com.gielinorgoals.model.SkillRequirement;
+import com.gielinorgoals.model.TotalLevelRequirement;
 import java.awt.image.BufferedImage;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -90,9 +93,17 @@ public class GoalIcons
 		{
 			applySprite(SpriteID.SideIcons.ACHIEVEMENT_DIARIES, label);
 		}
-		else if (requirement instanceof CombatAchievementRequirement)
+		else if (requirement instanceof CombatAchievementRequirement || requirement instanceof CombatLevelRequirement)
 		{
 			applySprite(SpriteID.SideIcons.COMBAT, label);
+		}
+		else if (requirement instanceof TotalLevelRequirement)
+		{
+			applySprite(SpriteID.SideIcons.STATS, label);
+		}
+		else if (requirement instanceof QuestPointsRequirement)
+		{
+			applySprite(SpriteID.SideIcons.QUEST, label);
 		}
 		else
 		{
@@ -123,9 +134,17 @@ public class GoalIcons
 		{
 			loadSprite(SpriteID.SideIcons.ACHIEVEMENT_DIARIES, consumer);
 		}
-		else if (requirement instanceof CombatAchievementRequirement)
+		else if (requirement instanceof CombatAchievementRequirement || requirement instanceof CombatLevelRequirement)
 		{
 			loadSprite(SpriteID.SideIcons.COMBAT, consumer);
+		}
+		else if (requirement instanceof TotalLevelRequirement)
+		{
+			loadSprite(SpriteID.SideIcons.STATS, consumer);
+		}
+		else if (requirement instanceof QuestPointsRequirement)
+		{
+			loadSprite(SpriteID.SideIcons.QUEST, consumer);
 		}
 	}
 

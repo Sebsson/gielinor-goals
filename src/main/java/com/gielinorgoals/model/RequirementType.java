@@ -38,7 +38,10 @@ public enum RequirementType
 	ITEM(ItemRequirement.class),
 	QUEST(QuestRequirement.class),
 	DIARY(DiaryRequirement.class),
-	COMBAT_ACHIEVEMENT(CombatAchievementRequirement.class);
+	COMBAT_ACHIEVEMENT(CombatAchievementRequirement.class),
+	TOTAL_LEVEL(TotalLevelRequirement.class),
+	COMBAT_LEVEL(CombatLevelRequirement.class),
+	QUEST_POINTS(QuestPointsRequirement.class);
 
 	private final Class<? extends Requirement> implementation;
 }

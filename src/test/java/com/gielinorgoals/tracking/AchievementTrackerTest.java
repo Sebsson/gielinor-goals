@@ -58,4 +58,16 @@ public class AchievementTrackerTest
 		goal.setRequirement(requirement);
 		return goal;
 	}
+
+	@Test
+	public void snapshotReportsQuestPointsOrUnknown()
+	{
+		AchievementTracker.Achievements achievements = new AchievementTracker.Achievements(
+			java.util.Collections.emptyMap(), java.util.Collections.emptyMap(), java.util.Collections.emptyMap(), 142);
+
+		assertEquals(142, new GameSnapshot(java.util.Collections.emptyMap(), GameSnapshot.Items.UNKNOWN, achievements)
+			.getQuestPoints());
+		assertEquals(-1, new GameSnapshot(java.util.Collections.emptyMap(), GameSnapshot.Items.UNKNOWN,
+			AchievementTracker.Achievements.NONE).getQuestPoints());
+	}
 }
