@@ -59,8 +59,9 @@ public class SchemaMigrator
 	 *     målen manuella när de inte känner igen typerna.
 	 * 9 – kravtypen KILL_COUNT och en valfri sektion "counters" med nuvarande värden
 	 *     per aktivitet. Ingen dataändring; äldre filer får inga räknare.
-	 * 10 – valfria fält templateId, templateParams, templateIgnoredKeys och templateNodeKey
-	 *     på mål, för "Update from template". Ingen dataändring; äldre mål saknar dem.
+	 * 10 – valfria fält templateId, templateParams, templateIgnoredKeys, templateNodeKey och
+	 *     wikiPage på mål, för "Update from template" och "Open on wiki". Ingen dataändring;
+	 *     äldre mål saknar dem.
 	 */
 	public static final int CURRENT_VERSION = 10;
 	static final String VERSION_FIELD = "schemaVersion";

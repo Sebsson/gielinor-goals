@@ -52,6 +52,18 @@ public class QuestCapeTemplate implements GoalTemplate
 	}
 
 	@Override
+	public String getCategory()
+	{
+		return TemplateCategories.CAPES;
+	}
+
+	@Override
+	public java.util.List<String> getTags()
+	{
+		return java.util.List.of("quest", "qpc", "cape");
+	}
+
+	@Override
 	public String getName()
 	{
 		return "Quest cape";

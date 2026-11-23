@@ -268,7 +268,8 @@ public class GielinorGoalsPanel extends PluginPanel
 	private void openTemplateDialog()
 	{
 		TemplateNode template = TemplateDialog.show(this, templateCatalog.getTemplates(), goalManager.getTree(),
-			services.currentGameData(), services.getIcons(), services.getQuestRequirements());
+			services.currentGameData(), services.getIcons(), services.getQuestRequirements(),
+			services.getAccountStatus().isIronman());
 		if (template == null)
 		{
 			return;

@@ -43,6 +43,18 @@ public class DiaryCapeTemplate implements GoalTemplate
 	}
 
 	@Override
+	public String getCategory()
+	{
+		return TemplateCategories.CAPES;
+	}
+
+	@Override
+	public java.util.List<String> getTags()
+	{
+		return java.util.List.of("diary", "achievement", "cape");
+	}
+
+	@Override
 	public String getName()
 	{
 		return "Achievement diary cape";

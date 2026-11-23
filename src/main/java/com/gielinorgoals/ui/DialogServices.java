@@ -29,6 +29,7 @@ import com.gielinorgoals.model.ActivityCounters;
 import com.gielinorgoals.model.GameData;
 import com.gielinorgoals.model.Requirement;
 import com.gielinorgoals.template.QuestRequirementsDb;
+import com.gielinorgoals.tracking.AccountStatus;
 import com.gielinorgoals.template.TemplateUpdates;
 import com.gielinorgoals.tracking.CompletionLookup;
 import javax.annotation.Nullable;
@@ -55,12 +56,14 @@ public class DialogServices
 	private final QuestRequirementsDb questRequirements;
 	@Getter
 	private final TemplateUpdates templateUpdates;
+	@Getter
+	private final AccountStatus accountStatus;
 	private final GoalManager goalManager;
 
 	@Inject
 	DialogServices(ItemSearch itemSearch, CombatAchievementCatalog combatAchievements,
 		CompletionLookup completionLookup, GoalIcons icons, GoalManager goalManager,
-		QuestRequirementsDb questRequirements, TemplateUpdates templateUpdates)
+		QuestRequirementsDb questRequirements, TemplateUpdates templateUpdates, AccountStatus accountStatus)
 	{
 		this.itemSearch = itemSearch;
 		this.combatAchievements = combatAchievements;
@@ -69,6 +72,7 @@ public class DialogServices
 		this.goalManager = goalManager;
 		this.questRequirements = questRequirements;
 		this.templateUpdates = templateUpdates;
+		this.accountStatus = accountStatus;
 	}
 
 	/**

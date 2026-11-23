@@ -317,6 +317,13 @@ class CompletedTab extends JPanel
 		JMenuItem show = new JMenuItem("Show in tree");
 		show.addActionListener(a -> showInTree.accept(goal.getId()));
 		menu.add(show);
+		String wikiUrl = WikiLinks.url(goal);
+		if (wikiUrl != null)
+		{
+			JMenuItem wiki = new JMenuItem("Open on wiki");
+			wiki.addActionListener(a -> net.runelite.client.util.LinkBrowser.browse(wikiUrl));
+			menu.add(wiki);
+		}
 
 		// Ett uppfyllt automatiskt mål skulle bara bockas av igen direkt.
 		GoalProgress progress = goalManager.getProgress(goal.getId());

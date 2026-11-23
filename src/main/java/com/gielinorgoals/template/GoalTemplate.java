@@ -46,6 +46,19 @@ public interface GoalTemplate
 	String getDescription();
 
 	/**
+	 * Kategorin i template-dialogen, se {@link TemplateCategories}.
+	 */
+	String getCategory();
+
+	/**
+	 * Sökord utöver namnet, t.ex. "rfd" eller "ironman".
+	 */
+	default List<String> getTags()
+	{
+		return Collections.emptyList();
+	}
+
+	/**
 	 * Ett krav vars ikon representerar templaten i listan, eller null för ingen ikon.
 	 */
 	@Nullable

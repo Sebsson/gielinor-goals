@@ -60,6 +60,7 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 import net.runelite.client.ui.ColorScheme;
+import net.runelite.client.util.LinkBrowser;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.components.ProgressBar;
 
@@ -385,6 +386,11 @@ class GoalRow extends JPanel
 		if (goal.getTemplateId() != null)
 		{
 			menu.add(item("Update from template...", true, this::updateFromTemplate));
+		}
+		String wikiUrl = WikiLinks.url(goal);
+		if (wikiUrl != null)
+		{
+			menu.add(item("Open on wiki", true, () -> LinkBrowser.browse(wikiUrl)));
 		}
 		menu.add(item("Link to another goal...", true, this::linkToAnotherGoal));
 		if (parentId != null && parents.size() > 1)

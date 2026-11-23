@@ -47,6 +47,18 @@ public class BaseLevelTemplate implements GoalTemplate
 	}
 
 	@Override
+	public String getCategory()
+	{
+		return TemplateCategories.SKILLS;
+	}
+
+	@Override
+	public java.util.List<String> getTags()
+	{
+		return java.util.List.of("base", "level", "skills", "stats");
+	}
+
+	@Override
 	public String getName()
 	{
 		return "Base N";

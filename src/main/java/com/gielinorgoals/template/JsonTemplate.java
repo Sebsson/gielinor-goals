@@ -62,6 +62,9 @@ public class JsonTemplate implements GoalTemplate
 		String id;
 		String name;
 		String description;
+		// En av kategorierna i TemplateCategories, t.ex. "Ironman · Mid".
+		String category;
+		List<String> tags;
 		NodeSpec root;
 	}
 
@@ -69,6 +72,8 @@ public class JsonTemplate implements GoalTemplate
 	{
 		String title;
 		Boolean aggregate;
+		// Egen sida på OSRS Wiki för "Open on wiki"; går före den som härleds ur kravet.
+		String wikiPage;
 		String quest;
 		String skill;
 		Integer level;
@@ -97,6 +102,8 @@ public class JsonTemplate implements GoalTemplate
 	private final String id;
 	private final String name;
 	private final String description;
+	private String category = TemplateCategories.OTHER;
+	private List<String> tags = java.util.Collections.emptyList();
 	private final NodeSpec root;
 
 	private JsonTemplate(String id, String name, String description, NodeSpec root)
@@ -129,6 +136,14 @@ public class JsonTemplate implements GoalTemplate
 			: spec.name.trim().toLowerCase(java.util.Locale.ROOT).replaceAll("[^a-z0-9]+", "-");
 		JsonTemplate template = new JsonTemplate(id, spec.name, spec.description == null ? "" : spec.description,
 			spec.root);
+		if (spec.category != null)
+		{
+			template.category = spec.category;
+		}
+		if (spec.tags != null)
+		{
+			template.tags = java.util.List.copyOf(spec.tags);
+		}
 		// Bygg en gång direkt, så att fel i filen märks när den läses och inte i dialogen.
 		template.build(Map.of());
 		return template;
@@ -138,6 +153,18 @@ public class JsonTemplate implements GoalTemplate
 	public String getId()
 	{
 		return id;
+	}
+
+	@Override
+	public String getCategory()
+	{
+		return category;
+	}
+
+	@Override
+	public List<String> getTags()
+	{
+		return tags;
 	}
 
 	@Override
@@ -181,6 +208,7 @@ public class JsonTemplate implements GoalTemplate
 			throw new IllegalArgumentException("A node needs a title or a requirement");
 		}
 		TemplateNode node = new TemplateNode(title, requirement, Boolean.TRUE.equals(spec.aggregate));
+		node.setWikiPage(spec.wikiPage);
 		if (spec.children != null)
 		{
 			for (NodeSpec child : spec.children)

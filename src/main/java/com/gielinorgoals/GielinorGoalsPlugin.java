@@ -27,6 +27,7 @@ package com.gielinorgoals;
 import com.gielinorgoals.model.DiaryJournal;
 import com.gielinorgoals.model.Goal;
 import com.gielinorgoals.model.NextGoals;
+import com.gielinorgoals.tracking.AccountStatus;
 import com.gielinorgoals.tracking.AchievementTracker;
 import com.gielinorgoals.tracking.DiaryJournalParser;
 import com.gielinorgoals.model.KillCountRequirement;
@@ -65,6 +66,7 @@ import net.runelite.api.events.StatChanged;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.gameval.InterfaceID;
+import net.runelite.api.gameval.VarbitID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.chat.ChatColorType;
@@ -140,6 +142,9 @@ public class GielinorGoalsPlugin extends Plugin
 	@Inject
 	private HiscoreFetcher hiscoreFetcher;
 
+	@Inject
+	private AccountStatus accountStatus;
+
 	// Hiscores hämtas på första tick efter inloggning när spelarens namn finns. Klienttråden.
 	private boolean hiscoreFetchPending;
 	// Hiscore-aktiviteter som har KC-mål; ett nytt mål ger en hämtning av startvärdet. EDT.
@@ -164,6 +169,11 @@ public class GielinorGoalsPlugin extends Plugin
 		clientThread.invokeLater(() ->
 		{
 			boolean loggedIn = client.getGameState() == GameState.LOGGED_IN;
+			// Pluginet kan slås på efter inloggning, då kommer inget VarbitChanged för kontotypen.
+			if (loggedIn)
+			{
+				accountStatus.update(client.getVarbitValue(VarbitID.IRONMAN));
+			}
 			latestXp = Collections.emptyMap();
 			latestItems = GameSnapshot.Items.UNKNOWN;
 			latestAchievements = AchievementTracker.Achievements.NONE;
@@ -245,6 +255,7 @@ public class GielinorGoalsPlugin extends Plugin
 		else if (event.getGameState() == GameState.LOGIN_SCREEN)
 		{
 			completionNotifier.clear();
+			accountStatus.reset();
 		}
 	}
 
@@ -366,6 +377,10 @@ public class GielinorGoalsPlugin extends Plugin
 	@Subscribe
 	public void onVarbitChanged(VarbitChanged event)
 	{
+		if (event.getVarbitId() == VarbitID.IRONMAN)
+		{
+			accountStatus.update(event.getValue());
+		}
 		// Kommer mycket ofta; trackern läser först vid nästa tick.
 		achievementTracker.onVarChanged();
 	}

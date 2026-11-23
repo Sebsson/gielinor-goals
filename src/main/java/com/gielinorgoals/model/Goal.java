@@ -61,6 +61,8 @@ public class Goal
 	private List<String> templateIgnoredKeys;
 	// Stabil nyckel för noden i templaten målet skapades från, t.ex. "quest:117".
 	private String templateNodeKey;
+	// Egen wikisida från en handplockad template; går före sidan som härleds ur kravet.
+	private String wikiPage;
 	// Null betyder ett manuellt mål som bara bockas av för hand.
 	private Requirement requirement;
 	// Delmålens id:n i användarens ordning. Målen själva ligger i GoalTree, så att ett

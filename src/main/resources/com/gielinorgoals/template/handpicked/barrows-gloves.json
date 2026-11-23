@@ -9,8 +9,11 @@
     "Ej boostbara enligt wikin: Agility, Thieving, Ranged. Övriga får boostas, men målen här kräver riktig nivå.",
     "Delquests i wikins ordning, med namn från RuneLites Quest-enum."
   ],
+  "id": "barrows-gloves",
   "name": "Barrows gloves",
   "description": "Recipe for Disaster with every subquest, 175 quest points and its skill levels",
+  "category": "Ironman · Mid",
+  "tags": ["rfd", "recipe for disaster", "gloves", "quest", "ironman"],
   "root": {
     "title": "Barrows gloves",
     "item": {"id": 7462, "name": "Barrows gloves", "quantity": 1},

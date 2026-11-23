@@ -253,6 +253,7 @@ public final class TemplateInserter
 		goal.setRequirement(node.getRequirement());
 		goal.setAggregate(node.isAggregate());
 		goal.setTemplateNodeKey(node.getKey());
+		goal.setWikiPage(node.getWikiPage());
 		return goal;
 	}
 }

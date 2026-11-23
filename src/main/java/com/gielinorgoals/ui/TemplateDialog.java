@@ -30,6 +30,7 @@ import com.gielinorgoals.model.Requirement;
 import com.gielinorgoals.template.GoalTemplate;
 import com.gielinorgoals.template.QuestChains;
 import com.gielinorgoals.template.QuestRequirementsDb;
+import com.gielinorgoals.template.TemplateCategories;
 import com.gielinorgoals.template.TemplateNode;
 import com.gielinorgoals.template.TemplateUpdates;
 import com.gielinorgoals.template.TemplateParameter;
@@ -44,6 +45,8 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
+import javax.swing.DefaultListModel;
+import javax.swing.JTextField;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
@@ -81,7 +84,11 @@ final class TemplateDialog
 	private final GoalTree tree;
 	private final GameData data;
 
-	private final JList<GoalTemplate> templateList;
+	// Listan blandar kategorirubriker (String) och templates (GoalTemplate).
+	private final DefaultListModel<Object> listModel = new DefaultListModel<>();
+	private final JList<Object> templateList = new JList<>(listModel);
+	private final JTextField searchField = new JTextField();
+	private final boolean ironman;
 	private final Map<GoalTemplate, Icon> templateIcons = new HashMap<>();
 	private final JPanel parameterPanel = new JPanel(new DynamicGridLayout(0, 2, 6, 4));
 	private final Map<String, JSpinner> spinners = new HashMap<>();
@@ -98,13 +105,13 @@ final class TemplateDialog
 	private final Map<TemplateNode, PreviewRow> rows = new IdentityHashMap<>();
 
 	private TemplateDialog(List<GoalTemplate> templates, GoalTree tree, GameData data, GoalIcons icons,
-		QuestRequirementsDb questRequirements)
+		QuestRequirementsDb questRequirements, boolean ironman)
 	{
 		this.questRequirements = questRequirements;
 		this.templates = templates;
 		this.tree = tree;
 		this.data = data;
-		this.templateList = new JList<>(templates.toArray(new GoalTemplate[0]));
+		this.ironman = ironman;
 
 		for (GoalTemplate template : templates)
 		{
@@ -125,13 +132,13 @@ final class TemplateDialog
 	 */
 	@Nullable
 	static TemplateNode show(Component parent, List<GoalTemplate> templates, GoalTree tree, GameData data,
-		GoalIcons icons, QuestRequirementsDb questRequirements)
+		GoalIcons icons, QuestRequirementsDb questRequirements, boolean ironman)
 	{
 		if (templates.isEmpty())
 		{
 			return null;
 		}
-		TemplateDialog dialog = new TemplateDialog(templates, tree, data, icons, questRequirements);
+		TemplateDialog dialog = new TemplateDialog(templates, tree, data, icons, questRequirements, ironman);
 		JPanel content = dialog.buildContent();
 		int choice = JOptionPane.showOptionDialog(parent, content, "Add from template",
 			JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, new Object[]{"Add", "Cancel"}, "Add");
@@ -149,6 +156,16 @@ final class TemplateDialog
 			public Component getListCellRendererComponent(JList<?> list, Object value, int index,
 				boolean isSelected, boolean cellHasFocus)
 			{
+				if (value instanceof String)
+				{
+					// Kategorirubrik; går inte att välja.
+					JLabel header = (JLabel) super.getListCellRendererComponent(list, value, index, false, false);
+					header.setFont(header.getFont().deriveFont(java.awt.Font.BOLD));
+					header.setForeground(ColorScheme.BRAND_ORANGE);
+					header.setIcon(null);
+					header.setBorder(new EmptyBorder(6, 4, 2, 4));
+					return header;
+				}
 				GoalTemplate template = (GoalTemplate) value;
 				// Fast textbredd, så att långa beskrivningar bryts i stället för att kapas.
 				String text = "<html><body style='width:" + LIST_TEXT_WIDTH + "px'><b>" + escapeHtml(template.getName())
@@ -162,9 +179,45 @@ final class TemplateDialog
 		});
 		templateList.addListSelectionListener(e ->
 		{
-			if (!e.getValueIsAdjusting())
+			if (e.getValueIsAdjusting())
 			{
-				selectTemplate(templateList.getSelectedValue());
+				return;
+			}
+			Object value = templateList.getSelectedValue();
+			if (value instanceof String)
+			{
+				// En rubrik markerades; hoppa till första templaten under den.
+				int index = templateList.getSelectedIndex();
+				if (index + 1 < listModel.size())
+				{
+					templateList.setSelectedIndex(index + 1);
+				}
+				return;
+			}
+			if (value != selected)
+			{
+				selectTemplate((GoalTemplate) value);
+			}
+		});
+		searchField.putClientProperty("JTextField.placeholderText", "Search templates and tags");
+		searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener()
+		{
+			@Override
+			public void insertUpdate(javax.swing.event.DocumentEvent e)
+			{
+				fillList();
+			}
+
+			@Override
+			public void removeUpdate(javax.swing.event.DocumentEvent e)
+			{
+				fillList();
+			}
+
+			@Override
+			public void changedUpdate(javax.swing.event.DocumentEvent e)
+			{
+				fillList();
 			}
 		});
 
@@ -179,6 +232,7 @@ final class TemplateDialog
 			ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		listScroll.setPreferredSize(new Dimension(PREVIEW_WIDTH, LIST_HEIGHT));
 		listScroll.getVerticalScrollBar().setUnitIncrement(16);
+		top.add(searchField, BorderLayout.NORTH);
 		top.add(listScroll, BorderLayout.CENTER);
 		questChainBox.setFocusPainted(false);
 		questChainBox.setToolTipText("Add every quest needed first, plus the skill levels and quest points;"
@@ -194,8 +248,34 @@ final class TemplateDialog
 		content.add(previewScroll, BorderLayout.CENTER);
 		content.add(summaryLabel, BorderLayout.SOUTH);
 
-		templateList.setSelectedIndex(0);
+		fillList();
 		return content;
+	}
+
+	// Fyller listan per kategori efter söktexten och behåller valet om det fortfarande syns.
+	private void fillList()
+	{
+		GoalTemplate keep = selected;
+		listModel.clear();
+		Map<String, List<GoalTemplate>> grouped = TemplateCategories.group(templates, searchField.getText(), ironman);
+		for (Map.Entry<String, List<GoalTemplate>> entry : grouped.entrySet())
+		{
+			listModel.addElement(entry.getKey());
+			entry.getValue().forEach(listModel::addElement);
+		}
+		if (keep != null && listModel.contains(keep))
+		{
+			templateList.setSelectedValue(keep, true);
+		}
+		else if (listModel.size() > 1)
+		{
+			templateList.setSelectedIndex(1);
+		}
+		else
+		{
+			templateList.clearSelection();
+			selectTemplate(null);
+		}
 	}
 
 	private void selectTemplate(@Nullable GoalTemplate template)

@@ -59,6 +59,11 @@ public class TemplateNode
 	@Nullable
 	private java.util.Map<String, Integer> templateParams;
 
+	// Egen wikisida från en handplockad template, t.ex. "Barrows gloves".
+	@Setter
+	@Nullable
+	private String wikiPage;
+
 	public TemplateNode(String title, @Nullable Requirement requirement, boolean aggregate)
 	{
 		this.title = title;
