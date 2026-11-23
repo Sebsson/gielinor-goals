@@ -25,6 +25,7 @@
 package com.gielinorgoals.ui;
 
 import com.gielinorgoals.GoalManager;
+import com.gielinorgoals.ProfileGuard;
 import com.gielinorgoals.model.Goal;
 import com.gielinorgoals.model.GoalProgress;
 import com.gielinorgoals.model.GoalTree;
@@ -157,10 +158,26 @@ final class GoalActions
 		return menu;
 	}
 
+	/**
+	 * Om profilen bytts medan en dialog var öppen används inte resultatet; användaren får veta
+	 * varför inget hände.
+	 */
+	static boolean stillSameProfile(Component owner, ProfileGuard guard)
+	{
+		if (guard.isCurrent())
+		{
+			return true;
+		}
+		JOptionPane.showMessageDialog(owner, "You switched account while the dialog was open, so nothing was changed.",
+			"Gielinor Goals", JOptionPane.INFORMATION_MESSAGE);
+		return false;
+	}
+
 	void addSubGoal()
 	{
+		ProfileGuard guard = ProfileGuard.of(goalManager);
 		GoalEditDialog.Result result = GoalEditDialog.show(owner, services, "Add sub-goal", null, "", null, null, false);
-		if (result != null)
+		if (result != null && stillSameProfile(owner, guard))
 		{
 			GoalEditDialog.addGoal(goalManager, services, goal.getId(), result);
 		}
@@ -168,9 +185,10 @@ final class GoalActions
 
 	void edit()
 	{
+		ProfileGuard guard = ProfileGuard.of(goalManager);
 		GoalEditDialog.Result result = GoalEditDialog.show(owner, services, "Edit goal", goal.getId(), goal.getTitle(),
 			goal.getNote(), goal.getRequirement(), goal.isAggregate(), goal.getDropSource());
-		if (result != null)
+		if (result != null && stillSameProfile(owner, guard))
 		{
 			goalManager.editGoal(goal.getId(), result.getTitle(), result.getNote(), result.getRequirement(),
 				result.isAggregate(), result.getDropSource());
@@ -192,9 +210,11 @@ final class GoalActions
 	{
 		KillCountRequirement kc = (KillCountRequirement) goal.getRequirement();
 		long current = goalManager.getCounters().value(kc.counterKey());
+		ProfileGuard guard = ProfileGuard.of(goalManager);
 		Object input = JOptionPane.showInputDialog(owner, "Current count for " + kc.getActivityName() + ":",
 			"Set value", JOptionPane.PLAIN_MESSAGE, null, null, current < 0 ? "" : String.valueOf(current));
-		if (input == null)
+		// Räknarna hör till profilen; ett nytt konto ska inte få det gamla kontots värde.
+		if (input == null || !stillSameProfile(owner, guard))
 		{
 			return;
 		}
@@ -223,8 +243,9 @@ final class GoalActions
 				"Update from template", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}
+		ProfileGuard guard = ProfileGuard.of(goalManager);
 		TemplateUpdateDialog.Selection selection = TemplateUpdateDialog.show(owner, plan, tree);
-		if (selection != null)
+		if (selection != null && stillSameProfile(owner, guard))
 		{
 			goalManager.applyTemplateUpdate(goal.getId(), selection.getAdditions(), selection.getRemoveGoalIds(),
 				selection.getDeclinedKeys());
@@ -233,8 +254,9 @@ final class GoalActions
 
 	private void linkToAnotherGoal()
 	{
+		ProfileGuard guard = ProfileGuard.of(goalManager);
 		String newParentId = LinkGoalDialog.show(owner, tree, goal);
-		if (newParentId != null)
+		if (newParentId != null && stillSameProfile(owner, guard))
 		{
 			goalManager.link(newParentId, goal.getId());
 		}
@@ -259,9 +281,10 @@ final class GoalActions
 			{
 				message.append("<br>Its sub-goals are deleted too, except those that are also under another goal.");
 			}
+			ProfileGuard guard = ProfileGuard.of(goalManager);
 			int choice = JOptionPane.showConfirmDialog(owner, message.append("</html>").toString(),
 				"Delete goal", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-			if (choice != JOptionPane.YES_OPTION)
+			if (choice != JOptionPane.YES_OPTION || !stillSameProfile(owner, guard))
 			{
 				return;
 			}

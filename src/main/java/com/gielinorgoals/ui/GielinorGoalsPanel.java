@@ -25,6 +25,7 @@
 package com.gielinorgoals.ui;
 
 import com.gielinorgoals.GoalManager;
+import com.gielinorgoals.ProfileGuard;
 import com.gielinorgoals.GielinorGoalsConfig;
 import com.gielinorgoals.model.Goal;
 import com.gielinorgoals.model.GoalTree;
@@ -270,10 +271,11 @@ public class GielinorGoalsPanel extends PluginPanel
 
 	private void openNewGoalDialog()
 	{
+		ProfileGuard guard = ProfileGuard.of(goalManager);
 		// Text som redan skrivits i fältet följer med som titel.
 		GoalEditDialog.Result result = GoalEditDialog.show(this, services, "New goal", null,
 			newGoalField.getText().trim(), null, null, false);
-		if (result != null)
+		if (result != null && GoalActions.stillSameProfile(this, guard))
 		{
 			GoalEditDialog.addGoal(goalManager, services, null, result);
 			newGoalField.setText("");
@@ -282,10 +284,12 @@ public class GielinorGoalsPanel extends PluginPanel
 
 	private void openTemplateDialog()
 	{
+		ProfileGuard guard = ProfileGuard.of(goalManager);
 		TemplateNode template = TemplateDialog.show(this, templateCatalog.getTemplates(), goalManager.getTree(),
 			services.currentGameData(), services.getIcons(), services.getQuestRequirements(),
 			services.getAccountStatus().isIronman());
-		if (template == null)
+		// Templaten planerades mot målen i den profil som var laddad när dialogen öppnades.
+		if (template == null || !GoalActions.stillSameProfile(this, guard))
 		{
 			return;
 		}
