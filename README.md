@@ -43,13 +43,17 @@ can plan your account without checking things off by hand. Great for ironmen, wh
 
 ## How it works
 
-All data comes from the game client itself. The plugin makes no network requests.
+Almost all data comes from the game client itself. The only network request is the optional kill count lookup on the
+official OSRS hiscores (Jagex's own servers), which can be turned off in the settings.
 
 - Skills and items come from RuneLite events (`StatChanged`, `ItemContainerChanged`). The bank and seed vault can only be
   read while they are open, so their contents are cached for each account.
 - Quests, diaries and combat achievements are read from game variables. The list of combat achievement tasks is read
   from the game cache, so it stays up to date with the game.
 - Diary tasks are read from the journal text when you open it, because the task texts are not part of the game cache.
+- Quest requirements (prerequisite quests, skill levels and quest points) for full quest chains come from the
+  [OSRS Wiki](https://oldschool.runescape.wiki), collected on 2026-11-23 and shipped as a static file
+  (`quest-requirements.json`). Nothing is downloaded while the plugin runs.
 
 ## Known limitations
 

@@ -260,9 +260,7 @@ public class GielinorGoalsPanel extends PluginPanel
 			newGoalField.getText().trim(), null, null, false);
 		if (result != null)
 		{
-			goalManager.addGoal(null, result.getTitle(), result.getNote(), result.getRequirement(),
-				result.isAggregate());
-			GoalEditDialog.applyStartCount(goalManager, result);
+			GoalEditDialog.addGoal(goalManager, services, null, result);
 			newGoalField.setText("");
 		}
 	}
@@ -270,7 +268,7 @@ public class GielinorGoalsPanel extends PluginPanel
 	private void openTemplateDialog()
 	{
 		TemplateNode template = TemplateDialog.show(this, templateCatalog.getTemplates(), goalManager.getTree(),
-			services.currentGameData(), services.getIcons());
+			services.currentGameData(), services.getIcons(), services.getQuestRequirements());
 		if (template == null)
 		{
 			return;

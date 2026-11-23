@@ -49,6 +49,14 @@ public interface GoalTemplate
 		return null;
 	}
 
+	/**
+	 * Om "Show full quest chains" ska vara ibockad från början i template-dialogen.
+	 */
+	default boolean defaultExpandQuestChains()
+	{
+		return false;
+	}
+
 	default List<TemplateParameter> getParameters()
 	{
 		return Collections.emptyList();

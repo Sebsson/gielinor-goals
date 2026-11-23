@@ -28,6 +28,8 @@ import com.gielinorgoals.model.GameData;
 import com.gielinorgoals.model.GoalTree;
 import com.gielinorgoals.model.Requirement;
 import com.gielinorgoals.template.GoalTemplate;
+import com.gielinorgoals.template.QuestChains;
+import com.gielinorgoals.template.QuestRequirementsDb;
 import com.gielinorgoals.template.TemplateNode;
 import com.gielinorgoals.template.TemplateParameter;
 import com.gielinorgoals.template.TemplatePlanner;
@@ -84,14 +86,20 @@ final class TemplateDialog
 	private final Map<String, JSpinner> spinners = new HashMap<>();
 	private final JPanel previewPanel = new JPanel(new DynamicGridLayout(0, 1, 0, 1));
 	private final JLabel summaryLabel = new JLabel(" ");
+	private final JCheckBox questChainBox = new JCheckBox("Show full quest chains");
+	private final QuestRequirementsDb questRequirements;
+	@Nullable
+	private GoalTemplate selected;
 
 	@Nullable
 	private TemplateNode current;
 	// Varje nods rad i förhandsvisningen och dess förälder i förslaget.
 	private final Map<TemplateNode, PreviewRow> rows = new IdentityHashMap<>();
 
-	private TemplateDialog(List<GoalTemplate> templates, GoalTree tree, GameData data, GoalIcons icons)
+	private TemplateDialog(List<GoalTemplate> templates, GoalTree tree, GameData data, GoalIcons icons,
+		QuestRequirementsDb questRequirements)
 	{
+		this.questRequirements = questRequirements;
 		this.templates = templates;
 		this.tree = tree;
 		this.data = data;
@@ -116,13 +124,13 @@ final class TemplateDialog
 	 */
 	@Nullable
 	static TemplateNode show(Component parent, List<GoalTemplate> templates, GoalTree tree, GameData data,
-		GoalIcons icons)
+		GoalIcons icons, QuestRequirementsDb questRequirements)
 	{
 		if (templates.isEmpty())
 		{
 			return null;
 		}
-		TemplateDialog dialog = new TemplateDialog(templates, tree, data, icons);
+		TemplateDialog dialog = new TemplateDialog(templates, tree, data, icons, questRequirements);
 		JPanel content = dialog.buildContent();
 		int choice = JOptionPane.showOptionDialog(parent, content, "Add from template",
 			JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, new Object[]{"Add", "Cancel"}, "Add");
@@ -171,7 +179,14 @@ final class TemplateDialog
 		listScroll.setPreferredSize(new Dimension(PREVIEW_WIDTH, LIST_HEIGHT));
 		listScroll.getVerticalScrollBar().setUnitIncrement(16);
 		top.add(listScroll, BorderLayout.CENTER);
-		top.add(parameterPanel, BorderLayout.SOUTH);
+		questChainBox.setFocusPainted(false);
+		questChainBox.setToolTipText("Add every quest needed first, plus the skill levels and quest points;"
+			+ " shared quests are added once and linked");
+		questChainBox.addActionListener(e -> rebuildPreview(selected));
+		JPanel options = new JPanel(new BorderLayout(0, 4));
+		options.add(parameterPanel, BorderLayout.CENTER);
+		options.add(questChainBox, BorderLayout.SOUTH);
+		top.add(options, BorderLayout.SOUTH);
 
 		JPanel content = new JPanel(new BorderLayout(0, 8));
 		content.add(top, BorderLayout.NORTH);
@@ -184,6 +199,9 @@ final class TemplateDialog
 
 	private void selectTemplate(@Nullable GoalTemplate template)
 	{
+		selected = template;
+		// Standard per template: på för handplockade, av för t.ex. Quest cape (platt lista).
+		questChainBox.setSelected(template != null && template.defaultExpandQuestChains());
 		parameterPanel.removeAll();
 		spinners.clear();
 		if (template != null)
@@ -214,6 +232,12 @@ final class TemplateDialog
 			Map<String, Integer> values = new HashMap<>();
 			spinners.forEach((key, spinner) -> values.put(key, (Integer) spinner.getValue()));
 			current = template.build(values);
+			boolean hasQuests = QuestChains.hasQuestNodes(current);
+			questChainBox.setVisible(hasQuests);
+			if (hasQuests && questChainBox.isSelected())
+			{
+				QuestChains.expand(current, questRequirements, tree);
+			}
 			addRows(current, null, 0);
 		}
 		refreshStatuses();

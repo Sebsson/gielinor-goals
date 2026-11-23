@@ -521,9 +521,7 @@ class GoalRow extends JPanel
 		GoalEditDialog.Result result = GoalEditDialog.show(this, services, "Add sub-goal", null, "", null, null, false);
 		if (result != null)
 		{
-			goalManager.addGoal(goal.getId(), result.getTitle(), result.getNote(), result.getRequirement(),
-				result.isAggregate());
-			GoalEditDialog.applyStartCount(goalManager, result);
+			GoalEditDialog.addGoal(goalManager, services, goal.getId(), result);
 		}
 	}
 

@@ -90,6 +90,14 @@ public final class TemplateInserter
 
 	public static Result insert(GoalTree tree, TemplateNode template)
 	{
+		return insert(tree, template, null);
+	}
+
+	/**
+	 * @param parentId målet förslagets rot läggs under, eller null för ett nytt rotmål
+	 */
+	public static Result insert(GoalTree tree, TemplateNode template, @Nullable String parentId)
+	{
 		// Befintliga mål med krav; nya mål läggs till efter hand, så att samma krav
 		// två gånger i en template bara ger ett mål.
 		List<Goal> withRequirement = new ArrayList<>();
@@ -109,7 +117,7 @@ public final class TemplateInserter
 		}
 
 		Goal root = create(template);
-		tree.add(null, root);
+		tree.add(parentId, root);
 		Result result = new Result(root);
 		result.created.add(root);
 		if (root.getRequirement() != null)

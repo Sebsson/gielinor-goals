@@ -638,12 +638,25 @@ public class GoalManager
 	@Nullable
 	public TemplateInserter.Result insertTemplate(TemplateNode template)
 	{
+		return insertTemplate(null, template);
+	}
+
+	/**
+	 * Som {@link #insertTemplate(TemplateNode)}, men roten läggs under {@code parentId}.
+	 */
+	@Nullable
+	public TemplateInserter.Result insertTemplate(@Nullable String parentId, TemplateNode template)
+	{
 		if (!isEditable())
 		{
 			return null;
 		}
 
-		TemplateInserter.Result result = TemplateInserter.insert(tree, template);
+		if (parentId != null && tree.find(parentId) == null)
+		{
+			return null;
+		}
+		TemplateInserter.Result result = TemplateInserter.insert(tree, template, parentId);
 		// Ingen completionListener här: inga popups eller chattmeddelanden för en insättning.
 		markApprox(evaluate());
 		save();

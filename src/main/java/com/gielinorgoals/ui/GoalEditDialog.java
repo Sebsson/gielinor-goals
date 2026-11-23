@@ -37,6 +37,9 @@ import com.gielinorgoals.model.ItemRequirement;
 import com.gielinorgoals.model.KillCountRequirement;
 import com.gielinorgoals.model.QuestPointsRequirement;
 import com.gielinorgoals.model.QuestRequirement;
+import com.gielinorgoals.template.QuestChains;
+import com.gielinorgoals.template.TemplateInserter;
+import com.gielinorgoals.template.TemplateNode;
 import com.gielinorgoals.model.Requirement;
 import com.gielinorgoals.model.SkillRequirement;
 import com.gielinorgoals.model.TotalLevelRequirement;
@@ -138,6 +141,32 @@ final class GoalEditDialog
 		// Nuvarande värde för ett KC-mål om användaren angav eller ändrade det, annars null.
 		@Nullable
 		Long startCount;
+		// Lägg till questets krav (förkrav-quests, skills, QP) som delmål.
+		boolean expandQuest;
+	}
+
+	/**
+	 * Lägger till målet från dialogen under {@code parentId} (null = rotnivå). Med
+	 * "Add the quest's requirements as sub-goals" sätts questet in med hela sin kedja,
+	 * med samma dubblettregel som templates.
+	 */
+	static void addGoal(GoalManager goalManager, DialogServices services, @Nullable String parentId, Result result)
+	{
+		if (result.isExpandQuest() && result.getRequirement() instanceof QuestRequirement)
+		{
+			QuestRequirement quest = (QuestRequirement) result.getRequirement();
+			TemplateNode node = QuestChains.forQuest(result.getTitle(), quest, result.isAggregate(),
+				services.getQuestRequirements(), goalManager.getTree());
+			TemplateInserter.Result inserted = goalManager.insertTemplate(parentId, node);
+			String note = result.getNote() == null ? "" : result.getNote().trim();
+			if (inserted != null && !note.isEmpty())
+			{
+				goalManager.editGoal(inserted.getRoot().getId(), result.getTitle(), note, quest, result.isAggregate());
+			}
+			return;
+		}
+		goalManager.addGoal(parentId, result.getTitle(), result.getNote(), result.getRequirement(), result.isAggregate());
+		applyStartCount(goalManager, result);
 	}
 
 	/**
@@ -215,6 +244,7 @@ final class GoalEditDialog
 	private final JTextField titleField = new JTextField(20);
 	private final JTextArea noteArea = new JTextArea(3, 20);
 	private final JCheckBox aggregateBox = new JCheckBox("Show as counter (sub-goals done, e.g. 142/170)");
+	private final JCheckBox questChainBox = new JCheckBox("Add the quest's requirements as sub-goals");
 	private final CardLayout cards = new CardLayout();
 	private final JPanel cardPanel = new JPanel(cards);
 
@@ -468,7 +498,12 @@ final class GoalEditDialog
 		JPanel bottom = new JPanel(new BorderLayout(0, 4));
 		bottom.add(titlePanel, BorderLayout.NORTH);
 		bottom.add(noteScroll, BorderLayout.CENTER);
-		bottom.add(aggregateBox, BorderLayout.SOUTH);
+		questChainBox.setToolTipText("Adds the quests, skill levels and quest points it needs, recursively."
+			+ " Goals you already have are linked in instead of copied.");
+		JPanel checkBoxes = new JPanel(new DynamicGridLayout(0, 1, 0, 2));
+		checkBoxes.add(questChainBox);
+		checkBoxes.add(aggregateBox);
+		bottom.add(checkBoxes, BorderLayout.SOUTH);
 
 		JPanel content = new JPanel(new BorderLayout(0, 10));
 		content.add(top, BorderLayout.NORTH);
@@ -660,6 +695,8 @@ final class GoalEditDialog
 	private void updateFields()
 	{
 		GoalKind kind = (GoalKind) kindBox.getSelectedItem();
+		// Bara när ett nytt quest-mål skapas; ett befintligt mål ändras inte i efterhand.
+		questChainBox.setVisible(kind == GoalKind.QUEST && editingGoalId == null);
 		titleField.putClientProperty("JTextField.placeholderText", kind == GoalKind.MANUAL
 			? "What do you want to do?"
 			: "Optional - named after the goal if empty");
@@ -783,7 +820,8 @@ final class GoalEditDialog
 		{
 			throw new IllegalArgumentException("You already have this goal in your list.");
 		}
-		return new Result(title, note, requirement, aggregateBox.isSelected(), startCount(requirement));
+		return new Result(title, note, requirement, aggregateBox.isSelected(), startCount(requirement),
+			questChainBox.isVisible() && questChainBox.isSelected());
 	}
 
 	// Ett angivet nuvarande värde som skiljer från räknarlagret, annars null.

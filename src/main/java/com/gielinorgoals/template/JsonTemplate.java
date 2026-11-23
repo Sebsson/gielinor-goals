@@ -138,6 +138,13 @@ public class JsonTemplate implements GoalTemplate
 		return toRequirement(root);
 	}
 
+	// Handplockade templates visar hela quest-kedjorna som standard.
+	@Override
+	public boolean defaultExpandQuestChains()
+	{
+		return true;
+	}
+
 	@Override
 	public TemplateNode build(Map<String, Integer> parameters)
 	{
