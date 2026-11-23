@@ -41,7 +41,7 @@ import com.gielinorgoals.tracking.WatchedAchievements;
 import com.gielinorgoals.ui.GielinorGoalsPanel;
 import com.gielinorgoals.ui.GoalCompletedOverlay;
 import com.gielinorgoals.ui.GoalCompletionNotifier;
-import com.gielinorgoals.ui.GoalIcons;
+import com.gielinorgoals.ui.DialogServices;
 import com.gielinorgoals.ui.GoalMapWindow;
 import com.gielinorgoals.ui.NextGoalOverlay;
 import com.google.inject.Provides;
@@ -79,6 +79,7 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.events.NpcLootReceived;
+import net.runelite.client.events.OverlayMenuClicked;
 import net.runelite.client.events.RuneScapeProfileChanged;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -168,6 +169,7 @@ public class GielinorGoalsPlugin extends Plugin
 	{
 		panel = injector.getInstance(GielinorGoalsPanel.class);
 		panel.setOpenMap(this::openMap);
+		injector.getInstance(DialogServices.class).setMapOpener(this::showOnMap);
 		goalManager.setListener(this::onGoalsChanged);
 		goalManager.setCompletionListener(this::announceCompleted);
 
@@ -215,6 +217,9 @@ public class GielinorGoalsPlugin extends Plugin
 			mapWindow.close();
 			mapWindow = null;
 		}
+		injector.getInstance(DialogServices.class).setMapOpener(id ->
+		{
+		});
 		overlayManager.remove(nextGoalOverlay);
 		overlayManager.remove(goalCompletedOverlay);
 		completionNotifier.clear();
@@ -464,12 +469,38 @@ public class GielinorGoalsPlugin extends Plugin
 	// Knappen "Map" i panelen; ett nytt klick tar fram det befintliga fönstret. EDT.
 	private void openMap()
 	{
+		mapWindow().open();
+	}
+
+	// "Show on map" från panelens meny och popupen. EDT.
+	private void showOnMap(String goalId)
+	{
+		mapWindow().showGoal(goalId);
+	}
+
+	private GoalMapWindow mapWindow()
+	{
 		if (mapWindow == null)
 		{
-			mapWindow = new GoalMapWindow(goalManager, config, configManager, injector.getInstance(GoalIcons.class),
+			mapWindow = new GoalMapWindow(goalManager, config, configManager, injector.getInstance(DialogServices.class),
 				pluginIcon);
 		}
-		mapWindow.open();
+		return mapWindow;
+	}
+
+	@Subscribe
+	public void onOverlayMenuClicked(OverlayMenuClicked event)
+	{
+		if (event.getOverlay() != goalCompletedOverlay
+			|| !GoalCompletedOverlay.SHOW_ON_MAP.equals(event.getEntry().getOption()))
+		{
+			return;
+		}
+		String goalId = goalCompletedOverlay.getShownGoalId();
+		if (goalId != null)
+		{
+			SwingUtilities.invokeLater(() -> showOnMap(goalId));
+		}
 	}
 
 	// Anropas bara för automatiskt klarade mål; manuella bockar i panelen går inte hit.

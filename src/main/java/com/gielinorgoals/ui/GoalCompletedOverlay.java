@@ -36,10 +36,12 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.image.BufferedImage;
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
+import net.runelite.api.MenuAction;
 import net.runelite.api.Point;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.ui.FontManager;
@@ -69,10 +71,14 @@ public class GoalCompletedOverlay extends Overlay
 	private static final Color NAME = Color.WHITE;
 	private static final Color DETAIL = new Color(190, 180, 160);
 	private static final Stroke BORDER_STROKE = new BasicStroke(2f);
+	public static final String SHOW_ON_MAP = "Show on map";
 
 	private final Client client;
 	private final ClientThread clientThread;
 	private final NotificationQueue queue;
+	// Målet i notisen som visas just nu; läses när "Show on map" väljs i menyn.
+	@Nullable
+	private volatile String shownGoalId;
 
 	@Inject
 	GoalCompletedOverlay(Client client, ClientThread clientThread, NotificationQueue queue)
@@ -81,6 +87,14 @@ public class GoalCompletedOverlay extends Overlay
 		this.clientThread = clientThread;
 		this.queue = queue;
 		setPosition(OverlayPosition.TOP_CENTER);
+		// Högerklick på popupen; menyvalet hanteras i pluginet och skickar inget till servern.
+		addMenuEntry(MenuAction.RUNELITE_OVERLAY, SHOW_ON_MAP, "Gielinor Goals");
+	}
+
+	@Nullable
+	public String getShownGoalId()
+	{
+		return shownGoalId;
 	}
 
 	@Override
@@ -93,6 +107,7 @@ public class GoalCompletedOverlay extends Overlay
 
 		long now = System.currentTimeMillis();
 		PopupNotice notice = queue.current(now, isHovered());
+		shownGoalId = notice == null ? null : notice.getGoalId();
 		if (notice == null)
 		{
 			return null;

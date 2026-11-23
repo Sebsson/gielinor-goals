@@ -86,6 +86,11 @@ public final class GoalMapWindow extends JFrame
 	private final ConfigManager configManager;
 	private final MapLayoutCache cache = new MapLayoutCache();
 	private final GoalMapCanvas canvas;
+	private final GoalMapDetails details;
+	private final DialogServices services;
+	// Klara mål vid förra uppdateringen, för pulsen; null tills fönstret visats.
+	@Nullable
+	private Set<String> completedBefore;
 
 	private final JComboBox<RootOption> rootBox = new JComboBox<>();
 	private final JTextField searchField = new JTextField(16);
@@ -122,22 +127,44 @@ public final class GoalMapWindow extends JFrame
 	private static final RootOption ALL_GOALS = new RootOption(null, "All goals");
 
 	public GoalMapWindow(GoalManager goalManager, GielinorGoalsConfig config, ConfigManager configManager,
-		GoalIcons icons, BufferedImage windowIcon)
+		DialogServices services, BufferedImage windowIcon)
 	{
 		super("Gielinor Goals - Map");
 		this.goalManager = goalManager;
 		this.config = config;
 		this.configManager = configManager;
+		this.services = services;
 		setIconImage(windowIcon);
 		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 
-		canvas = new GoalMapCanvas(icons, goalManager::getProgress, goalManager::getCounters);
+		canvas = new GoalMapCanvas(services.getIcons(), goalManager::getProgress, goalManager::getCounters);
 		canvas.setOnToggle(this::toggle);
+		details = new GoalMapDetails(goalManager, this::reveal, this::edit);
+		canvas.setOnSelect(details::show);
+		canvas.setOnOpen(id ->
+		{
+			Goal goal = goalManager.getTree().find(id);
+			if (goal != null)
+			{
+				edit(goal);
+			}
+		});
+		canvas.setOnMenu((id, point) ->
+		{
+			Goal goal = goalManager.getTree().find(id);
+			if (goal != null && goalManager.isEditable())
+			{
+				new GoalActions(this, goal, goalManager.getTree(), goalManager, services)
+					.menu(GoalActions.Context.map())
+					.show(canvas, point.x, point.y);
+			}
+		});
 
 		JPanel content = new JPanel(new BorderLayout());
 		content.setBackground(ColorScheme.DARK_GRAY_COLOR);
 		content.add(buildToolbar(), BorderLayout.NORTH);
 		content.add(canvas, BorderLayout.CENTER);
+		content.add(details, BorderLayout.EAST);
 		setContentPane(content);
 
 		saveTimer = new Timer(SAVE_DELAY_MS, e -> saveBounds());
@@ -162,6 +189,7 @@ public final class GoalMapWindow extends JFrame
 			public void windowClosing(WindowEvent e)
 			{
 				saveBounds();
+				canvas.stopPulses();
 			}
 		});
 		restoreBounds();
@@ -221,6 +249,8 @@ public final class GoalMapWindow extends JFrame
 	{
 		if (!isVisible())
 		{
+			// Mål som klarades medan fönstret var stängt ska inte pulsera när det öppnas.
+			completedBefore = null;
 			setVisible(true);
 		}
 		if (getExtendedState() == ICONIFIED)
@@ -238,6 +268,7 @@ public final class GoalMapWindow extends JFrame
 	public void close()
 	{
 		saveTimer.stop();
+		canvas.stopPulses();
 		if (isVisible())
 		{
 			saveBounds();
@@ -274,6 +305,7 @@ public final class GoalMapWindow extends JFrame
 		Set<String> next = new HashSet<>();
 		NextGoals.selectGoals(tree, NEXT_GOALS).forEach(goal -> next.add(goal.getId()));
 		long signature = signature(graph, next);
+		pulseNewlyCompleted(tree, graph);
 
 		boolean goalsChanged = revision != shownRevision;
 		if (!goalsChanged && layout == shownLayout && signature == shownSignature && !fit)
@@ -288,7 +320,55 @@ public final class GoalMapWindow extends JFrame
 		{
 			canvas.fitToWindow();
 		}
+		// Detaljerna visar samma läge som kartan; ett borttaget mål stänger panelen.
+		details.show(details.getGoalId());
 		statusLabel.setText(graph.size() + " goals");
+	}
+
+	// Mål som blivit klara sedan förra uppdateringen pulserar, om de syns på kartan.
+	private void pulseNewlyCompleted(GoalTree tree, MapGraph graph)
+	{
+		Set<String> completed = new HashSet<>();
+		tree.forEach(goal ->
+		{
+			if (goal.isCompleted())
+			{
+				completed.add(goal.getId());
+			}
+		});
+		if (completedBefore != null)
+		{
+			Set<String> fresh = new HashSet<>();
+			for (String id : completed)
+			{
+				if (!completedBefore.contains(id) && graph.contains(id))
+				{
+					fresh.add(id);
+				}
+			}
+			if (!fresh.isEmpty())
+			{
+				canvas.pulse(fresh);
+			}
+		}
+		completedBefore = completed;
+	}
+
+	/**
+	 * "Show on map": öppnar fönstret och visar målet.
+	 */
+	public void showGoal(String goalId)
+	{
+		open();
+		reveal(goalId);
+	}
+
+	private void edit(Goal goal)
+	{
+		if (goalManager.isEditable())
+		{
+			new GoalActions(this, goal, goalManager.getTree(), goalManager, services).edit();
+		}
 	}
 
 	// Allt som syns på noderna och som kan ändras utan att målen sparas: progress och räknare.
@@ -459,6 +539,7 @@ public final class GoalMapWindow extends JFrame
 		}
 		canvas.setSelected(goalId);
 		canvas.centerOn(goalId);
+		details.show(goalId);
 	}
 
 	private void selectRoot(String rootId)

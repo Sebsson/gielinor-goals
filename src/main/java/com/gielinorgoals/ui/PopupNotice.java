@@ -50,6 +50,9 @@ public class PopupNotice
 
 	@Nullable
 	private volatile BufferedImage icon;
+	// Målet notisen gäller, för "Show on map" i popupens meny.
+	@Nullable
+	private volatile String goalId;
 
 	// Sätts av kön när notisen börjar visas; bara läst/skriven under köns lås eller på klienttråden.
 	private long shownAt = -1;
@@ -74,6 +77,17 @@ public class PopupNotice
 	public void setIcon(@Nullable BufferedImage icon)
 	{
 		this.icon = icon;
+	}
+
+	public void setGoalId(@Nullable String goalId)
+	{
+		this.goalId = goalId;
+	}
+
+	@Nullable
+	public String getGoalId()
+	{
+		return goalId;
 	}
 
 	/**

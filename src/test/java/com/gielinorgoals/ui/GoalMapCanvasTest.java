@@ -57,6 +57,35 @@ public class GoalMapCanvasTest
 	}
 
 	@Test
+	public void centeredGoalStaysCenteredWhenTheMapIsResized()
+	{
+		Goal root = add(null, "Root");
+		Goal far = null;
+		for (int i = 0; i < 20; i++)
+		{
+			far = add(root, "Child " + i);
+		}
+		GoalMapCanvas canvas = canvas(root);
+		canvas.setSize(1100, 700);
+		canvas.fitToWindow();
+
+		canvas.centerOn(far.getId());
+		assertNodeCentered(canvas, far);
+		// T.ex. när detaljpanelen visas och kartan blir smalare.
+		canvas.setSize(830, 640);
+		assertNodeCentered(canvas, far);
+	}
+
+	private void assertNodeCentered(GoalMapCanvas canvas, Goal goal)
+	{
+		java.awt.geom.Point2D center = canvas.worldCenterForTest();
+		com.gielinorgoals.map.MapLayout.Node node = canvas.nodesForTest().stream()
+			.filter(n -> n.getGoalId().equals(goal.getId())).findFirst().orElseThrow();
+		assertEquals(node.centerX(), center.getX(), 1.0);
+		assertEquals(node.getY() + node.getHeight() / 2, center.getY(), 1.0);
+	}
+
+	@Test
 	public void savedWindowBoundsAreReadSafely()
 	{
 		assertEquals(new Rectangle(10, 20, 900, 600), GoalMapWindow.parseBounds("10,20,900,600"));

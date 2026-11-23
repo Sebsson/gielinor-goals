@@ -67,6 +67,7 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import javax.swing.ToolTipManager;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.FontManager;
@@ -99,6 +100,8 @@ final class GoalMapCanvas extends JComponent
 	private static final Color HIGHLIGHT = ColorScheme.BRAND_ORANGE;
 	private static final Color GLOW = new Color(255, 152, 31);
 	private static final Color BAR_BACKGROUND = new Color(30, 30, 30);
+	private static final int PULSE_MS = 1400;
+	private static final int PULSE_FRAME_MS = 30;
 
 	private final GoalIcons icons;
 	private final Function<String, GoalProgress> progress;
@@ -126,6 +129,10 @@ final class GoalMapCanvas extends JComponent
 	private Set<String> related = Collections.emptySet();
 	@Nullable
 	private String selectedId;
+	// Målet som ska stå i mitten tills användaren själv panorerar eller zoomar; centreras igen
+	// när ytan ändrar storlek, t.ex. när detaljpanelen visas eller fönstret just öppnats.
+	@Nullable
+	private String centerTargetId;
 
 	private final Map<String, Image> iconCache = new HashMap<>();
 	private final Set<String> iconsLoading = new HashSet<>();
@@ -136,6 +143,20 @@ final class GoalMapCanvas extends JComponent
 	private Consumer<String> onToggle = id ->
 	{
 	};
+	// Klick väljer (null = klick utanför noderna), dubbelklick öppnar, högerklick ger menyn.
+	private Consumer<String> onSelect = id ->
+	{
+	};
+	private Consumer<String> onOpen = id ->
+	{
+	};
+	private java.util.function.BiConsumer<String, Point> onMenu = (id, point) ->
+	{
+	};
+
+	// Mål som just klarades → när pulsen började. Timern går bara medan någon puls lever.
+	private final Map<String, Long> pulses = new HashMap<>();
+	private final Timer pulseTimer;
 
 	/**
 	 * Räknarnas nuvarande värden, för "1,240 kc" på andra raden.
@@ -152,6 +173,7 @@ final class GoalMapCanvas extends JComponent
 		this.counters = counters;
 		setOpaque(true);
 		setPreferredSize(new Dimension(900, 600));
+		pulseTimer = new Timer(PULSE_FRAME_MS, e -> stepPulses());
 		ToolTipManager.sharedInstance().registerComponent(this);
 
 		MouseAdapter mouse = new MouseAdapter()
@@ -166,6 +188,17 @@ final class GoalMapCanvas extends JComponent
 				pressed = e.getPoint();
 				last = e.getPoint();
 				dragged = false;
+				maybeMenu(e);
+			}
+
+			@Override
+			public void mouseClicked(MouseEvent e)
+			{
+				String id = nodeAt(e.getPoint());
+				if (id != null && SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2)
+				{
+					onOpen.accept(id);
+				}
 			}
 
 			@Override
@@ -180,6 +213,7 @@ final class GoalMapCanvas extends JComponent
 					return;
 				}
 				dragged = true;
+				centerTargetId = null;
 				translateX += e.getX() - last.x;
 				translateY += e.getY() - last.y;
 				last = e.getPoint();
@@ -193,6 +227,7 @@ final class GoalMapCanvas extends JComponent
 				{
 					click(e.getPoint());
 				}
+				maybeMenu(e);
 				pressed = null;
 				last = null;
 			}
@@ -223,6 +258,74 @@ final class GoalMapCanvas extends JComponent
 	void setOnToggle(Consumer<String> onToggle)
 	{
 		this.onToggle = onToggle;
+	}
+
+	void setOnSelect(Consumer<String> onSelect)
+	{
+		this.onSelect = onSelect;
+	}
+
+	void setOnOpen(Consumer<String> onOpen)
+	{
+		this.onOpen = onOpen;
+	}
+
+	void setOnMenu(java.util.function.BiConsumer<String, Point> onMenu)
+	{
+		this.onMenu = onMenu;
+	}
+
+	private void maybeMenu(MouseEvent e)
+	{
+		if (!e.isPopupTrigger())
+		{
+			return;
+		}
+		String id = nodeAt(e.getPoint());
+		if (id != null)
+		{
+			setSelected(id);
+			onSelect.accept(id);
+			onMenu.accept(id, e.getPoint());
+		}
+	}
+
+	/**
+	 * Låter nyss klarade mål pulsera en kort stund.
+	 */
+	void pulse(Set<String> goalIds)
+	{
+		long now = System.currentTimeMillis();
+		for (String id : goalIds)
+		{
+			pulses.put(id, now);
+		}
+		if (!pulses.isEmpty() && !pulseTimer.isRunning())
+		{
+			pulseTimer.start();
+		}
+	}
+
+	void stopPulses()
+	{
+		pulseTimer.stop();
+		pulses.clear();
+	}
+
+	boolean isPulsing()
+	{
+		return pulseTimer.isRunning();
+	}
+
+	private void stepPulses()
+	{
+		long now = System.currentTimeMillis();
+		pulses.values().removeIf(start -> now - start > PULSE_MS);
+		if (pulses.isEmpty())
+		{
+			pulseTimer.stop();
+		}
+		repaint();
 	}
 
 	/**
@@ -288,6 +391,7 @@ final class GoalMapCanvas extends JComponent
 			return;
 		}
 		fitted = true;
+		centerTargetId = null;
 		double w = layout.getWidth() + 2 * FIT_MARGIN;
 		double h = layout.getHeight() + 2 * FIT_MARGIN;
 		scale = clamp(Math.min(getWidth() / w, getHeight() / h), MIN_SCALE, 1.0);
@@ -308,20 +412,46 @@ final class GoalMapCanvas extends JComponent
 		}
 		fitted = true;
 		scale = Math.max(scale, 0.8);
+		centerTargetId = goalId;
+		applyCenter();
+		return true;
+	}
+
+	private void applyCenter()
+	{
+		MapLayout.Node node = layout == null || centerTargetId == null ? null : layout.node(centerTargetId);
+		if (node == null)
+		{
+			centerTargetId = null;
+			return;
+		}
 		translateX = getWidth() / 2.0 - node.centerX() * scale;
 		translateY = getHeight() / 2.0 - (node.getY() + node.getHeight() / 2) * scale;
 		repaint();
-		return true;
 	}
 
 	@Override
 	public void setBounds(int x, int y, int width, int height)
 	{
 		super.setBounds(x, y, width, height);
-		if (!fitted && layout != null && width > 0)
+		if (width <= 0 || layout == null)
+		{
+			return;
+		}
+		if (centerTargetId != null)
+		{
+			applyCenter();
+		}
+		else if (!fitted)
 		{
 			fitToWindow();
 		}
+	}
+
+	// För tester: kartpunkten mitt i ytan.
+	Point2D worldCenterForTest()
+	{
+		return toWorld(new Point(getWidth() / 2, getHeight() / 2));
 	}
 
 	private void zoomAt(Point at, double factor)
@@ -332,6 +462,7 @@ final class GoalMapCanvas extends JComponent
 		translateY = at.y - (at.y - translateY) * (next / scale);
 		scale = next;
 		fitted = true;
+		centerTargetId = null;
 		repaint();
 	}
 
@@ -340,6 +471,8 @@ final class GoalMapCanvas extends JComponent
 		String id = nodeAt(point);
 		if (id == null || graph == null || layout == null)
 		{
+			setSelected(null);
+			onSelect.accept(null);
 			return;
 		}
 		MapLayout.Node node = layout.node(id);
@@ -347,7 +480,10 @@ final class GoalMapCanvas extends JComponent
 		if (hasToggle(id) && toggleBounds(node).contains(world))
 		{
 			onToggle.accept(id);
+			return;
 		}
+		setSelected(id);
+		onSelect.accept(id);
 	}
 
 	private void setHover(@Nullable String id)
@@ -619,6 +755,19 @@ final class GoalMapCanvas extends JComponent
 			g.fill(new Rectangle2D.Double(barX, barY, barW * Math.max(0, Math.min(1, shown.fraction())), 5));
 		}
 		g.setComposite(before);
+
+		Long pulseStart = pulses.get(id);
+		if (pulseStart != null)
+		{
+			double t = Math.min(1, (System.currentTimeMillis() - pulseStart) / (double) PULSE_MS);
+			double grow = 4 + t * 18;
+			float fade = (float) (1 - t);
+			g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, Math.max(0f, fade)));
+			g.setColor(DONE_BORDER);
+			g.setStroke(new BasicStroke(3f));
+			g.draw(new RoundRectangle2D.Double(x - grow, y - grow, w + 2 * grow, h + 2 * grow, 14 + grow, 14 + grow));
+			g.setComposite(before);
+		}
 	}
 
 	private static void paintToggle(Graphics2D g, Rectangle2D bounds, boolean collapsed)

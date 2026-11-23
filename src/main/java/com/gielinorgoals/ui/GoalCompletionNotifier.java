@@ -118,6 +118,7 @@ public class GoalCompletionNotifier
 		Requirement requirement = goal.getRequirement();
 		PopupNotice notice = new PopupNotice("Goal completed!", name, detail, requirement != null,
 			entry.isRoot(), soundId, holdMs);
+		notice.setGoalId(goal.getId());
 		if (requirement != null)
 		{
 			iconLoader.accept(requirement, notice::setIcon);

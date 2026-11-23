@@ -34,7 +34,6 @@ import com.gielinorgoals.model.GoalProgress;
 import com.gielinorgoals.model.GoalTree;
 import com.gielinorgoals.model.ActivityCounters;
 import com.gielinorgoals.model.KillCountRequirement;
-import com.gielinorgoals.template.TemplateUpdates;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -50,10 +49,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JLabel;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
@@ -62,7 +58,6 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 import net.runelite.client.ui.ColorScheme;
-import net.runelite.client.util.LinkBrowser;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.components.ProgressBar;
 
@@ -374,45 +369,12 @@ class GoalRow extends JPanel
 
 	private JPopupMenu buildMenu()
 	{
-		String id = goal.getId();
-		JPopupMenu menu = new JPopupMenu();
-		menu.add(item("Add sub-goal", true, this::addSubGoal));
-		menu.add(item("Edit", true, this::edit));
-		menu.addSeparator();
-		menu.add(item("Move up", tree.canMoveUp(parentId, id), () -> goalManager.moveUp(parentId, id)));
-		menu.add(item("Move down", tree.canMoveDown(parentId, id), () -> goalManager.moveDown(parentId, id)));
-		menu.add(item("Make sub-goal of goal above", tree.canIndent(parentId, id),
-			() -> goalManager.indent(parentId, id)));
-		menu.add(item("Move out one level", tree.canOutdent(grandparentId, parentId, id),
-			() -> goalManager.outdent(grandparentId, parentId, id)));
-		menu.addSeparator();
-		if (goal.getRequirement() instanceof KillCountRequirement)
-		{
-			menu.add(item("Set value...", true, this::setCounterValue));
-		}
-		if (goal.getTemplateId() != null)
-		{
-			menu.add(item("Update from template...", true, this::updateFromTemplate));
-		}
-		String wikiUrl = WikiLinks.url(goal);
-		if (wikiUrl != null)
-		{
-			menu.add(item("Open on wiki", true, () -> LinkBrowser.browse(wikiUrl)));
-		}
-		menu.add(item("Link to another goal...", true, this::linkToAnotherGoal));
-		if (parentId != null && parents.size() > 1)
-		{
-			Goal parent = tree.find(parentId);
-			menu.add(item("Remove from " + (parent == null ? "this goal" : parent.getDisplayTitle()), true,
-				() -> goalManager.unlink(parentId, id)));
-		}
-		JCheckBoxMenuItem counterItem = new JCheckBoxMenuItem("Show as counter", goal.isAggregate());
-		counterItem.setToolTipText("Show how many sub-goals are done, e.g. 142/170, and collapse the list");
-		counterItem.addActionListener(e -> goalManager.setAggregate(id, counterItem.isSelected()));
-		menu.add(counterItem);
-		menu.addSeparator();
-		menu.add(item("Delete", true, this::delete));
-		return menu;
+		return actions().menu(GoalActions.Context.panel(parentId, grandparentId));
+	}
+
+	private GoalActions actions()
+	{
+		return new GoalActions(this, goal, tree, goalManager, services);
 	}
 
 	// Templaten byggs om bara när målen har ändrats; resultatet cachas per revision.
@@ -420,23 +382,6 @@ class GoalRow extends JPanel
 	{
 		return goal.getTemplateId() != null
 			&& services.getTemplateUpdates().hasUpdate(tree, goal, goalManager.getRevision());
-	}
-
-	private void updateFromTemplate()
-	{
-		TemplateUpdates.Plan plan = services.getTemplateUpdates().plan(tree, goal);
-		if (plan == null)
-		{
-			JOptionPane.showMessageDialog(this, "The template this goal came from is no longer available.",
-				"Update from template", JOptionPane.INFORMATION_MESSAGE);
-			return;
-		}
-		TemplateUpdateDialog.Selection selection = TemplateUpdateDialog.show(this, plan, tree);
-		if (selection != null)
-		{
-			goalManager.applyTemplateUpdate(goal.getId(), selection.getAdditions(), selection.getRemoveGoalIds(),
-				selection.getDeclinedKeys());
-		}
 	}
 
 	private boolean isManualCounter()
@@ -474,42 +419,6 @@ class GoalRow extends JPanel
 			}
 		});
 		return button;
-	}
-
-	// För alla KC-mål, t.ex. för att rätta ett fel eller ange ett startvärde.
-	private void setCounterValue()
-	{
-		KillCountRequirement kc = (KillCountRequirement) goal.getRequirement();
-		long current = goalManager.getCounters().value(kc.counterKey());
-		Object input = JOptionPane.showInputDialog(this, "Current count for " + kc.getActivityName() + ":",
-			"Set value", JOptionPane.PLAIN_MESSAGE, null, null, current < 0 ? "" : String.valueOf(current));
-		if (input == null)
-		{
-			return;
-		}
-		try
-		{
-			long value = Long.parseLong(input.toString().replace(",", "").replace(" ", "").trim());
-			if (value < 0)
-			{
-				throw new NumberFormatException();
-			}
-			goalManager.setCounter(kc.counterKey(), value);
-		}
-		catch (NumberFormatException e)
-		{
-			JOptionPane.showMessageDialog(this, "Enter a whole number of 0 or more.", "Set value",
-				JOptionPane.INFORMATION_MESSAGE);
-		}
-	}
-
-	private void linkToAnotherGoal()
-	{
-		String newParentId = LinkGoalDialog.show(this, tree, goal);
-		if (newParentId != null)
-		{
-			goalManager.link(newParentId, goal.getId());
-		}
 	}
 
 	// T.ex. "From chat, 2 minutes ago" eller att värdet inte är känt än.
@@ -561,61 +470,9 @@ class GoalRow extends JPanel
 		return image;
 	}
 
-	private static JMenuItem item(String text, boolean enabled, Runnable action)
-	{
-		JMenuItem item = new JMenuItem(text);
-		item.setEnabled(enabled);
-		item.addActionListener(e -> action.run());
-		return item;
-	}
-
-	private void addSubGoal()
-	{
-		GoalEditDialog.Result result = GoalEditDialog.show(this, services, "Add sub-goal", null, "", null, null, false);
-		if (result != null)
-		{
-			GoalEditDialog.addGoal(goalManager, services, goal.getId(), result);
-		}
-	}
-
 	private void edit()
 	{
-		GoalEditDialog.Result result = GoalEditDialog.show(this, services, "Edit goal", goal.getId(), goal.getTitle(), goal.getNote(),
-			goal.getRequirement(), goal.isAggregate(), goal.getDropSource());
-		if (result != null)
-		{
-			goalManager.editGoal(goal.getId(), result.getTitle(), result.getNote(), result.getRequirement(),
-				result.isAggregate(), result.getDropSource());
-			GoalEditDialog.applyStartCount(goalManager, result);
-		}
-	}
-
-	private void delete()
-	{
-		// Bekräfta när mer än den här raden försvinner: andra föräldrar eller delmål.
-		// Ett enskilt mål utan delmål är lätt att skapa igen.
-		boolean shared = parents.size() > 1;
-		if (shared || goal.hasChildren())
-		{
-			StringBuilder message = new StringBuilder("<html>Delete \"")
-				.append(escapeHtml(goal.getDisplayTitle())).append("\" completely?");
-			if (shared)
-			{
-				message.append("<br>It is under ").append(parents.size())
-					.append(" goals and will be removed from all of them.");
-			}
-			if (goal.hasChildren())
-			{
-				message.append("<br>Its sub-goals are deleted too, except those that are also under another goal.");
-			}
-			int choice = JOptionPane.showConfirmDialog(this, message.append("</html>").toString(),
-				"Delete goal", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-			if (choice != JOptionPane.YES_OPTION)
-			{
-				return;
-			}
-		}
-		goalManager.removeGoal(goal.getId());
+		actions().edit();
 	}
 
 	/**

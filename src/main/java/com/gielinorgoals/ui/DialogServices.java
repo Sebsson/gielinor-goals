@@ -32,6 +32,7 @@ import com.gielinorgoals.template.QuestRequirementsDb;
 import com.gielinorgoals.tracking.AccountStatus;
 import com.gielinorgoals.template.TemplateUpdates;
 import com.gielinorgoals.tracking.CompletionLookup;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -59,6 +60,10 @@ public class DialogServices
 	@Getter
 	private final AccountStatus accountStatus;
 	private final GoalManager goalManager;
+	// Sätts av pluginet, som äger kartfönstret.
+	private Consumer<String> mapOpener = id ->
+	{
+	};
 
 	@Inject
 	DialogServices(ItemSearch itemSearch, CombatAchievementCatalog combatAchievements,
@@ -89,6 +94,19 @@ public class DialogServices
 	public ActivityCounters counters()
 	{
 		return goalManager.getCounters();
+	}
+
+	public void setMapOpener(Consumer<String> mapOpener)
+	{
+		this.mapOpener = mapOpener;
+	}
+
+	/**
+	 * "Show on map": öppnar kartan och centrerar och markerar målet.
+	 */
+	public void showOnMap(String goalId)
+	{
+		mapOpener.accept(goalId);
 	}
 
 	public boolean isDuplicate(Requirement requirement, @Nullable String exceptGoalId)
