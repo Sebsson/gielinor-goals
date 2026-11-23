@@ -37,16 +37,20 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import net.runelite.api.Client;
+import net.runelite.api.EnumComposition;
+import net.runelite.api.EnumID;
 import net.runelite.api.GameState;
 import net.runelite.api.Item;
 import net.runelite.api.ItemContainer;
 import net.runelite.api.gameval.InventoryID;
+import net.runelite.api.gameval.VarbitID;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.game.ItemManager;
 
 /**
  * Räknar föremål i inventory och equipment (alltid läsbara) samt bank och seed vault,
  * som bara kan läsas när de är öppna och därför cachas per RuneScape-profil.
+ * Runorna i rune pouchen ligger i varbits och räknas oavsett var pouchen finns.
  * Alla metoder körs på klienttråden.
  */
 @Singleton
@@ -55,6 +59,16 @@ public class ItemTracker
 	static final String BANK_CACHE_KEY = "bankCache";
 	static final String SEED_VAULT_CACHE_KEY = "seedVaultCache";
 
+	// Rune pouchens fack. Vanlig pouch använder tre, divine fyra; övriga fack har typ 0.
+	private static final int[] RUNE_POUCH_TYPE_VARBITS = {
+		VarbitID.RUNE_POUCH_TYPE_1, VarbitID.RUNE_POUCH_TYPE_2, VarbitID.RUNE_POUCH_TYPE_3,
+		VarbitID.RUNE_POUCH_TYPE_4, VarbitID.RUNE_POUCH_TYPE_5, VarbitID.RUNE_POUCH_TYPE_6,
+	};
+	private static final int[] RUNE_POUCH_QUANTITY_VARBITS = {
+		VarbitID.RUNE_POUCH_QUANTITY_1, VarbitID.RUNE_POUCH_QUANTITY_2, VarbitID.RUNE_POUCH_QUANTITY_3,
+		VarbitID.RUNE_POUCH_QUANTITY_4, VarbitID.RUNE_POUCH_QUANTITY_5, VarbitID.RUNE_POUCH_QUANTITY_6,
+	};
+
 	private final Client client;
 	private final ItemManager itemManager;
 	private final ConfigManager configManager;
@@ -62,6 +76,7 @@ public class ItemTracker
 
 	private Map<Integer, Long> inventory = Collections.emptyMap();
 	private Map<Integer, Long> worn = Collections.emptyMap();
+	private Map<Integer, Long> runePouch = Collections.emptyMap();
 	@Nullable
 	private ContainerCache bank;
 	@Nullable
@@ -89,6 +104,7 @@ public class ItemTracker
 	{
 		inventory = Collections.emptyMap();
 		worn = Collections.emptyMap();
+		runePouch = Collections.emptyMap();
 		bank = null;
 		seedVault = null;
 		cacheProfileKey = null;
@@ -146,6 +162,73 @@ public class ItemTracker
 	}
 
 	/**
+	 * Läser om rune pouchen när någon av dess varbits har ändrats.
+	 */
+	public void onVarbitChanged(int varbitId)
+	{
+		if (isRunePouchVarbit(varbitId) && client.getGameState() == GameState.LOGGED_IN)
+		{
+			readRunePouch();
+		}
+	}
+
+	private static boolean isRunePouchVarbit(int varbitId)
+	{
+		for (int i = 0; i < RUNE_POUCH_TYPE_VARBITS.length; i++)
+		{
+			if (varbitId == RUNE_POUCH_TYPE_VARBITS[i] || varbitId == RUNE_POUCH_QUANTITY_VARBITS[i])
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private void readRunePouch()
+	{
+		EnumComposition runes = client.getEnum(EnumID.RUNEPOUCH_RUNE);
+		if (runes == null)
+		{
+			return;
+		}
+		int[] types = new int[RUNE_POUCH_TYPE_VARBITS.length];
+		int[] quantities = new int[RUNE_POUCH_QUANTITY_VARBITS.length];
+		for (int i = 0; i < types.length; i++)
+		{
+			types[i] = client.getVarbitValue(RUNE_POUCH_TYPE_VARBITS[i]);
+			quantities[i] = client.getVarbitValue(RUNE_POUCH_QUANTITY_VARBITS[i]);
+		}
+		Map<Integer, Long> contents = runePouchContents(types, quantities, runes::getIntValue);
+		if (!contents.equals(runePouch))
+		{
+			runePouch = contents;
+			dirty = true;
+		}
+	}
+
+	/**
+	 * Översätter pouchens fack till föremål. Fack med typ 0 eller antal 0 är tomma;
+	 * {@code runeItemId} slår upp runans item-id för ett typvärde.
+	 */
+	static Map<Integer, Long> runePouchContents(int[] types, int[] quantities, IntUnaryOperator runeItemId)
+	{
+		Map<Integer, Long> contents = new HashMap<>();
+		for (int i = 0; i < types.length; i++)
+		{
+			if (types[i] <= 0 || quantities[i] <= 0)
+			{
+				continue;
+			}
+			int itemId = runeItemId.applyAsInt(types[i]);
+			if (itemId > 0)
+			{
+				contents.merge(itemId, (long) quantities[i], Long::sum);
+			}
+		}
+		return contents;
+	}
+
+	/**
 	 * Laddar cachar för nya profiler, sparar ändrade cachar och läser om allt efter inloggning.
 	 *
 	 * @return ny föremålsdata om något har ändrats sedan förra anropet, annars null
@@ -162,6 +245,7 @@ public class ItemTracker
 		{
 			onItemContainerChanged(InventoryID.INV, client.getItemContainer(InventoryID.INV));
 			onItemContainerChanged(InventoryID.WORN, client.getItemContainer(InventoryID.WORN));
+			readRunePouch();
 			// Inventory finns alltid när man är inloggad, även om containern inte skickats än.
 			inventoryKnown = true;
 			needFullRead = false;
@@ -184,6 +268,7 @@ public class ItemTracker
 		Map<Integer, Long> totals = sum(Arrays.asList(
 			inventory,
 			worn,
+			runePouch,
 			bank == null ? Collections.emptyMap() : bank.getItems(),
 			seedVault == null ? Collections.emptyMap() : seedVault.getItems()));
 		return new GameSnapshot.Items(totals, bank == null ? null : bank.getSavedAt());

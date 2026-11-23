@@ -383,6 +383,7 @@ public class GielinorGoalsPlugin extends Plugin
 		}
 		// Kommer mycket ofta; trackern läser först vid nästa tick.
 		achievementTracker.onVarChanged();
+		itemTracker.onVarbitChanged(event.getVarbitId());
 	}
 
 	@Subscribe
