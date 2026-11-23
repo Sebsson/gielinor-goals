@@ -92,8 +92,8 @@ import net.runelite.client.util.Text;
 @Slf4j
 @PluginDescriptor(
 	name = "Gielinor Goals",
-	description = "A goal and todo list that ticks off goals automatically from game data",
-	tags = {"goals", "todo", "checklist", "ironman", "progress"}
+	description = "Goals that tick themselves off, ironman templates, kill count goals and a goal map",
+	tags = {"goals", "todo", "checklist", "ironman", "progress", "templates", "kill count", "map"}
 )
 public class GielinorGoalsPlugin extends Plugin
 {

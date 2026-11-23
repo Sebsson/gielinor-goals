@@ -8,4 +8,6 @@ nbactions.xml
 nb-configuration.xml
 nbproject/
 *.class
+out/
+*.tmp
 .claude/settings.local.json
