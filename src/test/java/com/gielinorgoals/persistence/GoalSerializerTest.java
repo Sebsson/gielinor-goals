@@ -535,4 +535,31 @@ public class GoalSerializerTest
 		assertEquals(List.of("quest:17"), again.getTemplateIgnoredKeys());
 		assertEquals("group:quest cape", again.getTemplateNodeKey());
 	}
+
+	@Test
+	public void version10LoadsIntoVersion11AndDropSourceRoundTrips()
+	{
+		String json = "{\"schemaVersion\":10,\"rootIds\":[\"a\"],\"goals\":["
+			+ "{\"id\":\"a\",\"title\":\"\",\"childIds\":[],\"requirement\":{\"type\":\"ITEM\","
+			+ "\"itemId\":13576,\"itemName\":\"Dragon warhammer\",\"quantity\":1,\"includeVariants\":false}}]}";
+
+		LoadResult result = serializer.deserialize(json);
+		assertTrue(result.isMigrated());
+		Goal goal = result.getTree().find("a");
+		assertEquals("Dragon warhammer", goal.getDisplayTitle());
+		assertNull(goal.getDropSource());
+		assertNull(goal.getObtainedAtKc());
+
+		goal.setDropSource(com.gielinorgoals.model.DropSource.npc("Lizardman shaman", 5000));
+		goal.markCompleted(true, 5L);
+		goal.setObtainedAtKc(3210L);
+		String saved = serializer.serialize(result.getTree());
+		LoadResult reloaded = serializer.deserialize(saved);
+
+		Goal again = reloaded.getTree().find("a");
+		assertFalse(reloaded.isMigrated());
+		assertEquals(com.gielinorgoals.model.DropSource.npc("Lizardman shaman", 5000), again.getDropSource());
+		assertEquals(Long.valueOf(3210L), again.getObtainedAtKc());
+		assertEquals(11, new Gson().fromJson(saved, JsonObject.class).get("schemaVersion").getAsInt());
+	}
 }

@@ -28,11 +28,14 @@ import com.gielinorgoals.model.ActivityCounters;
 import com.gielinorgoals.model.CountedGameData;
 import com.gielinorgoals.model.DiaryJournal;
 import com.gielinorgoals.model.DiaryRequirement;
+import com.gielinorgoals.model.DropSource;
+import com.gielinorgoals.model.DryMeter;
 import com.gielinorgoals.model.GameData;
 import com.gielinorgoals.model.Goal;
 import com.gielinorgoals.model.GoalEvaluator;
 import com.gielinorgoals.model.GoalProgress;
 import com.gielinorgoals.model.GoalTree;
+import com.gielinorgoals.model.ItemRequirement;
 import com.gielinorgoals.model.KillCountRequirement;
 import com.gielinorgoals.model.Requirement;
 import com.gielinorgoals.persistence.GoalSerializer;
@@ -362,6 +365,11 @@ public class GoalManager
 			{
 				keys.add(((KillCountRequirement) goal.getRequirement()).counterKey());
 			}
+			// Torrhetsmätaren behöver räknaren även utan KC-mål på aktiviteten.
+			if (DryMeter.sourceOf(goal) != null && !goal.isCompleted())
+			{
+				keys.add(goal.getDropSource().counterKey());
+			}
 		}
 		return keys;
 	}
@@ -492,6 +500,15 @@ public class GoalManager
 	public void addGoal(@Nullable String parentId, String title, @Nullable String note, @Nullable Requirement requirement,
 		boolean aggregate)
 	{
+		addGoal(parentId, title, note, requirement, aggregate, null);
+	}
+
+	/**
+	 * @param dropSource var föremålet droppar; ignoreras om kravet inte är ett föremål
+	 */
+	public void addGoal(@Nullable String parentId, String title, @Nullable String note, @Nullable Requirement requirement,
+		boolean aggregate, @Nullable DropSource dropSource)
+	{
 		String trimmed = title.trim();
 		if (trimmed.isEmpty() && requirement == null)
 		{
@@ -502,6 +519,7 @@ public class GoalManager
 		goal.setNote(emptyToNull(note));
 		goal.setRequirement(requirement);
 		goal.setAggregate(aggregate);
+		goal.setDropSource(requirement instanceof ItemRequirement ? dropSource : null);
 		apply(tree -> tree.add(parentId, goal));
 	}
 
@@ -513,6 +531,16 @@ public class GoalManager
 
 	public void editGoal(String id, String title, @Nullable String note, @Nullable Requirement requirement,
 		boolean aggregate)
+	{
+		Goal goal = tree.find(id);
+		editGoal(id, title, note, requirement, aggregate, goal == null ? null : goal.getDropSource());
+	}
+
+	/**
+	 * @param dropSource var föremålet droppar; tas bort om kravet inte är ett föremål
+	 */
+	public void editGoal(String id, String title, @Nullable String note, @Nullable Requirement requirement,
+		boolean aggregate, @Nullable DropSource dropSource)
 	{
 		String trimmed = title.trim();
 		if (trimmed.isEmpty() && requirement == null)
@@ -536,6 +564,7 @@ public class GoalManager
 			goal.setTitle(trimmed);
 			goal.setNote(emptyToNull(note));
 			goal.setRequirement(requirement);
+			goal.setDropSource(requirement instanceof ItemRequirement ? dropSource : null);
 			applyAggregate(goal, aggregate);
 			return true;
 		});
@@ -591,7 +620,34 @@ public class GoalManager
 
 	public void setCompleted(String id, boolean completed)
 	{
-		apply(tree -> tree.setCompleted(id, completed, System.currentTimeMillis()));
+		apply(tree ->
+		{
+			if (!tree.setCompleted(id, completed, System.currentTimeMillis()))
+			{
+				return false;
+			}
+			if (completed)
+			{
+				recordObtainedKc(List.of(tree.find(id)));
+			}
+			return true;
+		});
+	}
+
+	/**
+	 * Sparar räknarens värde på mål med drop-källa som just klarades, för "Got it at 1,240 kc".
+	 */
+	private void recordObtainedKc(List<Goal> completed)
+	{
+		for (Goal goal : completed)
+		{
+			DropSource source = DryMeter.sourceOf(goal);
+			if (source != null && goal.isCompleted())
+			{
+				long kc = counters.value(source.counterKey());
+				goal.setObtainedAtKc(kc < 0 ? null : kc);
+			}
+		}
 	}
 
 	/**
@@ -866,6 +922,7 @@ public class GoalManager
 		GoalEvaluator.Result result = GoalEvaluator.evaluate(tree, new CountedGameData(data, counters),
 			System.currentTimeMillis());
 		progress = result.getProgress();
+		recordObtainedKc(result.getNewlyCompleted());
 		return result.getNewlyCompleted();
 	}
 

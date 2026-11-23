@@ -63,6 +63,10 @@ public class Goal
 	private String templateNodeKey;
 	// Egen wikisida från en handplockad template; går före sidan som härleds ur kravet.
 	private String wikiPage;
+	// Var föremålet droppar och hur ofta; bara på item-mål, för torrhetsmätaren.
+	private DropSource dropSource;
+	// Räknarens värde när ett mål med drop-källa klarades; null om det inte var känt.
+	private Long obtainedAtKc;
 	// Null betyder ett manuellt mål som bara bockas av för hand.
 	private Requirement requirement;
 	// Delmålens id:n i användarens ordning. Målen själva ligger i GoalTree, så att ett
@@ -114,5 +118,9 @@ public class Goal
 		this.completed = completed;
 		this.completedAt = completed ? now : null;
 		this.completedAtApprox = completed && approx;
+		if (!completed)
+		{
+			obtainedAtKc = null;
+		}
 	}
 }

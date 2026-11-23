@@ -26,6 +26,8 @@ package com.gielinorgoals.ui;
 
 import com.gielinorgoals.GoalManager;
 import com.gielinorgoals.model.DiaryRequirement;
+import com.gielinorgoals.model.DropSource;
+import com.gielinorgoals.model.DryMeter;
 import com.gielinorgoals.model.Goal;
 import com.gielinorgoals.model.GoalEvaluator;
 import com.gielinorgoals.model.GoalProgress;
@@ -300,6 +302,11 @@ class GoalRow extends JPanel
 		{
 			text = "<strike>" + text + "</strike>";
 		}
+		String dry = DryMeter.rowText(goal, dropKc());
+		if (dry != null)
+		{
+			text += "<br><font color='#a0a0a0'>" + escapeHtml(dry) + "</font>";
+		}
 
 		if (goal.getRequirement() != null)
 		{
@@ -518,6 +525,13 @@ class GoalRow extends JPanel
 			+ GielinorGoalsPanel.formatAge(System.currentTimeMillis() - counter.getUpdatedAt());
 	}
 
+	// Räknarens värde för målets drop-källa, -1 om okänt eller om det inte finns någon källa.
+	private long dropKc()
+	{
+		DropSource source = DryMeter.sourceOf(goal);
+		return source == null ? -1 : goalManager.getCounters().value(source.counterKey());
+	}
+
 	// Föräldrarna utom den raden visas under, t.ex. "Barrows gloves, Quest cape".
 	private String otherParentTitles()
 	{
@@ -567,11 +581,11 @@ class GoalRow extends JPanel
 	private void edit()
 	{
 		GoalEditDialog.Result result = GoalEditDialog.show(this, services, "Edit goal", goal.getId(), goal.getTitle(), goal.getNote(),
-			goal.getRequirement(), goal.isAggregate());
+			goal.getRequirement(), goal.isAggregate(), goal.getDropSource());
 		if (result != null)
 		{
 			goalManager.editGoal(goal.getId(), result.getTitle(), result.getNote(), result.getRequirement(),
-				result.isAggregate());
+				result.isAggregate(), result.getDropSource());
 			GoalEditDialog.applyStartCount(goalManager, result);
 		}
 	}
@@ -626,6 +640,14 @@ class GoalRow extends JPanel
 		if (goal.getRequirement() instanceof KillCountRequirement)
 		{
 			html.append("<br><i>").append(counterSource()).append("</i>");
+		}
+		DropSource drop = DryMeter.sourceOf(goal);
+		if (drop != null && !goal.isCompleted())
+		{
+			html.append("<br>Drop rate ").append(escapeHtml(drop.describe()));
+			String chance = DryMeter.chanceText(goal, dropKc());
+			html.append("<br>").append(chance != null ? escapeHtml(chance)
+				: "<i>Kill count not known yet</i>");
 		}
 		if (hasTemplateUpdate())
 		{

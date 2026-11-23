@@ -29,6 +29,7 @@ import com.gielinorgoals.model.CombatLevelRequirement;
 import com.gielinorgoals.model.DiaryArea;
 import com.gielinorgoals.model.DiaryRequirement;
 import com.gielinorgoals.model.DiaryTier;
+import com.gielinorgoals.model.DropSource;
 import com.gielinorgoals.GoalManager;
 import com.gielinorgoals.model.ActivityCounters;
 import com.gielinorgoals.model.GameData;
@@ -143,6 +144,9 @@ final class GoalEditDialog
 		Long startCount;
 		// Lägg till questets krav (förkrav-quests, skills, QP) som delmål.
 		boolean expandQuest;
+		// Var föremålet droppar, för torrhetsmätaren; bara för item-mål.
+		@Nullable
+		DropSource dropSource;
 	}
 
 	/**
@@ -165,7 +169,8 @@ final class GoalEditDialog
 			}
 			return;
 		}
-		goalManager.addGoal(parentId, result.getTitle(), result.getNote(), result.getRequirement(), result.isAggregate());
+		goalManager.addGoal(parentId, result.getTitle(), result.getNote(), result.getRequirement(), result.isAggregate(),
+			result.getDropSource());
 		applyStartCount(goalManager, result);
 	}
 
@@ -191,6 +196,8 @@ final class GoalEditDialog
 		"Other NPC (by name)...");
 	static final KcOption MANUAL_COUNTER = new KcOption(KillCountRequirement.ActivityType.MANUAL, null,
 		"Manual counter...");
+	// Första valet i drop-källan: ingen torrhetsmätare.
+	static final KcOption NO_DROP_SOURCE = new KcOption(null, null, "None");
 
 	/**
 	 * Sätter KC-målets nuvarande värde efter att målet lagts till eller ändrats.
@@ -277,6 +284,11 @@ final class GoalEditDialog
 	private final JTextField quantityField = new JTextField("1", 20);
 	private final JCheckBox variantsBox = new JCheckBox("Also count variants (e.g. charged/uncharged)");
 	private final JLabel ownedLabel = hintLabel();
+	private final JComboBox<KcOption> dropBox = new JComboBox<>();
+	private final JLabel dropNameLabel = new JLabel();
+	private final JTextField dropNameField = new JTextField(20);
+	private final JLabel dropRateLabel = new JLabel("Drop rate: 1 in (e.g. 5000 or 5k)");
+	private final JTextField dropRateField = new JTextField(20);
 	private final Map<Integer, Icon> itemIcons = new HashMap<>();
 
 	// Quest-, diary- och CA-korten.
@@ -368,7 +380,19 @@ final class GoalEditDialog
 	static Result show(Component parent, DialogServices services, String dialogTitle, @Nullable String editingGoalId,
 		String title, @Nullable String note, @Nullable Requirement requirement, boolean aggregate)
 	{
+		return show(parent, services, dialogTitle, editingGoalId, title, note, requirement, aggregate, null);
+	}
+
+	/**
+	 * @param dropSource målets drop-källa, eller null
+	 */
+	@Nullable
+	static Result show(Component parent, DialogServices services, String dialogTitle, @Nullable String editingGoalId,
+		String title, @Nullable String note, @Nullable Requirement requirement, boolean aggregate,
+		@Nullable DropSource dropSource)
+	{
 		GoalEditDialog dialog = new GoalEditDialog(services, editingGoalId, title, note, requirement, aggregate);
+		dialog.prefillDropSource(dropSource);
 		JPanel content = dialog.buildContent();
 
 		// Visa dialogen igen tills värdena är giltiga eller användaren avbryter.
@@ -670,11 +694,98 @@ final class GoalEditDialog
 		options.add(new JLabel("How many? (e.g. 1, 500 or 10k)"));
 		options.add(quantityField);
 		options.add(variantsBox);
+		options.add(new JLabel("Drops from (optional, shows how dry you are)"));
+		options.add(dropBox);
+		options.add(dropNameLabel);
+		options.add(dropNameField);
+		options.add(dropRateLabel);
+		options.add(dropRateField);
+
+		dropBox.addItem(NO_DROP_SOURCE);
+		dropBox.addItem(OTHER_NPC);
+		dropBox.addItem(MANUAL_COUNTER);
+		List<KcOption> activities = new ArrayList<>();
+		for (HiscoreSkill skill : HiscoreSkill.values())
+		{
+			if (skill.getType() == HiscoreSkillType.BOSS || skill.getType() == HiscoreSkillType.ACTIVITY)
+			{
+				activities.add(new KcOption(KillCountRequirement.ActivityType.HISCORE, skill, skill.getName()));
+			}
+		}
+		activities.sort(Comparator.comparing(KcOption::getLabel, String.CASE_INSENSITIVE_ORDER));
+		activities.forEach(dropBox::addItem);
+		dropBox.setMaximumRowCount(16);
+		dropBox.addActionListener(e -> updateDropFields());
+		updateDropFields();
 
 		JPanel card = new JPanel(new BorderLayout(0, 6));
 		card.add(itemPanel, BorderLayout.CENTER);
 		card.add(options, BorderLayout.SOUTH);
 		return card;
+	}
+
+	private void prefillDropSource(@Nullable DropSource source)
+	{
+		if (source == null || !source.isValid())
+		{
+			dropBox.setSelectedItem(NO_DROP_SOURCE);
+			updateDropFields();
+			return;
+		}
+		HiscoreSkill skill = source.hiscoreSkill();
+		if (skill != null)
+		{
+			dropBox.setSelectedItem(new KcOption(KillCountRequirement.ActivityType.HISCORE, skill, skill.getName()));
+		}
+		else
+		{
+			dropBox.setSelectedItem(source.getActivityType() == KillCountRequirement.ActivityType.NPC
+				? OTHER_NPC : MANUAL_COUNTER);
+			dropNameField.setText(source.getActivityName());
+		}
+		dropRateField.setText(String.valueOf(source.getRate()));
+		updateDropFields();
+	}
+
+	// Namnfältet behövs för NPC och egna räknare, raten för alla utom "None".
+	private void updateDropFields()
+	{
+		KcOption option = (KcOption) dropBox.getSelectedItem();
+		boolean any = option != null && option != NO_DROP_SOURCE;
+		boolean needsName = any && option.getSkill() == null;
+		dropNameLabel.setText(option == MANUAL_COUNTER ? "Counter name, e.g. Slayer tasks"
+			: "NPC name, e.g. Lizardman shaman");
+		dropNameLabel.setVisible(needsName);
+		dropNameField.setVisible(needsName);
+		dropRateLabel.setVisible(any);
+		dropRateField.setVisible(any);
+	}
+
+	@Nullable
+	private DropSource buildDropSource()
+	{
+		KcOption option = (KcOption) dropBox.getSelectedItem();
+		if (option == null || option == NO_DROP_SOURCE)
+		{
+			return null;
+		}
+		String rateText = dropRateField.getText().trim();
+		// "1/5000" och "5000" betyder samma sak.
+		if (rateText.startsWith("1/"))
+		{
+			rateText = rateText.substring(2).trim();
+		}
+		long rate = parseAmount(rateText);
+		if (rate < 1 || rate > DropSource.MAX_RATE)
+		{
+			throw new IllegalArgumentException("Enter the drop rate as the number after \"1 in\", e.g. 5000.");
+		}
+		if (option.getSkill() != null)
+		{
+			return DropSource.hiscore(option.getSkill(), (int) rate);
+		}
+		return option == OTHER_NPC ? DropSource.npc(dropNameField.getText(), (int) rate)
+			: DropSource.manual(dropNameField.getText(), (int) rate);
 	}
 
 	private static JPanel northAligned(JPanel panel)
@@ -821,7 +932,8 @@ final class GoalEditDialog
 			throw new IllegalArgumentException("You already have this goal in your list.");
 		}
 		return new Result(title, note, requirement, aggregateBox.isSelected(), startCount(requirement),
-			questChainBox.isVisible() && questChainBox.isSelected());
+			questChainBox.isVisible() && questChainBox.isSelected(),
+			requirement instanceof ItemRequirement ? buildDropSource() : null);
 	}
 
 	// Ett angivet nuvarande värde som skiljer från räknarlagret, annars null.

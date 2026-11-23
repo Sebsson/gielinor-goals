@@ -167,7 +167,7 @@ public final class QuestChains
 
 	private static void collectQuestNodes(TemplateNode node, List<TemplateNode> out)
 	{
-		if (node.getRequirement() instanceof QuestRequirement)
+		if (node.getRequirement() instanceof QuestRequirement && node.isExpandChain())
 		{
 			out.add(node);
 		}
@@ -251,7 +251,7 @@ public final class QuestChains
 		// Förälder före barn, barnen i ordning: samma ordning som insättningen och planeringen.
 		private void visit(TemplateNode node)
 		{
-			if (node.getRequirement() instanceof QuestRequirement)
+			if (node.getRequirement() instanceof QuestRequirement && node.isExpandChain())
 			{
 				int id = ((QuestRequirement) node.getRequirement()).getQuestId();
 				if ((node == alwaysExpand || !existingQuests.contains(id)) && expanded.add(id))

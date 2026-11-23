@@ -27,6 +27,7 @@ package com.gielinorgoals.ui;
 import com.gielinorgoals.GielinorGoalsConfig;
 import com.gielinorgoals.GoalManager;
 import com.gielinorgoals.model.CompletedLog;
+import com.gielinorgoals.model.DryMeter;
 import com.gielinorgoals.model.Goal;
 import com.gielinorgoals.model.GoalProgress;
 import java.awt.BorderLayout;
@@ -251,6 +252,11 @@ class CompletedTab extends JPanel
 			date.setToolTipText(APPROX_TOOLTIP);
 		}
 		text.add(date);
+		String obtained = DryMeter.completedText(goal);
+		if (obtained != null)
+		{
+			text.add(smallLabel(obtained, ColorScheme.LIGHT_GRAY_COLOR));
+		}
 
 		row.add(icon, BorderLayout.WEST);
 		row.add(text, BorderLayout.CENTER);

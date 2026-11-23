@@ -62,8 +62,11 @@ public class SchemaMigrator
 	 * 10 – valfria fält templateId, templateParams, templateIgnoredKeys, templateNodeKey och
 	 *     wikiPage på mål, för "Update from template" och "Open on wiki". Ingen dataändring;
 	 *     äldre mål saknar dem.
+	 * 11 – valfria fält dropSource och obtainedAtKc på mål, för torrhetsmätaren. Ingen
+	 *     dataändring; höjd så att äldre versioner blir skrivskyddade i stället för att
+	 *     tyst kasta bort drop-källorna när de sparar.
 	 */
-	public static final int CURRENT_VERSION = 10;
+	public static final int CURRENT_VERSION = 11;
 	static final String VERSION_FIELD = "schemaVersion";
 	private static final String GOALS_FIELD = GoalSerializer.GOALS_FIELD;
 	private static final String ROOT_IDS_FIELD = GoalSerializer.ROOT_IDS_FIELD;
@@ -85,7 +88,8 @@ public class SchemaMigrator
 			6, SchemaMigrator::v6ToV7,
 			7, SchemaMigrator::noStructuralChange,
 			8, SchemaMigrator::noStructuralChange,
-			9, SchemaMigrator::noStructuralChange));
+			9, SchemaMigrator::noStructuralChange,
+			10, SchemaMigrator::noStructuralChange));
 	}
 
 	/**

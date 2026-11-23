@@ -28,7 +28,9 @@ import com.gielinorgoals.model.CombatLevelRequirement;
 import com.gielinorgoals.model.DiaryArea;
 import com.gielinorgoals.model.DiaryRequirement;
 import com.gielinorgoals.model.DiaryTier;
+import com.gielinorgoals.model.DropSource;
 import com.gielinorgoals.model.ItemRequirement;
+import com.gielinorgoals.model.KillCountRequirement;
 import com.gielinorgoals.model.QuestPointsRequirement;
 import com.gielinorgoals.model.QuestRequirement;
 import com.gielinorgoals.model.Requirement;
@@ -39,6 +41,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import net.runelite.api.Quest;
 import net.runelite.api.Skill;
+import net.runelite.client.hiscore.HiscoreSkill;
 
 /**
  * En handplockad template från en JSON-fil i resources. Formatet är gjort för att
@@ -49,7 +52,16 @@ import net.runelite.api.Skill;
  * {"skill": "COOKING", "level": 70}
  * {"questPoints": 175}   {"totalLevel": 1500}   {"combatLevel": 100}
  * {"diary": {"area": "VARROCK", "tier": "HARD"}}
- * {"item": {"id": 7462, "name": "Barrows gloves", "quantity": 1}}
+ * {"item": {"id": 7462, "name": "Barrows gloves", "quantity": 1, "includeVariants": true}}
+ * {"killCount": {"hiscore": "ZULRAH", "count": 100}}
+ * {"killCount": {"npc": "Lizardman shaman", "count": 500}}
+ * {"killCount": {"manual": "Slayer points", "count": 750}}
+ * </pre>
+ * En nod utan krav är ett manuellt mål (eller en grupp med "aggregate"). Varje nod kan ha
+ * "note" (visas i hover-texten) och "wikiPage". Quest-noder kan ha "expandChain": false
+ * för att inte fällas ut med sin kedja. Item-noder kan ha en drop-källa för torrhetsmätaren:
+ * <pre>
+ * "dropSource": {"npc": "Lizardman shaman", "rate": 5000}
  * </pre>
  * Filen valideras när den läses; en trasig fil ger ingen template alls, aldrig en halv.
  */
@@ -74,6 +86,13 @@ public class JsonTemplate implements GoalTemplate
 		Boolean aggregate;
 		// Egen sida på OSRS Wiki för "Open on wiki"; går före den som härleds ur kravet.
 		String wikiPage;
+		// Visas i hover-texten, t.ex. "Bought for 750 slayer points".
+		String note;
+		// Bara på quest-noder; false = fäll inte ut kedjan för just den här questen.
+		Boolean expandChain;
+		// Bara på item-noder.
+		ActivitySpec dropSource;
+		ActivitySpec killCount;
 		String quest;
 		String skill;
 		Integer level;
@@ -96,7 +115,20 @@ public class JsonTemplate implements GoalTemplate
 		Integer id;
 		String name;
 		Long quantity;
+		// "includeVariants" som i målens sparformat; "variants" finns kvar för äldre filer.
+		Boolean includeVariants;
 		Boolean variants;
+	}
+
+	// En aktivitet: exakt en av hiscore (HiscoreSkill-namn), npc eller manual (räknarnamn).
+	// "count" används av killCount, "rate" (1/rate) av dropSource.
+	static final class ActivitySpec
+	{
+		String hiscore;
+		String npc;
+		String manual;
+		Integer count;
+		Integer rate;
 	}
 
 	private final String id;
@@ -209,6 +241,23 @@ public class JsonTemplate implements GoalTemplate
 		}
 		TemplateNode node = new TemplateNode(title, requirement, Boolean.TRUE.equals(spec.aggregate));
 		node.setWikiPage(spec.wikiPage);
+		node.setNote(spec.note == null || spec.note.trim().isEmpty() ? null : spec.note.trim());
+		if (spec.expandChain != null)
+		{
+			if (!(requirement instanceof QuestRequirement))
+			{
+				throw new IllegalArgumentException("expandChain is only for quest nodes");
+			}
+			node.setExpandChain(spec.expandChain);
+		}
+		if (spec.dropSource != null)
+		{
+			if (!(requirement instanceof ItemRequirement))
+			{
+				throw new IllegalArgumentException("dropSource is only for item nodes");
+			}
+			node.setDropSource(toDropSource(spec.dropSource));
+		}
 		if (spec.children != null)
 		{
 			for (NodeSpec child : spec.children)
@@ -258,8 +307,59 @@ public class JsonTemplate implements GoalTemplate
 				throw new IllegalArgumentException("Item needs an id and a name");
 			}
 			return new ItemRequirement(spec.item.id, spec.item.name,
-				spec.item.quantity == null ? 1 : spec.item.quantity, Boolean.TRUE.equals(spec.item.variants));
+				spec.item.quantity == null ? 1 : spec.item.quantity,
+				Boolean.TRUE.equals(spec.item.includeVariants) || Boolean.TRUE.equals(spec.item.variants));
+		}
+		if (spec.killCount != null)
+		{
+			return toKillCount(spec.killCount);
 		}
 		return null;
+	}
+
+	private static KillCountRequirement toKillCount(ActivitySpec spec)
+	{
+		if (spec.count == null)
+		{
+			throw new IllegalArgumentException("killCount needs a count");
+		}
+		switch (activityKind(spec))
+		{
+			case HISCORE:
+				return KillCountRequirement.hiscore(HiscoreSkill.valueOf(spec.hiscore), spec.count);
+			case NPC:
+				return KillCountRequirement.npc(spec.npc, spec.count);
+			default:
+				return KillCountRequirement.manual(spec.manual, spec.count);
+		}
+	}
+
+	private static DropSource toDropSource(ActivitySpec spec)
+	{
+		if (spec.rate == null)
+		{
+			throw new IllegalArgumentException("dropSource needs a rate");
+		}
+		switch (activityKind(spec))
+		{
+			case HISCORE:
+				return DropSource.hiscore(HiscoreSkill.valueOf(spec.hiscore), spec.rate);
+			case NPC:
+				return DropSource.npc(spec.npc, spec.rate);
+			default:
+				return DropSource.manual(spec.manual, spec.rate);
+		}
+	}
+
+	private static KillCountRequirement.ActivityType activityKind(ActivitySpec spec)
+	{
+		int set = (spec.hiscore != null ? 1 : 0) + (spec.npc != null ? 1 : 0) + (spec.manual != null ? 1 : 0);
+		if (set != 1)
+		{
+			throw new IllegalArgumentException("An activity needs exactly one of hiscore, npc or manual");
+		}
+		return spec.hiscore != null ? KillCountRequirement.ActivityType.HISCORE
+			: spec.npc != null ? KillCountRequirement.ActivityType.NPC
+			: KillCountRequirement.ActivityType.MANUAL;
 	}
 }

@@ -1,7 +1,10 @@
 package com.gielinorgoals;
 
 import com.gielinorgoals.model.ActivityCounters;
+import com.gielinorgoals.model.DropSource;
+import com.gielinorgoals.model.GameData;
 import com.gielinorgoals.model.Goal;
+import com.gielinorgoals.model.ItemRequirement;
 import com.gielinorgoals.model.KillCountRequirement;
 import com.gielinorgoals.tracking.InitialSync;
 import com.google.gson.Gson;
@@ -12,6 +15,7 @@ import java.util.Map;
 import net.runelite.client.hiscore.HiscoreSkill;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
@@ -145,6 +149,89 @@ public class GoalManagerKillCountTest
 		manager.loadProfile(PROFILE);
 		assertEquals(3, manager.getCounters().value(key));
 		assertEquals(ActivityCounters.Source.MANUAL, manager.getCounters().get(key).getSource());
+	}
+
+	@Test
+	public void killCountIsSavedWhenAnItemGoalWithDropSourceIsCompleted()
+	{
+		manager.addGoal(null, "", null, new ItemRequirement(FANG, "Tanzanite fang", 1, false), false,
+			DropSource.hiscore(HiscoreSkill.ZULRAH, 1024));
+		Goal fang = lastRoot();
+		manager.recordChatCount(PROFILE, ZULRAH, 1240);
+		assertNull(fang.getObtainedAtKc());
+
+		// Föremålet syns i inventory: målet klaras av sig självt och KC sparas.
+		manager.updateGameData(PROFILE, fang(1));
+
+		assertTrue(fang.isCompleted());
+		assertEquals(Long.valueOf(1240L), fang.getObtainedAtKc());
+		// Räknaren fortsätter, men det sparade värdet är kvar.
+		manager.recordChatCount(PROFILE, ZULRAH, 1300);
+		assertEquals(Long.valueOf(1240L), fang.getObtainedAtKc());
+		manager.loadProfile(PROFILE);
+		assertEquals(Long.valueOf(1240L), lastRoot().getObtainedAtKc());
+	}
+
+	@Test
+	public void manualCompletionAlsoSavesTheKillCountAndUndoForgetsIt()
+	{
+		manager.addGoal(null, "", null, new ItemRequirement(FANG, "Tanzanite fang", 1, false), false,
+			DropSource.hiscore(HiscoreSkill.ZULRAH, 1024));
+		Goal fang = lastRoot();
+		manager.recordChatCount(PROFILE, ZULRAH, 77);
+
+		manager.setCompleted(fang.getId(), true);
+		assertEquals(Long.valueOf(77L), fang.getObtainedAtKc());
+
+		manager.setCompleted(fang.getId(), false);
+		assertNull(fang.getObtainedAtKc());
+	}
+
+	@Test
+	public void npcDropSourceIsWatchedSoLootCounts()
+	{
+		manager.addGoal(null, "", null, new ItemRequirement(DWH, "Dragon warhammer", 1, false), false,
+			DropSource.npc("Lizardman shaman", 5000));
+
+		manager.recordNpcKill(PROFILE, "Lizardman shaman");
+
+		assertEquals(1, manager.getCounters().value("npc:lizardman shaman"));
+		assertTrue(manager.watchedCounterKeys().contains("npc:lizardman shaman"));
+	}
+
+	@Test
+	public void dropSourceOnlyStaysOnItemGoals()
+	{
+		manager.addGoal(null, "Kill Zulrah", null, null, false, DropSource.hiscore(HiscoreSkill.ZULRAH, 5000));
+
+		assertNull(lastRoot().getDropSource());
+	}
+
+	private static final int FANG = 12922;
+	private static final int DWH = 13576;
+
+	private static GameData fang(long count)
+	{
+		return new GameData()
+		{
+			@Override
+			public long getXp(net.runelite.api.Skill skill)
+			{
+				return 0;
+			}
+
+			@Override
+			public long getItemCount(int itemId)
+			{
+				return itemId == FANG ? count : 0;
+			}
+		};
+	}
+
+	private Goal lastRoot()
+	{
+		List<Goal> roots = manager.getTree().getRoots();
+		return roots.get(roots.size() - 1);
 	}
 
 	private Goal addGoal(KillCountRequirement requirement)

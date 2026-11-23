@@ -64,6 +64,20 @@ public class TemplateNode
 	@Nullable
 	private String wikiPage;
 
+	// Anteckning som följer med till målet, t.ex. "Bought for 750 slayer points".
+	@Setter
+	@Nullable
+	private String note;
+
+	// Var föremålet droppar; bara på item-noder.
+	@Setter
+	@Nullable
+	private com.gielinorgoals.model.DropSource dropSource;
+
+	// False om ett quest inte ska fällas ut med sin kedja trots att kedjor är påslagna.
+	@Setter
+	private boolean expandChain = true;
+
 	public TemplateNode(String title, @Nullable Requirement requirement, boolean aggregate)
 	{
 		this.title = title;
