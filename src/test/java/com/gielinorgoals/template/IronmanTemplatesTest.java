@@ -47,6 +47,7 @@ public class IronmanTemplatesTest
 		assertItem(obtain.get(0), ItemID.PRIF_WEAPON_SEED_ENHANCED, 1);
 		assertEquals(DropSource.hiscore(HiscoreSkill.THE_CORRUPTED_GAUNTLET, 400), obtain.get(0).getDropSource());
 		assertItem(obtain.get(1), ItemID.PRIF_ARMOUR_SEED, 6);
+		assertEquals(DropSource.hiscore(HiscoreSkill.THE_CORRUPTED_GAUNTLET, 50), obtain.get(1).getDropSource());
 		assertItem(obtain.get(2), ItemID.PRIF_CRYSTAL_SHARD, 400);
 		assertTrue(KillCountRequirement.hiscore(HiscoreSkill.THE_CORRUPTED_GAUNTLET, 400)
 			.isSameGoal(obtain.get(3).getRequirement()));
@@ -95,13 +96,13 @@ public class IronmanTemplatesTest
 		assertNull(root.getChildren().get(0).getChildren().get(0).getRequirement());
 
 		TemplateNode uniques = root.getChildren().get(1).getChildren().get(0);
-		int[][] expected = {
-			{ItemID.DRAGONHUNTER_WAND, 105},
-			{ItemID.HUEY_HIDE, 29},
-			{ItemID.TOME_OF_EARTH_UNCHARGED, 90},
-		};
-		assertUniques(uniques, HiscoreSkill.THE_HUEYCOATL, expected);
-		assertEquals(3, ((ItemRequirement) uniques.getChildren().get(1).getRequirement()).getQuantity());
+		assertItem(uniques.getChildren().get(0), ItemID.DRAGONHUNTER_WAND, 1);
+		assertEquals(DropSource.hiscore(HiscoreSkill.THE_HUEYCOATL, 105), uniques.getChildren().get(0).getDropSource());
+		assertItem(uniques.getChildren().get(1), ItemID.HUEY_HIDE, 3);
+		assertEquals(DropSource.hiscore(HiscoreSkill.THE_HUEYCOATL, 29).withPerDrop(3),
+			uniques.getChildren().get(1).getDropSource());
+		assertItem(uniques.getChildren().get(2), ItemID.TOME_OF_EARTH_UNCHARGED, 1);
+		assertEquals(DropSource.hiscore(HiscoreSkill.THE_HUEYCOATL, 90), uniques.getChildren().get(2).getDropSource());
 	}
 
 	@Test
@@ -117,9 +118,12 @@ public class IronmanTemplatesTest
 	public void categories()
 	{
 		Map<String, List<GoalTemplate>> grouped = TemplateCategories.group(TEMPLATES, "", false);
-		assertEquals(List.of("Barrows gloves", "Bow of Faerdhinen + crystal armour", "Dragon warhammer", "The Hueycoatl"),
-			names(grouped.get(TemplateCategories.IRONMAN_MID)));
-		assertEquals(List.of("Doom of Mokhaiotl"), names(grouped.get(TemplateCategories.IRONMAN_LATE)));
+		assertEquals(List.of("Fire cape", "Dragon defender", "Fighter torso", "Graceful outfit", "Rune pouch",
+			"Ardougne cloak and fairy rings"), names(grouped.get(TemplateCategories.IRONMAN_EARLY)));
+		assertEquals(List.of("Barrows gloves", "Bow of Faerdhinen + crystal armour", "Dragon warhammer", "The Hueycoatl",
+			"Ava's assembler", "Imbued god cape"), names(grouped.get(TemplateCategories.IRONMAN_MID)));
+		assertEquals(List.of("Doom of Mokhaiotl", "Infernal cape", "Zenyte jewellery"),
+			names(grouped.get(TemplateCategories.IRONMAN_LATE)));
 	}
 
 	@Test
@@ -174,7 +178,9 @@ public class IronmanTemplatesTest
 	@Test
 	public void templatesHaveStableIdsAndWikiPages()
 	{
-		for (String id : List.of("bowfa-crystal", "dragon-warhammer", "doom-of-mokhaiotl", "the-hueycoatl"))
+		for (String id : List.of("bowfa-crystal", "dragon-warhammer", "doom-of-mokhaiotl", "the-hueycoatl", "fire-cape",
+			"infernal-cape", "dragon-defender", "fighter-torso", "avas-assembler", "graceful", "rune-pouch",
+			"imbued-god-cape", "zenyte-jewellery", "ardougne-cloak"))
 		{
 			TemplateNode root = build(id);
 			assertNotNull(id, root.getWikiPage());

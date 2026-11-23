@@ -1,0 +1,47 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-23):",
+    "https://oldschool.runescape.wiki/w/Mage_Arena_II - kräver Mage Arena I, Magic 75 (ej boostbar) och att Claws of Guthix,",
+    "Flames of Zamorak och Saradomin Strike kastats 'each 100 times inside the Mage Arena'. Djup Wilderness (nivå 56).",
+    "https://oldschool.runescape.wiki/w/Mage_Arena_I - Magic 60 (ej boostbar); belöningen är en gudakappa.",
+    "https://oldschool.runescape.wiki/w/God_capes - imbue efter Mage Arena II: justiciar's hand (Saradomin, från Justiciar",
+    "Zachariah), demon's heart (Zamorak, från Porazdir), ent's roots (Guthix, från Derwen) till Kolodion. Fler imbuade kappor",
+    "kostar 250,000 coins; God capes-sidan säger Perdu, Mage Arena II-sidan Lost Property-butiken (osäkert vilken som gäller).",
+    "Standardvägen här är Saradomin via Mage Arena II. Item-id från gameval (fanns inte på sidorna): 2412 SARADOMIN_CAPE,",
+    "21791 MA2_SARADOMIN_CAPE (imbued saradomin cape). Varianter räknas, men inte de andra gudarnas kappor."
+  ],
+  "id": "imbued-god-cape",
+  "name": "Imbued god cape",
+  "description": "Mage Arena I and II, then an imbued Saradomin cape (Guthix and Zamorak work the same way)",
+  "category": "Ironman · Mid",
+  "tags": ["imbued god cape", "god cape", "imbued cape", "mage arena", "ma2", "mage arena 2", "saradomin cape", "ironman"],
+  "root": {
+    "title": "Imbued god cape",
+    "aggregate": true,
+    "wikiPage": "God capes",
+    "icon": {"item": 21791},
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {"sideIcon": "QUEST"},
+        "children": [
+          {"quest": "MAGE_ARENA_II",
+            "note": "Deep Wilderness (level 56). Before starting, cast Claws of Guthix, Flames of Zamorak and Saradomin Strike 100 times each inside the Mage Arena."}
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {"sideIcon": "INVENTORY"},
+        "children": [
+          {"item": {"id": 2412, "name": "Saradomin cape", "includeVariants": true},
+            "doneWhen": ["item:21791"],
+            "note": "From the statue after Mage Arena I. Any of the three gods works the same way."},
+          {"item": {"id": 21791, "name": "Imbued saradomin cape", "includeVariants": true},
+            "note": "Default: bring the justiciar's hand (from Justiciar Zachariah) to Kolodion after Mage Arena II. Alternatives: Guthix with ent's roots (Derwen) or Zamorak with demon's heart (Porazdir). Further imbued capes cost 250,000 coins (the wiki pages disagree on whether Perdu or the Lost Property shop sells them)."}
+        ]
+      }
+    ]
+  }
+}

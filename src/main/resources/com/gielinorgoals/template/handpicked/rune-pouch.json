@@ -1,0 +1,43 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-23):",
+    "https://oldschool.runescape.wiki/w/Rune_pouch - Item ID 12791 (gameval BH_RUNE_POUCH). 'can be purchased from any Slayer",
+    "master for 750 Slayer reward points or from the Mage Training Arena for 150 telekinetic, 150 graveyard, 1500 enchantment,",
+    "and 200 alchemist pizazz points.' En rune pouch note för 75 LMS-poäng byts mot en pouch på banken.",
+    "https://oldschool.runescape.wiki/w/Slayer_reward_point - poäng från den femte uppgiften; Vannaka 8, Chaeldar 10, Nieve/Steve 12,",
+    "Duradel 15, Konar 18 per uppgift; bonus varje 10:e (5x), 50:e (15x), 100:e (25x) uppgift.",
+    "Slayer points syns inte för pluginet, så de är en manuell räknare."
+  ],
+  "id": "rune-pouch",
+  "name": "Rune pouch",
+  "description": "750 slayer points for a rune pouch",
+  "category": "Ironman · Early",
+  "tags": ["rune pouch", "pouch", "slayer points", "slayer", "ironman"],
+  "root": {
+    "title": "Rune pouch",
+    "aggregate": true,
+    "wikiPage": "Rune pouch",
+    "icon": {"item": 12791},
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {"sideIcon": "QUEST"},
+        "children": [
+          {"killCount": {"manual": "Slayer points", "count": 750},
+            "doneWhen": ["item:12791"],
+            "note": "Points come from the fifth task on: Vannaka 8, Chaeldar 10, Nieve 12, Duradel 15, Konar 18 per task, more on every 10th, 50th and 100th task. Turael and Spria give none."}
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {"sideIcon": "INVENTORY"},
+        "children": [
+          {"item": {"id": 12791, "name": "Rune pouch", "includeVariants": true},
+            "note": "Bought from any Slayer master for 750 slayer points. Also from the Mage Training Arena (150 telekinetic, 150 graveyard, 1,500 enchantment and 200 alchemist pizazz points), or as a note for 75 Last Man Standing points."}
+        ]
+      }
+    ]
+  }
+}

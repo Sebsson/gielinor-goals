@@ -1,0 +1,57 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-23):",
+    "https://oldschool.runescape.wiki/w/Ava%27s_accumulator - Item ID 10499 (gameval ANMA_50_REWARD). Belöning från Animal",
+    "Magnetism med Ranged 50 (ej boostbar), annars attractor som Ava uppgraderar för 75 steel arrows + 999 coins.",
+    "https://oldschool.runescape.wiki/w/Ava%27s_assembler - Item ID 22109 (AVAS_ASSEMBLER): accumulator + Vorkath's head +",
+    "75 mithril arrows hos Ava, kräver Dragon Slayer II. Ranged 70 är bärkrav och är inte med.",
+    "https://oldschool.runescape.wiki/w/Vorkath%27s_head - Item ID 21907 (VORKATH_HEAD): 'the drop rate of the head is 1/50,",
+    "with the exception of the 50th kill, when the drop is guaranteed.' Därav KC-målet 50 på Vorkath.",
+    "Mithril arrow: 888 (MITHRIL_ARROW)."
+  ],
+  "id": "avas-assembler",
+  "name": "Ava's assembler",
+  "description": "Animal Magnetism, Dragon Slayer II, Vorkath's head and the accumulator upgrade",
+  "category": "Ironman · Mid",
+  "tags": ["assembler", "ava's assembler", "avas", "accumulator", "vorkath", "vorkath's head", "ds2", "ironman"],
+  "root": {
+    "title": "Ava's assembler",
+    "aggregate": true,
+    "wikiPage": "Ava's assembler",
+    "icon": {"item": 22109},
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {"sideIcon": "QUEST"},
+        "children": [
+          {"quest": "ANIMAL_MAGNETISM"},
+          {"skill": "RANGED", "level": 50,
+            "note": "Needed when Animal Magnetism finishes to get the accumulator instead of the attractor."},
+          {"quest": "DRAGON_SLAYER_II",
+            "note": "Needed to fight Vorkath and to make the assembler."}
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {"sideIcon": "INVENTORY"},
+        "children": [
+          {"item": {"id": 10499, "name": "Ava's accumulator"},
+            "doneWhen": ["item:22109"],
+            "note": "Reward from Animal Magnetism with 50 Ranged. With an attractor, Ava upgrades it for 75 steel arrows and 999 coins."},
+          {"item": {"id": 21907, "name": "Vorkath's head"},
+            "doneWhen": ["item:22109"],
+            "dropSource": {"hiscore": "VORKATH", "rate": 50},
+            "note": "1/50 from Vorkath, guaranteed on the 50th kill."},
+          {"killCount": {"hiscore": "VORKATH", "count": 50},
+            "doneWhen": ["item:21907", "item:22109"],
+            "note": "The head is guaranteed on the 50th kill."},
+          {"item": {"id": 888, "name": "Mithril arrow", "quantity": 75}, "doneWhen": ["item:22109"]},
+          {"item": {"id": 22109, "name": "Ava's assembler", "includeVariants": true},
+            "note": "Give Ava in Draynor Manor the accumulator, Vorkath's head and 75 mithril arrows."}
+        ]
+      }
+    ]
+  }
+}

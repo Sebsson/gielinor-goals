@@ -66,6 +66,8 @@ import net.runelite.client.hiscore.HiscoreSkill;
  * </pre>
  * Noder utan krav kan ha en egen ikon: {@code "icon": {"item": 25865}},
  * {@code {"activity": "THE_HUEYCOATL"}} eller {@code {"sideIcon": "QUEST"}}.
+ * {@code "doneWhen": ["item:12954"]} gör noden klar när ett mål med någon av nycklarna
+ * (se {@link TemplateKeys}) är klart, t.ex. en lägre defender när dragon defendern finns.
  * Filen valideras när den läses; en trasig fil ger ingen template alls, aldrig en halv.
  */
 public class JsonTemplate implements GoalTemplate
@@ -97,6 +99,8 @@ public class JsonTemplate implements GoalTemplate
 		ActivitySpec dropSource;
 		ActivitySpec killCount;
 		IconSpec icon;
+		// Nycklar till andra mål, t.ex. "item:12954"; noden är klar när något av dem är klart.
+		List<String> doneWhen;
 		String quest;
 		String skill;
 		Integer level;
@@ -141,6 +145,8 @@ public class JsonTemplate implements GoalTemplate
 		String manual;
 		Integer count;
 		Integer rate;
+		// Bara dropSource: föremål per drop, t.ex. 3 Hueycoatl hides.
+		Integer perDrop;
 	}
 
 	private final String id;
@@ -273,6 +279,17 @@ public class JsonTemplate implements GoalTemplate
 		{
 			node.setIcon(toIcon(spec.icon));
 		}
+		if (spec.doneWhen != null)
+		{
+			for (String key : spec.doneWhen)
+			{
+				if (key == null || key.trim().isEmpty() || !key.equals(key.trim()) || !key.contains(":"))
+				{
+					throw new IllegalArgumentException("doneWhen needs keys like \"item:12954\"");
+				}
+			}
+			node.setDoneWhen(List.copyOf(spec.doneWhen));
+		}
 		if (spec.dropSource != null)
 		{
 			if (!(requirement instanceof ItemRequirement))
@@ -363,15 +380,19 @@ public class JsonTemplate implements GoalTemplate
 		{
 			throw new IllegalArgumentException("dropSource needs a rate");
 		}
+		DropSource source;
 		switch (activityKind(spec))
 		{
 			case HISCORE:
-				return DropSource.hiscore(HiscoreSkill.valueOf(spec.hiscore), spec.rate);
+				source = DropSource.hiscore(HiscoreSkill.valueOf(spec.hiscore), spec.rate);
+				break;
 			case NPC:
-				return DropSource.npc(spec.npc, spec.rate);
+				source = DropSource.npc(spec.npc, spec.rate);
+				break;
 			default:
-				return DropSource.manual(spec.manual, spec.rate);
+				source = DropSource.manual(spec.manual, spec.rate);
 		}
+		return spec.perDrop == null ? source : source.withPerDrop(spec.perDrop);
 	}
 
 	private static GoalIcon toIcon(IconSpec spec)

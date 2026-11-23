@@ -47,6 +47,8 @@ public class DropSource
 	private String activityName;
 	// Nämnaren i drop rate, t.ex. 5000 för 1/5000.
 	private int rate;
+	// Antal föremål per drop, t.ex. 3 Hueycoatl hides; 1 för de flesta.
+	private int perDrop = 1;
 
 	// För Gson.
 	DropSource()
@@ -63,6 +65,22 @@ public class DropSource
 		this.activityId = activityId;
 		this.activityName = activityName;
 		this.rate = rate;
+	}
+
+	public static final int MAX_PER_DROP = 100_000;
+
+	/**
+	 * Samma källa med ett annat antal föremål per drop.
+	 */
+	public DropSource withPerDrop(int perDrop)
+	{
+		if (perDrop < 1 || perDrop > MAX_PER_DROP)
+		{
+			throw new IllegalArgumentException("perDrop must be between 1 and " + MAX_PER_DROP);
+		}
+		DropSource copy = new DropSource(activityType, activityId, activityName, rate);
+		copy.perDrop = perDrop;
+		return copy;
 	}
 
 	public static DropSource hiscore(HiscoreSkill skill, int rate)
@@ -117,6 +135,12 @@ public class DropSource
 		}
 	}
 
+	// Äldre sparad data utan fältet räknas som 1 per drop.
+	public int getPerDrop()
+	{
+		return Math.max(1, perDrop);
+	}
+
 	public boolean isValid()
 	{
 		if (activityType == null || activityId == null || activityId.isEmpty() || activityName == null
@@ -145,6 +169,35 @@ public class DropSource
 	}
 
 	/**
+	 * Chansen att ha fått minst {@code drops} drops efter {@code kc} försök (binomialfördelning).
+	 * Termerna räknas fram en i taget från P(0) = (1 − p)^kc, så att stora kc inte svämmar över.
+	 */
+	public static double chanceAtLeast(long kc, int rate, int drops)
+	{
+		if (drops <= 1)
+		{
+			return chanceByNow(kc, rate);
+		}
+		if (kc < drops || rate < 1)
+		{
+			return 0;
+		}
+		if (rate == 1)
+		{
+			return 1;
+		}
+		double p = 1.0 / rate;
+		double term = Math.exp(kc * Math.log1p(-p));
+		double fewer = 0;
+		for (int k = 0; k < drops; k++)
+		{
+			fewer += term;
+			term *= (kc - k) / (double) (k + 1) * p / (1 - p);
+		}
+		return Math.max(0, Math.min(1, 1 - fewer));
+	}
+
+	/**
 	 * Hur många gånger raten man har gjort, t.ex. 1.6 för 8 000 kc på 1/5000.
 	 */
 	public static double rateMultiple(long kc, int rate)
@@ -157,6 +210,7 @@ public class DropSource
 	 */
 	public String describe()
 	{
-		return "1/" + net.runelite.client.util.QuantityFormatter.formatNumber(rate) + " from " + activityName;
+		return "1/" + net.runelite.client.util.QuantityFormatter.formatNumber(rate) + " from " + activityName
+			+ (getPerDrop() > 1 ? ", " + getPerDrop() + " per drop" : "");
 	}
 }

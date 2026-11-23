@@ -1,0 +1,49 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-23):",
+    "https://oldschool.runescape.wiki/w/Graceful_outfit - köps av Grace i Rogues' Den under The Toad and Chicken i Burthorpe.",
+    "Hood 35, top 55, legs 60, gloves 30, boots 40, cape 40 marks; 'Buying the entire set costs 260 marks.'",
+    "https://oldschool.runescape.wiki/w/Mark_of_Grace - Item ID 11849 (gameval GRACE). Fås på rooftop-agilitybanor.",
+    "Item-id för delarna fanns inte på sidorna; de kommer från gameval: 11850 GRACEFUL_HOOD, 11852 GRACEFUL_CAPE,",
+    "11854 GRACEFUL_TOP, 11856 GRACEFUL_LEGS, 11858 GRACEFUL_GLOVES, 11860 GRACEFUL_BOOTS. Varianter (färgade) räknas.",
+    "Wikin anger inga krav för att köpa grundsetet."
+  ],
+  "id": "graceful",
+  "name": "Graceful outfit",
+  "description": "260 marks of grace and all six graceful pieces",
+  "category": "Ironman · Early",
+  "tags": ["graceful", "marks of grace", "mark of grace", "agility", "rooftop", "ironman"],
+  "root": {
+    "title": "Graceful outfit",
+    "aggregate": true,
+    "wikiPage": "Graceful outfit",
+    "icon": {"item": 11854},
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {"sideIcon": "QUEST"},
+        "children": [
+          {"title": "Find Grace in the Rogues' Den", "wikiPage": "Grace", "icon": {"item": 11849},
+            "doneWhen": ["item:11849:260", "item:11850", "item:11852", "item:11854", "item:11856", "item:11858", "item:11860"],
+            "note": "Beneath The Toad and Chicken in Burthorpe. No requirements to buy the outfit."}
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {"sideIcon": "INVENTORY"},
+        "children": [
+          {"item": {"id": 11849, "name": "Mark of Grace", "quantity": 260},
+            "note": "The whole set: hood 35, cape 40, top 55, legs 60, gloves 30, boots 40. Marks spent on pieces no longer count, so tick this off by hand if you buy as you go."},
+          {"item": {"id": 11850, "name": "Graceful hood", "includeVariants": true}, "note": "35 marks."},
+          {"item": {"id": 11852, "name": "Graceful cape", "includeVariants": true}, "note": "40 marks."},
+          {"item": {"id": 11854, "name": "Graceful top", "includeVariants": true}, "note": "55 marks."},
+          {"item": {"id": 11856, "name": "Graceful legs", "includeVariants": true}, "note": "60 marks."},
+          {"item": {"id": 11858, "name": "Graceful gloves", "includeVariants": true}, "note": "30 marks."},
+          {"item": {"id": 11860, "name": "Graceful boots", "includeVariants": true}, "note": "40 marks."}
+        ]
+      }
+    ]
+  }
+}

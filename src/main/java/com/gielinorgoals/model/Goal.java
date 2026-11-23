@@ -69,6 +69,9 @@ public class Goal
 	private Long obtainedAtKc;
 	// Egen ikon för mål utan krav, t.ex. grupper från en template; null = ingen.
 	private GoalIcon icon;
+	// Målet räknas som klart när något mål med en av de här nycklarna är klart, t.ex.
+	// "item:12954" på en bronze defender. Nycklarna är template-nycklar (TemplateKeys).
+	private List<String> doneWhen;
 	// Null betyder ett manuellt mål som bara bockas av för hand.
 	private Requirement requirement;
 	// Delmålens id:n i användarens ordning. Målen själva ligger i GoalTree, så att ett

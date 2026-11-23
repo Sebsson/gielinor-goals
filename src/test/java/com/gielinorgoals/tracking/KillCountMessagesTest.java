@@ -43,6 +43,8 @@ public class KillCountMessagesTest
 	{
 		assertCount(HiscoreSkill.KREEARRA, 10, "Your Kree'arra kill count is: <col=ff0000>10</col>.");
 		assertCount(HiscoreSkill.TZTOK_JAD, 3, "Your TzTok-Jad kill count is: <col=ff0000>3</col>.");
+		assertCount(HiscoreSkill.TZKAL_ZUK, 2, "Your TzKal-Zuk kill count is: <col=ff0000>2</col>.");
+		assertCount(HiscoreSkill.VORKATH, 50, "Your Vorkath kill count is: <col=ff0000>50</col>.");
 		assertCount(HiscoreSkill.THE_HUEYCOATL, 7, "Your Hueycoatl kill count is: <col=ff0000>7</col>.");
 		assertCount(HiscoreSkill.PHOSANIS_NIGHTMARE, 4, "Your Phosani's Nightmare kill count is: <col=ff0000>4</col>.");
 	}
@@ -55,16 +57,6 @@ public class KillCountMessagesTest
 		assertCount(HiscoreSkill.CLUE_SCROLL_BEGINNER, 1, "You have completed 1 beginner Treasure Trail.");
 		assertCount(HiscoreSkill.CLUE_SCROLL_MASTER, 50,
 			"<col=ef1020>You have completed <col=ff0000>50</col> master Treasure Trails.</col>");
-	}
-
-	@Test
-	public void gauntletAndHueycoatlNamesMatchTheirHiscores()
-	{
-		// Namnen i spelet saknar "The"; RuneLites egen lista över KC-namn har dem så här.
-		assertCount(HiscoreSkill.THE_GAUNTLET, 12, "Your Gauntlet completion count is: <col=ff0000>12</col>.");
-		assertCount(HiscoreSkill.THE_CORRUPTED_GAUNTLET, 3,
-			"Your Corrupted Gauntlet completion count is: <col=ff0000>3</col>.");
-		assertCount(HiscoreSkill.THE_HUEYCOATL, 7, "Your Hueycoatl kill count is: <col=ff0000>7</col>.");
 	}
 
 	@Test

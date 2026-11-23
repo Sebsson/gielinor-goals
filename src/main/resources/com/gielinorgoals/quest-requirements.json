@@ -2556,6 +2556,77 @@
    "name": "Children of the Sun",
    "quests": [],
    "skills": []
+  },
+  {
+   "id": 46,
+   "name": "Fairytale I - Growing Pains",
+   "quests": [
+    {
+     "id": 86,
+     "name": "Lost City"
+    },
+    {
+     "id": 103,
+     "name": "Nature Spirit"
+    }
+   ],
+   "skills": []
+  },
+  {
+   "id": 47,
+   "name": "Fairytale II - Cure a Queen",
+   "quests": [
+    {
+     "id": 46,
+     "name": "Fairytale I - Growing Pains"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "THIEVING",
+     "level": 40,
+     "boostable": false
+    },
+    {
+     "skill": "FARMING",
+     "level": 49,
+     "boostable": true
+    },
+    {
+     "skill": "HERBLORE",
+     "level": 57,
+     "boostable": true
+    }
+   ]
+  },
+  {
+   "id": 89,
+   "name": "Mage Arena I",
+   "quests": [],
+   "skills": [
+    {
+     "skill": "MAGIC",
+     "level": 60,
+     "boostable": false
+    }
+   ]
+  },
+  {
+   "id": 90,
+   "name": "Mage Arena II",
+   "quests": [
+    {
+     "id": 89,
+     "name": "Mage Arena I"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "MAGIC",
+     "level": 75,
+     "boostable": false
+    }
+   ]
   }
  ]
 }

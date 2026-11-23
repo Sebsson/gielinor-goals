@@ -1,0 +1,68 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-23):",
+    "https://oldschool.runescape.wiki/w/Zenyte_shard - Item ID 19529 (gameval ZENYTE_SHARD), Demonic gorilla '1/300'",
+    "(Tortured gorilla 1/3,000). Gorillorna i Crash Site Cavern nås efter Monkey Madness II.",
+    "https://oldschool.runescape.wiki/w/Uncut_zenyte - shard + cut onyx smälts i Temple of Marimbo Dungeon: 'completion of",
+    "Monkey Madness II and level 70 Crafting'. Slipas med Crafting 89.",
+    "https://oldschool.runescape.wiki/w/Zenyte - ring 89, necklace 92, bracelet 95, amulet (u) 98 Crafting; amuletten trädas",
+    "med ball of wool (98). https://oldschool.runescape.wiki/w/Lvl-7_Enchant - Magic 93, 20 blood, 1 cosmic, 20 soul.",
+    "https://oldschool.runescape.wiki/w/Uncut_onyx - Item ID 6571 (UNCUT_ONYX); för ironmen bl.a. TzHaar-Hur-Lek 300,000 tokkul",
+    "(260,000 med Karamja gloves), Zulrah 2 × 1/1,024, Skotizo 1/1,000, Zalcano 1/8,000. Onyx 6573 (ONYX); slipas med Crafting 67.",
+    "Resultat (gameval): 19550 ZENYTE_RING_ENCHANTED (Ring of suffering), 19547 ZENYTE_NECKLACE_ENCHANTED (Necklace of anguish),",
+    "19544 ZENYTE_BRACELET_ENCHANTED (Tormented bracelet), 19553 ZENYTE_AMULET_ENCHANTED (Amulet of torture).",
+    "Lås upp tar bara med nivåerna för att tillverka och förtrolla; bärkravet (75 Hitpoints) är inte med.",
+    "Fyra shards och fyra onyx räcker till alla fyra smyckena."
+  ],
+  "id": "zenyte-jewellery",
+  "name": "Zenyte jewellery",
+  "description": "Monkey Madness II, four zenyte shards, four onyx and the levels to craft and enchant all four pieces",
+  "category": "Ironman · Late",
+  "tags": ["zenyte", "zenytes", "torture", "anguish", "tormented", "suffering", "demonic gorilla", "gorillas", "onyx", "mm2", "ironman"],
+  "root": {
+    "title": "Zenyte jewellery",
+    "aggregate": true,
+    "wikiPage": "Zenyte",
+    "icon": {"item": 19553},
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {"sideIcon": "QUEST"},
+        "children": [
+          {"quest": "MONKEY_MADNESS_II",
+            "note": "Opens the Crash Site Cavern with the demonic gorillas and the wall of flame where zenytes are fused."},
+          {"skill": "CRAFTING", "level": 89,
+            "note": "Fusing needs 70, cutting the zenyte and making the ring 89. Necklace 92, bracelet 95, amulet 98."},
+          {"skill": "CRAFTING", "level": 98,
+            "note": "For the amulet of torture (amulet and stringing it). Skip it if you only want the other pieces."},
+          {"skill": "MAGIC", "level": 93,
+            "note": "Lvl-7 Enchant: 20 blood, 1 cosmic and 20 soul runes per cast."}
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {"sideIcon": "INVENTORY"},
+        "children": [
+          {"item": {"id": 19529, "name": "Zenyte shard", "quantity": 4},
+            "dropSource": {"npc": "Demonic gorilla", "rate": 300},
+            "note": "1/300 from demonic gorillas. One per piece of jewellery."},
+          {"item": {"id": 6571, "name": "Uncut onyx", "quantity": 4},
+            "note": "TzHaar-Hur-Lek sells one for 300,000 tokkul (260,000 with Karamja gloves). Also Zulrah (2 × 1/1,024), Skotizo (1/1,000) and Zalcano (1/8,000). Cut it with 67 Crafting."},
+          {
+            "title": "Jewellery",
+            "aggregate": true,
+            "icon": {"item": 19493},
+            "children": [
+              {"item": {"id": 19550, "name": "Ring of suffering", "includeVariants": true}, "note": "Zenyte ring (89 Crafting), enchanted."},
+              {"item": {"id": 19547, "name": "Necklace of anguish", "includeVariants": true}, "note": "Zenyte necklace (92 Crafting), enchanted."},
+              {"item": {"id": 19544, "name": "Tormented bracelet", "includeVariants": true}, "note": "Zenyte bracelet (95 Crafting), enchanted."},
+              {"item": {"id": 19553, "name": "Amulet of torture", "includeVariants": true}, "note": "Zenyte amulet (98 Crafting), strung with a ball of wool, enchanted."}
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

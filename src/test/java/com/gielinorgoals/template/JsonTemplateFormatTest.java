@@ -131,6 +131,23 @@ public class JsonTemplateFormatTest
 	}
 
 	@Test
+	public void doneWhenIsReadAndCopiedToTheGoal()
+	{
+		String json = "{\"name\":\"D\",\"root\":{\"title\":\"Root\",\"children\":["
+			+ "{\"title\":\"Enter the guild\",\"doneWhen\":[\"item:8844\",\"quest:47\"]}]}}";
+		TemplateNode root = parse(json).build(Map.of());
+		assertEquals(List.of("item:8844", "quest:47"), root.getChildren().get(0).getDoneWhen());
+
+		GoalTree tree = new GoalTree();
+		TemplateInserter.insert(tree, root, null);
+		assertEquals(List.of("item:8844", "quest:47"), find(tree, "group:enter the guild").getDoneWhen());
+
+		rejects("{\"name\":\"X\",\"root\":{\"title\":\"R\",\"doneWhen\":[\"\"]}}");
+		rejects("{\"name\":\"X\",\"root\":{\"title\":\"R\",\"doneWhen\":[\"no-colon\"]}}");
+		rejects("{\"name\":\"X\",\"root\":{\"title\":\"R\",\"doneWhen\":[\" item:1\"]}}");
+	}
+
+	@Test
 	public void oldVariantsFieldStillWorks()
 	{
 		String json = "{\"name\":\"V\",\"root\":{\"item\":{\"id\":7462,\"name\":\"Barrows gloves\",\"variants\":true}}}";

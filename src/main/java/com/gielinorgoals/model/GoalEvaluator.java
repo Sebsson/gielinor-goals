@@ -31,6 +31,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import javax.annotation.Nullable;
 import lombok.Value;
 
 /**
@@ -42,6 +44,10 @@ import lombok.Value;
  * Ett aggregat utan eget krav bockas av när alla direkta delmål är klara. Aggregaten
  * räknas efter kraven och barn före föräldrar, så att nästlade aggregat klaras i samma
  * utvärdering.
+ *
+ * <p>Ett mål med {@link Goal#getDoneWhen()} bockas av när något av de nämnda målen är klart,
+ * t.ex. en bronze defender när dragon defendern är klar. Det och aggregaten upprepas tills
+ * inget mer ändras, så att kedjor av sådana mål klaras i en och samma utvärdering.
  */
 public final class GoalEvaluator
 {
@@ -59,6 +65,14 @@ public final class GoalEvaluator
 	}
 
 	public static Result evaluate(GoalTree tree, GameData data, long now)
+	{
+		return evaluate(tree, data, now, Goal::getTemplateNodeKey);
+	}
+
+	/**
+	 * @param keyOf målets nyckel som {@code doneWhen} jämförs med, t.ex. "item:12954"
+	 */
+	public static Result evaluate(GoalTree tree, GameData data, long now, Function<Goal, String> keyOf)
 	{
 		Map<String, GoalProgress> progress = new HashMap<>();
 		List<Goal> newlyCompleted = new ArrayList<>();
@@ -85,7 +99,80 @@ public final class GoalEvaluator
 			}
 		});
 
-		for (Goal goal : childrenFirst(tree))
+		// Mål vars progress kommer från kravet; för övriga aggregat visas räknaren.
+		Set<String> fromRequirement = new HashSet<>(progress.keySet());
+		List<Goal> order = childrenFirst(tree);
+		// Varje varv bockar av minst ett mål, så det tar slut senast när alla är klara.
+		boolean changed = true;
+		while (changed)
+		{
+			changed = completeImplied(order, now, keyOf, newlyCompleted);
+			changed |= completeAggregates(tree, order, now, progress, fromRequirement, newlyCompleted);
+		}
+
+		return new Result(Collections.unmodifiableMap(progress), Collections.unmodifiableList(newlyCompleted));
+	}
+
+	// Mål som bockas av för att ett annat mål de nämner i doneWhen är klart.
+	private static boolean completeImplied(List<Goal> goals, long now, Function<Goal, String> keyOf,
+		List<Goal> newlyCompleted)
+	{
+		Set<String> doneKeys = new HashSet<>();
+		boolean anyWaiting = false;
+		for (Goal goal : goals)
+		{
+			if (goal.isCompleted())
+			{
+				String key = keyOf.apply(goal);
+				if (key != null)
+				{
+					doneKeys.add(key);
+				}
+			}
+			else if (goal.getDoneWhen() != null && !goal.getDoneWhen().isEmpty())
+			{
+				anyWaiting = true;
+			}
+		}
+		if (!anyWaiting)
+		{
+			return false;
+		}
+
+		boolean changed = false;
+		for (Goal goal : goals)
+		{
+			if (!goal.isCompleted() && impliedBy(goal.getDoneWhen(), doneKeys))
+			{
+				goal.markCompleted(true, now);
+				newlyCompleted.add(goal);
+				changed = true;
+			}
+		}
+		return changed;
+	}
+
+	private static boolean impliedBy(@Nullable List<String> doneWhen, Set<String> doneKeys)
+	{
+		if (doneWhen == null)
+		{
+			return false;
+		}
+		for (String key : doneWhen)
+		{
+			if (doneKeys.contains(key))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static boolean completeAggregates(GoalTree tree, List<Goal> order, long now,
+		Map<String, GoalProgress> progress, Set<String> fromRequirement, List<Goal> newlyCompleted)
+	{
+		boolean changed = false;
+		for (Goal goal : order)
 		{
 			if (!goal.isAggregate())
 			{
@@ -100,16 +187,16 @@ public final class GoalEvaluator
 				{
 					goal.markCompleted(true, now);
 					newlyCompleted.add(goal);
+					changed = true;
 				}
 			}
-			else if (!progress.containsKey(goal.getId()))
+			else if (!fromRequirement.contains(goal.getId()))
 			{
 				// Med eget krav styr kravet när målet är klart; räknaren visas bara.
 				progress.put(goal.getId(), counter);
 			}
 		}
-
-		return new Result(Collections.unmodifiableMap(progress), Collections.unmodifiableList(newlyCompleted));
+		return changed;
 	}
 
 	// Postordning: varje mål kommer efter alla sina delmål, även delade delmål i en DAG.

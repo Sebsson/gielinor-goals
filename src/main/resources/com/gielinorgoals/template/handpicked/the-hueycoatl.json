@@ -27,6 +27,7 @@
         "icon": {"sideIcon": "QUEST"},
         "children": [
           {"title": "Reach the Darkfrost in Varlamore", "wikiPage": "The Hueycoatl", "icon": {"activity": "THE_HUEYCOATL"},
+            "doneWhen": ["item:30070", "item:30085:3", "item:30066"],
             "note": "No quest or skill requirements. Below 85 combat and 43 Prayer the game warns you, but you can still go in. A private instance costs 50,000 coins (25,000 with the hard combat achievements)."}
         ]
       },
@@ -44,7 +45,7 @@
                 "dropSource": {"hiscore": "THE_HUEYCOATL", "rate": 105},
                 "note": "1/105, scaled by your contribution."},
               {"item": {"id": 30085, "name": "Hueycoatl hide", "quantity": 3},
-                "dropSource": {"hiscore": "THE_HUEYCOATL", "rate": 29},
+                "dropSource": {"hiscore": "THE_HUEYCOATL", "rate": 29, "perDrop": 3},
                 "note": "11/315 (about 1/29) for 3 hides, scaled by your contribution."},
               {"item": {"id": 30066, "name": "Tome of Earth (empty)", "includeVariants": true},
                 "dropSource": {"hiscore": "THE_HUEYCOATL", "rate": 90},

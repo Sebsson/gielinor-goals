@@ -289,6 +289,8 @@ final class GoalEditDialog
 	private final JTextField dropNameField = new JTextField(20);
 	private final JLabel dropRateLabel = new JLabel("Drop rate: 1 in (e.g. 5000 or 5k)");
 	private final JTextField dropRateField = new JTextField(20);
+	// Föremål per drop från en template; dialogen visar det inte men behåller det.
+	private int dropPerDrop = 1;
 	private final Map<Integer, Icon> itemIcons = new HashMap<>();
 
 	// Quest-, diary- och CA-korten.
@@ -744,6 +746,7 @@ final class GoalEditDialog
 			dropNameField.setText(source.getActivityName());
 		}
 		dropRateField.setText(String.valueOf(source.getRate()));
+		dropPerDrop = source.getPerDrop();
 		updateDropFields();
 	}
 
@@ -780,12 +783,17 @@ final class GoalEditDialog
 		{
 			throw new IllegalArgumentException("Enter the drop rate as the number after \"1 in\", e.g. 5000.");
 		}
+		DropSource source;
 		if (option.getSkill() != null)
 		{
-			return DropSource.hiscore(option.getSkill(), (int) rate);
+			source = DropSource.hiscore(option.getSkill(), (int) rate);
 		}
-		return option == OTHER_NPC ? DropSource.npc(dropNameField.getText(), (int) rate)
-			: DropSource.manual(dropNameField.getText(), (int) rate);
+		else
+		{
+			source = option == OTHER_NPC ? DropSource.npc(dropNameField.getText(), (int) rate)
+				: DropSource.manual(dropNameField.getText(), (int) rate);
+		}
+		return dropPerDrop == 1 ? source : source.withPerDrop(dropPerDrop);
 	}
 
 	private static JPanel northAligned(JPanel panel)

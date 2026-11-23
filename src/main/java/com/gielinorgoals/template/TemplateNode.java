@@ -79,6 +79,11 @@ public class TemplateNode
 	@Nullable
 	private com.gielinorgoals.model.GoalIcon icon;
 
+	// Nycklar till mål som gör den här noden klar, t.ex. "item:12954" (dragon defender).
+	@Setter
+	@Nullable
+	private List<String> doneWhen;
+
 	// False om ett quest inte ska fällas ut med sin kedja trots att kedjor är påslagna.
 	@Setter
 	private boolean expandChain = true;

@@ -1,0 +1,45 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-23):",
+    "https://oldschool.runescape.wiki/w/Fire_cape - Item ID 6570 (gameval TZHAAR_CAPE_FIRE), 'obtained as a reward for completing",
+    "the TzHaar Fight Cave' (alla vågor och TzTok-Jad).",
+    "https://oldschool.runescape.wiki/w/TzHaar_Fight_Cave - inga krav för att gå in.",
+    "KC-räknaren är hiscore-posten TzTok-Jad; KC-meddelandet i chatten är inte bekräftat på wikin."
+  ],
+  "id": "fire-cape",
+  "name": "Fire cape",
+  "description": "The TzHaar Fight Cave and TzTok-Jad",
+  "category": "Ironman · Early",
+  "tags": ["fire cape", "firecape", "jad", "tztok-jad", "fight cave", "fight caves", "tzhaar", "ironman"],
+  "root": {
+    "title": "Fire cape",
+    "aggregate": true,
+    "wikiPage": "Fire cape",
+    "icon": {"item": 6570},
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {"sideIcon": "QUEST"},
+        "children": [
+          {"title": "Reach the TzHaar Fight Cave", "wikiPage": "TzHaar Fight Cave", "icon": {"activity": "TZTOK_JAD"},
+            "doneWhen": ["kc:hiscore:TZTOK_JAD:1", "item:6570"],
+            "note": "In Mor Ul Rek / the TzHaar City. No quest or skill requirements."}
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {"sideIcon": "INVENTORY"},
+        "children": [
+          {"killCount": {"hiscore": "TZTOK_JAD", "count": 1},
+            "doneWhen": ["item:6570", "item:21295"],
+            "note": "Survive every wave and kill TzTok-Jad."},
+          {"item": {"id": 6570, "name": "Fire cape", "includeVariants": true},
+            "doneWhen": ["kc:hiscore:TZTOK_JAD:1", "item:21295", "kc:hiscore:TZKAL_ZUK:1"],
+            "note": "Reward for completing the Fight Cave."}
+        ]
+      }
+    ]
+  }
+}

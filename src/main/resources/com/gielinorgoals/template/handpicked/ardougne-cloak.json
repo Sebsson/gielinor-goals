@@ -1,0 +1,63 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-23):",
+    "https://oldschool.runescape.wiki/w/Fairy_ring - kräver The Restless Ghost, Priest in Peril, Nature Spirit, Lost City,",
+    "Fairytale I - Growing Pains och 'Partially completed Fairytale II - Cure a Queen (up until you're \"granted permission\"",
+    "to use them)'. Dramen eller lunar staff behövs, utom med elite Lumbridge & Draynor Diary.",
+    "Fairytale I tar med de andra fyra quests via kedjan; Fairytale II-steget är ett manuellt mål eftersom bara en del krävs.",
+    "https://oldschool.runescape.wiki/w/Ardougne_cloak - cloak 1-4 för easy/medium/hard/elite Ardougne Diary, hämtas gratis",
+    "hos Two-pints i Flying Horse Inn. Item-id: 13121-13124 (gameval ARDY_CAPE_EASY/MEDIUM/HARD/ELITE). Dramen staff: 772.",
+    "Fairytale I och II lades till i quest-requirements.json samma dag."
+  ],
+  "id": "ardougne-cloak",
+  "name": "Ardougne cloak and fairy rings",
+  "description": "Fairy ring access and Ardougne cloaks 1-4 through the Ardougne Diary",
+  "category": "Ironman · Early",
+  "tags": ["ardougne cloak", "ardy cloak", "ardy", "fairy ring", "fairy rings", "fairytale", "diary", "ironman"],
+  "root": {
+    "title": "Ardougne cloak and fairy rings",
+    "aggregate": true,
+    "wikiPage": "Ardougne cloak",
+    "icon": {"item": 13124},
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {"sideIcon": "QUEST"},
+        "children": [
+          {
+            "title": "Fairy rings",
+            "aggregate": true,
+            "wikiPage": "Fairy ring",
+            "icon": {"item": 772},
+            "children": [
+              {"quest": "FAIRYTALE_I__GROWING_PAINS"},
+              {"title": "Fairytale II - Cure a Queen: get permission to use fairy rings", "wikiPage": "Fairytale II - Cure a Queen",
+                "icon": {"sideIcon": "QUEST"},
+                "doneWhen": ["quest:47"],
+                "note": "Start the quest and continue until the Fairy Godfather grants permission. The rest of the quest and its skill requirements are not needed."},
+              {"item": {"id": 772, "name": "Dramen staff"},
+                "doneWhen": ["diary:LUMBRIDGE:ELITE"],
+                "note": "Wield a dramen or lunar staff to use the rings. Not needed after the elite Lumbridge & Draynor Diary."}
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {"sideIcon": "INVENTORY"},
+        "children": [
+          {"item": {"id": 13121, "name": "Ardougne cloak 1"}, "doneWhen": ["item:13122"], "note": "Free from Two-pints in the Flying Horse Inn.",
+            "children": [{"diary": {"area": "ARDOUGNE", "tier": "EASY"}}]},
+          {"item": {"id": 13122, "name": "Ardougne cloak 2"}, "doneWhen": ["item:13123"], "note": "Free from Two-pints.",
+            "children": [{"diary": {"area": "ARDOUGNE", "tier": "MEDIUM"}}]},
+          {"item": {"id": 13123, "name": "Ardougne cloak 3"}, "doneWhen": ["item:13124"], "note": "Free from Two-pints.",
+            "children": [{"diary": {"area": "ARDOUGNE", "tier": "HARD"}}]},
+          {"item": {"id": 13124, "name": "Ardougne cloak 4"}, "note": "Free from Two-pints. Unlimited teleports to the Ardougne farming patch.",
+            "children": [{"diary": {"area": "ARDOUGNE", "tier": "ELITE"}}]}
+        ]
+      }
+    ]
+  }
+}

@@ -63,7 +63,7 @@ public class SchemaMigrator
 	 *     wikiPage på mål, för "Update from template" och "Open on wiki". Ingen dataändring;
 	 *     äldre mål saknar dem.
 	 * 11 – valfria fält dropSource och obtainedAtKc på mål, för torrhetsmätaren, och icon
-	 *     (egen ikon för mål utan krav). Ingen
+	 *     (egen ikon för mål utan krav) och doneWhen (klart när ett annat mål är klart). Ingen
 	 *     dataändring; höjd så att äldre versioner blir skrivskyddade i stället för att
 	 *     tyst kasta bort drop-källorna när de sparar.
 	 */

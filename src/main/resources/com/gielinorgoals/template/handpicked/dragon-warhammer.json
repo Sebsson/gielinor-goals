@@ -25,6 +25,7 @@
         "icon": {"sideIcon": "QUEST"},
         "children": [
           {"title": "Reach the lizardman shamans", "wikiPage": "Lizardman shaman", "icon": {"item": 13393},
+            "doneWhen": ["item:13576"],
             "note": "West Lizardman Canyon (3 shamans): fairy ring DJR, or walk south from Xeric's Inferno. Lizardman Temple beneath Molch (6). The caves under the Lizardman Settlement (8) need a lizardman Slayer task. The wiki lists no quest or skill requirements for the canyon or the temple."}
         ]
       },

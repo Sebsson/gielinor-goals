@@ -1,0 +1,47 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-23):",
+    "https://oldschool.runescape.wiki/w/Infernal_cape - Item ID 21295 (gameval INFERNAL_CAPE), 'awarded for defeating TzKal-Zuk",
+    "in the Inferno'. https://oldschool.runescape.wiki/w/The_Inferno - 'a fire cape must be sacrificed by giving it to",
+    "TzHaar-Ket-Keh. This is a one-time fee.' 69 vågor, TzKal-Zuk är nivå 1400.",
+    "Fire cape-målet är samma nod som i Fire cape-templaten (item:6570), så de delas om båda läggs till.",
+    "Ett klart item-mål förblir klart när föremålet försvinner, så offret bockar inte av målet igen.",
+    "KC-räknaren är hiscore-posten TzKal-Zuk; KC-meddelandet i chatten är inte bekräftat på wikin."
+  ],
+  "id": "infernal-cape",
+  "name": "Infernal cape",
+  "description": "A fire cape to sacrifice, then the Inferno and TzKal-Zuk",
+  "category": "Ironman · Late",
+  "tags": ["infernal cape", "inferno", "zuk", "tzkal-zuk", "tzhaar", "fire cape", "ironman"],
+  "root": {
+    "title": "Infernal cape",
+    "aggregate": true,
+    "wikiPage": "Infernal cape",
+    "icon": {"item": 21295},
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {"sideIcon": "QUEST"},
+        "children": [
+          {"item": {"id": 6570, "name": "Fire cape", "includeVariants": true},
+            "doneWhen": ["kc:hiscore:TZTOK_JAD:1", "item:21295", "kc:hiscore:TZKAL_ZUK:1"],
+            "note": "Sacrificed once to TzHaar-Ket-Keh to enter the Inferno. No other requirements."}
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {"sideIcon": "INVENTORY"},
+        "children": [
+          {"killCount": {"hiscore": "TZKAL_ZUK", "count": 1},
+            "doneWhen": ["item:21295"],
+            "note": "Survive 69 waves and kill TzKal-Zuk."},
+          {"item": {"id": 21295, "name": "Infernal cape", "includeVariants": true},
+            "doneWhen": ["kc:hiscore:TZKAL_ZUK:1"],
+            "note": "Guaranteed for completing the Inferno."}
+        ]
+      }
+    ]
+  }
+}

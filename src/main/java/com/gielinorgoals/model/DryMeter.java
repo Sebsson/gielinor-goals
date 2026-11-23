@@ -30,10 +30,14 @@ import net.runelite.client.util.QuantityFormatter;
 
 /**
  * Texterna för torrhetsmätaren på item-mål med {@link DropSource}. Rena funktioner, så att
- * de kan testas utan UI.
+ * de kan testas utan UI. Ett mål på flera föremål (t.ex. 4 zenyte shards) räknas om till
+ * antal drops som behövs, med hänsyn till hur många föremål en drop ger.
  */
 public final class DryMeter
 {
+	// Fler drops än så blir ingen meningsfull mätare (och sannolikhetssumman blir lång).
+	static final int MAX_DROPS = 1000;
+
 	private DryMeter()
 	{
 	}
@@ -45,7 +49,8 @@ public final class DryMeter
 	public static DropSource sourceOf(Goal goal)
 	{
 		DropSource source = goal.getDropSource();
-		if (source == null || !source.isValid() || !(goal.getRequirement() instanceof ItemRequirement))
+		if (source == null || !source.isValid() || !(goal.getRequirement() instanceof ItemRequirement)
+			|| dropsNeeded(goal, source) > MAX_DROPS)
 		{
 			return null;
 		}
@@ -53,7 +58,18 @@ public final class DryMeter
 	}
 
 	/**
-	 * T.ex. "1,240 kc · 1.6× rate". Visas bara medan målet inte är klart och räknaren är känd.
+	 * Antal drops som behövs för målets antal, t.ex. 2 för 6 föremål med 3 per drop.
+	 */
+	static int dropsNeeded(Goal goal, DropSource source)
+	{
+		long quantity = ((ItemRequirement) goal.getRequirement()).getQuantity();
+		long drops = (quantity + source.getPerDrop() - 1) / source.getPerDrop();
+		return (int) Math.min(Integer.MAX_VALUE, Math.max(1, drops));
+	}
+
+	/**
+	 * T.ex. "1,240 kc · 1.6× rate". Med flera drops jämförs mot raten gånger antalet drops.
+	 * Visas bara medan målet inte är klart och räknaren är känd.
 	 *
 	 * @param kc räknarens värde, -1 om det inte är känt
 	 */
@@ -65,12 +81,13 @@ public final class DryMeter
 		{
 			return null;
 		}
-		return QuantityFormatter.formatNumber(kc) + " kc · "
-			+ String.format(Locale.ROOT, "%.1f", DropSource.rateMultiple(kc, source.getRate())) + "× rate";
+		double multiple = DropSource.rateMultiple(kc, source.getRate()) / dropsNeeded(goal, source);
+		return QuantityFormatter.formatNumber(kc) + " kc · " + String.format(Locale.ROOT, "%.1f", multiple) + "× rate";
 	}
 
 	/**
-	 * T.ex. "Chance to have received it by now: 71%".
+	 * T.ex. "Chance to have received it by now: 71%" eller, för flera drops,
+	 * "Chance to have all 4 by now: 23%".
 	 */
 	@Nullable
 	public static String chanceText(Goal goal, long kc)
@@ -80,9 +97,13 @@ public final class DryMeter
 		{
 			return null;
 		}
-		boolean certain = source.getRate() == 1 && kc >= 1;
-		return "Chance to have received it by now: "
-			+ formatPercent(DropSource.chanceByNow(kc, source.getRate()), certain);
+		int drops = dropsNeeded(goal, source);
+		boolean certain = source.getRate() == 1 && kc >= drops;
+		String percent = formatPercent(DropSource.chanceAtLeast(kc, source.getRate(), drops), certain);
+		long quantity = ((ItemRequirement) goal.getRequirement()).getQuantity();
+		return quantity == 1
+			? "Chance to have received it by now: " + percent
+			: "Chance to have all " + QuantityFormatter.formatNumber(quantity) + " by now: " + percent;
 	}
 
 	/**

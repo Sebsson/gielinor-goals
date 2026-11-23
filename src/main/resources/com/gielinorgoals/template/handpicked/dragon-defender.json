@@ -1,0 +1,53 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-23):",
+    "https://oldschool.runescape.wiki/w/Warriors%27_Guild - 'Combined Attack and Strength level of at least 130, or level 99 in",
+    "either skill.' 'Temporary boosts cannot be used.' Kan inte uttryckas med befintliga kravtyper, så det är ett manuellt mål.",
+    "https://oldschool.runescape.wiki/w/Cyclops - översta våningen: defenders i ordning brons till rune, 'a drop chance of 1/50'",
+    "vardera; minst 100 warrior guild tokens för att gå in, 10 per minut. Källaren (Lorelai, visa en rune defender en gång):",
+    "'1/100 chance to drop the dragon defender'.",
+    "Item-id (gameval): 8844-8850 BRONZE..RUNE_PARRYINGDAGGER, 12954 DRAGON_PARRYINGDAGGER.",
+    "Drop-källan är NPC-räknaren 'Cyclops'. Cyklopar på översta våningen har samma namn och räknas också, så räknaren",
+    "kan bli för hög om den inte nollställs när man går ner i källaren."
+  ],
+  "id": "dragon-defender",
+  "name": "Dragon defender",
+  "description": "Warriors' Guild entry and every defender from bronze to dragon",
+  "category": "Ironman · Early",
+  "tags": ["dragon defender", "defender", "ddef", "warriors guild", "warriors' guild", "cyclops", "ironman"],
+  "root": {
+    "title": "Dragon defender",
+    "aggregate": true,
+    "wikiPage": "Dragon defender",
+    "icon": {"item": 12954},
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {"sideIcon": "QUEST"},
+        "children": [
+          {"title": "Enter the Warriors' Guild", "wikiPage": "Warriors' Guild", "icon": {"sideIcon": "STATS"},
+            "doneWhen": ["item:8844"],
+            "note": "Attack + Strength of at least 130 combined, or 99 in either. Boosts don't count. Bring at least 100 warrior guild tokens for the cyclops room (10 per minute)."}
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {"sideIcon": "INVENTORY"},
+        "children": [
+          {"item": {"id": 8844, "name": "Bronze defender"}, "doneWhen": ["item:8845"], "note": "1/50 from the top-floor cyclopes. Show it to Kamfreena for the next one."},
+          {"item": {"id": 8845, "name": "Iron defender"}, "doneWhen": ["item:8846"], "note": "1/50 from the top-floor cyclopes."},
+          {"item": {"id": 8846, "name": "Steel defender"}, "doneWhen": ["item:8847"], "note": "1/50 from the top-floor cyclopes."},
+          {"item": {"id": 8847, "name": "Black defender"}, "doneWhen": ["item:8848"], "note": "1/50 from the top-floor cyclopes."},
+          {"item": {"id": 8848, "name": "Mithril defender"}, "doneWhen": ["item:8849"], "note": "1/50 from the top-floor cyclopes."},
+          {"item": {"id": 8849, "name": "Adamant defender"}, "doneWhen": ["item:8850"], "note": "1/50 from the top-floor cyclopes."},
+          {"item": {"id": 8850, "name": "Rune defender"}, "doneWhen": ["item:12954"], "note": "1/50 from the top-floor cyclopes. Show it to Lorelai once to enter the basement."},
+          {"item": {"id": 12954, "name": "Dragon defender", "includeVariants": true},
+            "dropSource": {"npc": "Cyclops", "rate": 100},
+            "note": "1/100 from the level 106 cyclopes in the basement. The counter also counts top-floor cyclopes; set it to 0 when you start in the basement."}
+        ]
+      }
+    ]
+  }
+}

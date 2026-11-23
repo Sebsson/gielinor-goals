@@ -257,6 +257,7 @@ public final class TemplateInserter
 		goal.setNote(node.getNote());
 		goal.setDropSource(node.getDropSource());
 		goal.setIcon(node.getIcon());
+		goal.setDoneWhen(node.getDoneWhen() == null ? null : new ArrayList<>(node.getDoneWhen()));
 		return goal;
 	}
 }

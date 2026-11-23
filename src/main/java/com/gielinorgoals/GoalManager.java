@@ -42,6 +42,7 @@ import com.gielinorgoals.persistence.GoalSerializer;
 import com.gielinorgoals.persistence.LoadResult;
 import com.gielinorgoals.persistence.SchemaMigrator;
 import com.gielinorgoals.template.TemplateInserter;
+import com.gielinorgoals.template.TemplateKeys;
 import com.gielinorgoals.template.TemplateNode;
 import com.gielinorgoals.template.TemplateUpdates;
 import com.gielinorgoals.tracking.InitialSync;
@@ -920,7 +921,7 @@ public class GoalManager
 		GameData data = Objects.equals(profileKey, gameDataProfileKey) ? gameData : GameData.EMPTY;
 		// Räknarna hör till profilen och finns även utan spelläge.
 		GoalEvaluator.Result result = GoalEvaluator.evaluate(tree, new CountedGameData(data, counters),
-			System.currentTimeMillis());
+			System.currentTimeMillis(), TemplateKeys::of);
 		progress = result.getProgress();
 		recordObtainedKc(result.getNewlyCompleted());
 		return result.getNewlyCompleted();

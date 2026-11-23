@@ -29,7 +29,9 @@ public class HandpickedTemplatesTest
 		new TemplateCatalog(new Gson()).getTemplates().forEach(template -> names.add(template.getName()));
 
 		assertEquals(List.of("Quest cape", "Achievement diary cape", "Base N", "Barrows gloves",
-			"Bow of Faerdhinen + crystal armour", "Dragon warhammer", "Doom of Mokhaiotl", "The Hueycoatl"), names);
+			"Bow of Faerdhinen + crystal armour", "Dragon warhammer", "Doom of Mokhaiotl", "The Hueycoatl",
+			"Fire cape", "Infernal cape", "Dragon defender", "Fighter torso", "Ava's assembler", "Graceful outfit",
+			"Rune pouch", "Imbued god cape", "Zenyte jewellery", "Ardougne cloak and fairy rings"), names);
 	}
 
 	@Test

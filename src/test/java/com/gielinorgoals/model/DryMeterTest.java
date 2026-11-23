@@ -60,6 +60,38 @@ public class DryMeterTest
 	}
 
 	@Test
+	public void severalItemsNeedSeveralDrops()
+	{
+		// 4 zenyte shards på 1/300: 600 kc är halva det förväntade (1 200).
+		Goal shards = new Goal("");
+		shards.setRequirement(new ItemRequirement(19529, "Zenyte shard", 4, false));
+		shards.setDropSource(DropSource.npc("Demonic gorilla", 300));
+
+		assertEquals("600 kc · 0.5× rate", DryMeter.rowText(shards, 600));
+		// P(X ≥ 4) för Bin(600, 1/300) ≈ 0.1426, uträknat exakt i Python
+		assertEquals(0.1426, DropSource.chanceAtLeast(600, 300, 4), 0.0001);
+		assertEquals("Chance to have all 4 by now: 14%", DryMeter.chanceText(shards, 600));
+		assertEquals(0.0, DropSource.chanceAtLeast(3, 300, 4), 0.0);
+		assertEquals("Chance to have all 4 by now: >99%", DryMeter.chanceText(shards, 10_000_000));
+	}
+
+	@Test
+	public void itemsPerDropReduceTheDropsNeeded()
+	{
+		// 3 hides per drop: ett mål på 3 hides är en drop, 6 hides två.
+		Goal hides = new Goal("");
+		hides.setRequirement(new ItemRequirement(30085, "Hueycoatl hide", 3, false));
+		hides.setDropSource(DropSource.hiscore(HiscoreSkill.THE_HUEYCOATL, 29).withPerDrop(3));
+		assertEquals("Chance to have all 3 by now: " + DryMeter.formatPercent(DropSource.chanceByNow(29, 29), false),
+			DryMeter.chanceText(hides, 29));
+		assertEquals("29 kc · 1.0× rate", DryMeter.rowText(hides, 29));
+		assertEquals("1/29 from The Hueycoatl, 3 per drop", hides.getDropSource().describe());
+
+		hides.setRequirement(new ItemRequirement(30085, "Hueycoatl hide", 6, false));
+		assertEquals("29 kc · 0.5× rate", DryMeter.rowText(hides, 29));
+	}
+
+	@Test
 	public void hiddenWhenCompletedOrCountUnknown()
 	{
 		Goal goal = itemGoal(DropSource.hiscore(HiscoreSkill.ZULRAH, 5000));

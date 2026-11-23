@@ -1,0 +1,56 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-23):",
+    "https://oldschool.runescape.wiki/w/Fighter_torso - Item ID 10551 (gameval BARBASSAULT_PENANCE_FIGHTER_TORSO).",
+    "'purchased from Commander Connad for 375 honour points in all four roles, and one Penance Queen kill.'",
+    "https://oldschool.runescape.wiki/w/Barbarian_Assault - inga krav för att spela, men tutorialen måste göras en gång.",
+    "Honour points syns inte i spelstatistik eller hiscores, så de är manuella räknare (en per roll), liksom Penance Queen-kills."
+  ],
+  "id": "fighter-torso",
+  "name": "Fighter torso",
+  "description": "Barbarian Assault: 375 honour points in every role and a Penance Queen kill",
+  "category": "Ironman · Early",
+  "tags": ["fighter torso", "torso", "barbarian assault", "ba", "penance", "honour points", "ironman"],
+  "root": {
+    "title": "Fighter torso",
+    "aggregate": true,
+    "wikiPage": "Fighter torso",
+    "icon": {"item": 10551},
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {"sideIcon": "QUEST"},
+        "children": [
+          {"title": "Do the Barbarian Assault tutorial", "wikiPage": "Barbarian Assault", "icon": {"sideIcon": "MINIGAMES"},
+            "doneWhen": ["kc:manual:ba attacker points:375", "kc:manual:ba collector points:375", "kc:manual:ba defender points:375", "kc:manual:ba healer points:375", "kc:manual:penance queen kills:1", "item:10551"],
+            "note": "No requirements to play, but the tutorial must be completed once to enter."}
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {"sideIcon": "INVENTORY"},
+        "children": [
+          {"killCount": {"manual": "BA attacker points", "count": 375},
+            "doneWhen": ["item:10551"],
+            "note": "Honour points for the attacker role. Check them with Commander Connad or on the blackboard."},
+          {"killCount": {"manual": "BA collector points", "count": 375},
+            "doneWhen": ["item:10551"],
+            "note": "Honour points for the collector role."},
+          {"killCount": {"manual": "BA defender points", "count": 375},
+            "doneWhen": ["item:10551"],
+            "note": "Honour points for the defender role."},
+          {"killCount": {"manual": "BA healer points", "count": 375},
+            "doneWhen": ["item:10551"],
+            "note": "Honour points for the healer role."},
+          {"killCount": {"manual": "Penance Queen kills", "count": 1},
+            "doneWhen": ["item:10551"],
+            "note": "Killed at the end of wave 10."},
+          {"item": {"id": 10551, "name": "Fighter torso", "includeVariants": true},
+            "note": "Bought from Commander Connad for 375 honour points in each role."}
+        ]
+      }
+    ]
+  }
+}
