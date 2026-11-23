@@ -141,7 +141,7 @@ final class LinkGoalDialog
 		JScrollPane scroll = new JScrollPane(list);
 		scroll.setPreferredSize(new Dimension(300, 240));
 		JPanel content = new JPanel(new BorderLayout(0, 6));
-		content.add(new JLabel("<html>Also show \"" + escapeHtml(goal.getDisplayTitle())
+		content.add(new JLabel("<html>Also show \"" + UiText.escapeHtml(goal.getDisplayTitle())
 			+ "\" under which goal?</html>"), BorderLayout.NORTH);
 		JPanel center = new JPanel(new BorderLayout(0, 4));
 		center.add(filter, BorderLayout.NORTH);
@@ -201,13 +201,5 @@ final class LinkGoalDialog
 				model.addElement(option);
 			}
 		}
-	}
-
-	private static String escapeHtml(String text)
-	{
-		return text.replace("&", "&amp;")
-			.replace("<", "&lt;")
-			.replace(">", "&gt;")
-			.replace("\"", "&quot;");
 	}
 }

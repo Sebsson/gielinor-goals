@@ -644,8 +644,7 @@ final class GoalEditDialog
 		if (counter != null)
 		{
 			kcCurrentField.setText(String.valueOf(counter.getValue()));
-			kcCurrentHint.setText("From " + counter.getSource().getLabel() + ", "
-				+ GielinorGoalsPanel.formatAge(System.currentTimeMillis() - counter.getUpdatedAt()) + ".");
+			kcCurrentHint.setText(UiText.counterSource(counter) + ".");
 			return;
 		}
 		kcCurrentField.setText("");

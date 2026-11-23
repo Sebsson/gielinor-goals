@@ -207,7 +207,7 @@ class CompletedTab extends JPanel
 		Goal latest = stats.getLatest();
 		if (latest != null)
 		{
-			text.append(" \u00b7 Latest: ").append(escapeHtml(latest.getDisplayTitle()))
+			text.append(" \u00b7 Latest: ").append(UiText.escapeHtml(latest.getDisplayTitle()))
 				.append(" (").append(CompletedLog.daysAgo(latest.getCompletedAt(), now, zone)).append(")");
 		}
 		if (stats.getAverageMs() != null)
@@ -235,7 +235,7 @@ class CompletedTab extends JPanel
 		JPanel text = new JPanel(new DynamicGridLayout(0, 1, 0, 1));
 		text.setOpaque(false);
 		JLabel name = new JLabel("<html><body style='width:" + TEXT_WIDTH + "px'>"
-			+ escapeHtml(goal.getDisplayTitle()) + "</body></html>");
+			+ UiText.escapeHtml(goal.getDisplayTitle()) + "</body></html>");
 		name.setFont(FontManager.getRunescapeSmallFont());
 		name.setForeground(Color.WHITE);
 		text.add(name);
@@ -243,7 +243,7 @@ class CompletedTab extends JPanel
 		if (entry.getParents() != null)
 		{
 			text.add(smallLabel("<html><body style='width:" + TEXT_WIDTH + "px'>in "
-				+ escapeHtml(entry.getParents()) + "</body></html>", ColorScheme.MEDIUM_GRAY_COLOR));
+				+ UiText.escapeHtml(entry.getParents()) + "</body></html>", ColorScheme.MEDIUM_GRAY_COLOR));
 		}
 
 		JLabel date = smallLabel(dateText(goal, zone), ColorScheme.LIGHT_GRAY_COLOR);
@@ -350,14 +350,5 @@ class CompletedTab extends JPanel
 		label.setFont(font);
 		label.setForeground(color);
 		return label;
-	}
-
-	// Användarens text får inte tolkas som HTML i JLabel.
-	private static String escapeHtml(String text)
-	{
-		return text.replace("&", "&amp;")
-			.replace("<", "&lt;")
-			.replace(">", "&gt;")
-			.replace("\"", "&quot;");
 	}
 }

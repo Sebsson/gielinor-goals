@@ -574,11 +574,11 @@ final class GoalMapCanvas extends JComponent
 		{
 			return null;
 		}
-		StringBuilder html = new StringBuilder("<html><b>").append(escape(goal.getDisplayTitle())).append("</b>");
+		StringBuilder html = new StringBuilder("<html><b>").append(UiText.escapeHtml(goal.getDisplayTitle())).append("</b>");
 		GoalProgress shown = progress.apply(id);
 		if (shown != null && !goal.isCompleted())
 		{
-			html.append("<br>").append(escape(shown.getLabel()));
+			html.append("<br>").append(UiText.escapeHtml(shown.getLabel()));
 		}
 		if (goal.isCompleted())
 		{
@@ -940,21 +940,10 @@ final class GoalMapCanvas extends JComponent
 		return Math.max(min, Math.min(max, value));
 	}
 
-	private static String escape(String text)
-	{
-		return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
-	}
-
 	// För tester.
 	double getScale()
 	{
 		return scale;
-	}
-
-	@Nullable
-	String getHoverId()
-	{
-		return hoverId;
 	}
 
 	Set<String> getRelated()

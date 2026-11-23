@@ -271,7 +271,7 @@ final class GoalActions
 		if (shared || goal.hasChildren())
 		{
 			StringBuilder message = new StringBuilder("<html>Delete \"")
-				.append(escapeHtml(goal.getDisplayTitle())).append("\" completely?");
+				.append(UiText.escapeHtml(goal.getDisplayTitle())).append("\" completely?");
 			if (shared)
 			{
 				message.append("<br>It is under ").append(parentCount)
@@ -298,14 +298,5 @@ final class GoalActions
 		item.setEnabled(enabled);
 		item.addActionListener(e -> action.run());
 		return item;
-	}
-
-	// Användarens text får inte tolkas som HTML i JLabel.
-	private static String escapeHtml(String text)
-	{
-		return text.replace("&", "&amp;")
-			.replace("<", "&lt;")
-			.replace(">", "&gt;")
-			.replace("\"", "&quot;");
 	}
 }

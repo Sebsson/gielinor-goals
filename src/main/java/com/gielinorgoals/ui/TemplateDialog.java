@@ -174,8 +174,8 @@ final class TemplateDialog
 				}
 				GoalTemplate template = (GoalTemplate) value;
 				// Fast textbredd, så att långa beskrivningar bryts i stället för att kapas.
-				String text = "<html><body style='width:" + LIST_TEXT_WIDTH + "px'><b>" + escapeHtml(template.getName())
-					+ "</b><br><font color='#a0a0a0'>" + escapeHtml(template.getDescription()) + "</font></body></html>";
+				String text = "<html><body style='width:" + LIST_TEXT_WIDTH + "px'><b>" + UiText.escapeHtml(template.getName())
+					+ "</b><br><font color='#a0a0a0'>" + UiText.escapeHtml(template.getDescription()) + "</font></body></html>";
 				JLabel label = (JLabel) super.getListCellRendererComponent(list, text, index, isSelected, cellHasFocus);
 				label.setIcon(templateIcons.getOrDefault(template, NO_ICON));
 				label.setIconTextGap(8);
@@ -434,13 +434,5 @@ final class TemplateDialog
 				status.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 			}
 		}
-	}
-
-	private static String escapeHtml(String text)
-	{
-		return text.replace("&", "&amp;")
-			.replace("<", "&lt;")
-			.replace(">", "&gt;")
-			.replace("\"", "&quot;");
 	}
 }

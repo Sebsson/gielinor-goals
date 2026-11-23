@@ -310,14 +310,15 @@ public class GielinorGoalsPanel extends PluginPanel
 		}
 	}
 
-	/**
-	 * Bygger om hela listan från modellen. Anropas på EDT.
-	 */
 	public void setOpenMap(Runnable openMap)
 	{
 		this.openMap = openMap;
 	}
 
+	/**
+	 * Bygger om listan från modellen, eller uppdaterar bara progressen om inget annat har
+	 * ändrats. Anropas på EDT.
+	 */
 	public void rebuild()
 	{
 		boolean editable = goalManager.isEditable();

@@ -32,7 +32,6 @@ import com.gielinorgoals.model.Goal;
 import com.gielinorgoals.model.GoalEvaluator;
 import com.gielinorgoals.model.GoalProgress;
 import com.gielinorgoals.model.GoalTree;
-import com.gielinorgoals.model.ActivityCounters;
 import com.gielinorgoals.model.KillCountRequirement;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -354,7 +353,7 @@ class GoalRow extends JPanel
 	private JLabel buildTitle(int depth, String tooltip)
 	{
 		int width = Math.max(MIN_TEXT_WIDTH, BASE_TEXT_WIDTH - depth * INDENT_PX);
-		String text = escapeHtml(goal.getDisplayTitle());
+		String text = UiText.escapeHtml(goal.getDisplayTitle());
 		if (hasTemplateUpdate())
 		{
 			text += " <font color='#ff9800'>(update)</font>";
@@ -371,7 +370,7 @@ class GoalRow extends JPanel
 		String dry = DryMeter.rowText(goal, dropKc());
 		if (dry != null)
 		{
-			text += "<br><font color='#a0a0a0'>" + escapeHtml(dry) + "</font>";
+			text += "<br><font color='#a0a0a0'>" + UiText.escapeHtml(dry) + "</font>";
 		}
 
 		if (GoalIcons.hasIcon(goal))
@@ -495,14 +494,8 @@ class GoalRow extends JPanel
 	// T.ex. "From chat, 2 minutes ago" eller att värdet inte är känt än.
 	private String counterSource()
 	{
-		ActivityCounters.Counter counter = goalManager.getCounters()
-			.get(((KillCountRequirement) goal.getRequirement()).counterKey());
-		if (counter == null)
-		{
-			return "Count not known yet";
-		}
-		return "From " + counter.getSource().getLabel() + ", "
-			+ GielinorGoalsPanel.formatAge(System.currentTimeMillis() - counter.getUpdatedAt());
+		return UiText.counterSource(goalManager.getCounters()
+			.get(((KillCountRequirement) goal.getRequirement()).counterKey()));
 	}
 
 	// Räknarens värde för målets drop-källa, -1 om okänt eller om det inte finns någon källa.
@@ -552,7 +545,7 @@ class GoalRow extends JPanel
 	 */
 	private String buildTooltip()
 	{
-		StringBuilder html = new StringBuilder("<html><b>").append(escapeHtml(goal.getDisplayTitle())).append("</b>");
+		StringBuilder html = new StringBuilder("<html><b>").append(UiText.escapeHtml(goal.getDisplayTitle())).append("</b>");
 
 		String numbers = progress != null && goal.getRequirement() != null
 			? goal.getRequirement().describeProgress(progress)
@@ -563,7 +556,7 @@ class GoalRow extends JPanel
 		}
 		if (numbers != null)
 		{
-			html.append("<br>").append(escapeHtml(numbers).replace("\n", "<br>"));
+			html.append("<br>").append(UiText.escapeHtml(numbers).replace("\n", "<br>"));
 		}
 		if (goal.getRequirement() instanceof KillCountRequirement)
 		{
@@ -572,9 +565,9 @@ class GoalRow extends JPanel
 		DropSource drop = DryMeter.sourceOf(goal);
 		if (drop != null && !goal.isCompleted())
 		{
-			html.append("<br>Drop rate ").append(escapeHtml(drop.describe()));
+			html.append("<br>Drop rate ").append(UiText.escapeHtml(drop.describe()));
 			String chance = DryMeter.chanceText(goal, dropKc());
-			html.append("<br>").append(chance != null ? escapeHtml(chance)
+			html.append("<br>").append(chance != null ? UiText.escapeHtml(chance)
 				: "<i>Kill count not known yet</i>");
 		}
 		if (hasTemplateUpdate())
@@ -583,29 +576,20 @@ class GoalRow extends JPanel
 		}
 		if (parents.size() > 1)
 		{
-			html.append("<br><i>Also under: ").append(escapeHtml(otherParentTitles())).append("</i>");
+			html.append("<br><i>Also under: ").append(UiText.escapeHtml(otherParentTitles())).append("</i>");
 		}
 
 		if (goal.getRequirement() instanceof DiaryRequirement && !goal.hasChildren() && !goal.isCompleted())
 		{
 			html.append("<br><i>Open the ")
-				.append(escapeHtml(((DiaryRequirement) goal.getRequirement()).getArea().getDisplayName()))
+				.append(UiText.escapeHtml(((DiaryRequirement) goal.getRequirement()).getArea().getDisplayName()))
 				.append(" diary journal in game to add its tasks as sub-goals.</i>");
 		}
 		if (goal.getNote() != null)
 		{
-			html.append("<br><br>").append(escapeHtml(goal.getNote()).replace("\n", "<br>"));
+			html.append("<br><br>").append(UiText.escapeHtml(goal.getNote()).replace("\n", "<br>"));
 		}
 		return html.append("</html>").toString();
-	}
-
-	// Användarens text får inte tolkas som HTML i JLabel.
-	private static String escapeHtml(String text)
-	{
-		return text.replace("&", "&amp;")
-			.replace("<", "&lt;")
-			.replace(">", "&gt;")
-			.replace("\"", "&quot;");
 	}
 
 	private int countCompletedChildren()

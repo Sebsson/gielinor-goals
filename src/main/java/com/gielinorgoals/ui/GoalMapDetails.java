@@ -25,7 +25,6 @@
 package com.gielinorgoals.ui;
 
 import com.gielinorgoals.GoalManager;
-import com.gielinorgoals.model.ActivityCounters;
 import com.gielinorgoals.model.CompletedLog;
 import com.gielinorgoals.model.DryMeter;
 import com.gielinorgoals.model.Goal;
@@ -178,11 +177,8 @@ final class GoalMapDetails extends JPanel
 
 		if (goal.getRequirement() instanceof KillCountRequirement)
 		{
-			ActivityCounters.Counter counter = goalManager.getCounters()
-				.get(((KillCountRequirement) goal.getRequirement()).counterKey());
-			line(counter == null ? "Count not known yet"
-				: "From " + counter.getSource().getLabel() + ", "
-				+ GielinorGoalsPanel.formatAge(System.currentTimeMillis() - counter.getUpdatedAt()));
+			line(UiText.counterSource(goalManager.getCounters()
+				.get(((KillCountRequirement) goal.getRequirement()).counterKey())));
 		}
 
 		if (DryMeter.sourceOf(goal) != null)
@@ -296,16 +292,11 @@ final class GoalMapDetails extends JPanel
 	private static JLabel text(String value, java.awt.Font font, Color color)
 	{
 		JLabel label = new JLabel("<html><body style='width:" + TEXT_WIDTH + "px'>"
-			+ escape(value).replace("\n", "<br>") + "</body></html>");
+			+ UiText.escapeHtml(value).replace("\n", "<br>") + "</body></html>");
 		label.setFont(font);
 		label.setForeground(color);
 		label.setAlignmentX(LEFT_ALIGNMENT);
 		return label;
-	}
-
-	private static String escape(String text)
-	{
-		return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
 	}
 
 	// För tester: det som visas just nu.

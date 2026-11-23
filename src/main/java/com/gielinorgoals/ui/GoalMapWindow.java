@@ -619,10 +619,4 @@ public final class GoalMapWindow extends JFrame
 		}
 		return false;
 	}
-
-	// För tester.
-	GoalMapCanvas getCanvas()
-	{
-		return canvas;
-	}
 }
