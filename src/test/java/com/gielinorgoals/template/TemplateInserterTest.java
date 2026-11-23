@@ -95,7 +95,8 @@ public class TemplateInserterTest
 		assertEquals(4, tree.size());
 		Goal mining = result.getCreated().get(2);
 		assertEquals(2, tree.getParents(mining.getId()).size());
-		assertSame(mining, result.getLinked().get(0));
+		// Ett mål från samma insättning räknas inte som ett inkopplat befintligt mål.
+		assertTrue(result.getLinked().isEmpty());
 	}
 
 	@Test

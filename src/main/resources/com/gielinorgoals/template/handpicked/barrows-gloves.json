@@ -1,0 +1,55 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-23):",
+    "Föremål: https://oldschool.runescape.wiki/w/Barrows_gloves - Item ID 7462 (ItemID.HUNDRED_GAUNTLETS_LEVEL_10 i gameval;",
+    "ett test kontrollerar att siffran stämmer). Köps från Culinaromancer's Chest efter hela Recipe for Disaster.",
+    "Krav: https://oldschool.runescape.wiki/w/Recipe_for_Disaster - 'To complete all chapters of the quest':",
+    "175 Quest points; Cooking 70, Agility 48, Mining 50, Fishing 53, Thieving 53, Herblore 25, Magic 59,",
+    "Smithing 40, Firemaking 50, Ranged 40, Crafting 40, Fletching 10, Woodcutting 36.",
+    "Ej boostbara enligt wikin: Agility, Thieving, Ranged. Övriga får boostas, men målen här kräver riktig nivå.",
+    "Delquests i wikins ordning, med namn från RuneLites Quest-enum."
+  ],
+  "name": "Barrows gloves",
+  "description": "Recipe for Disaster with every subquest, 175 quest points and its skill levels",
+  "root": {
+    "title": "Barrows gloves",
+    "item": {"id": 7462, "name": "Barrows gloves", "quantity": 1},
+    "children": [
+      {
+        "quest": "RECIPE_FOR_DISASTER",
+        "children": [
+          {"quest": "RECIPE_FOR_DISASTER__ANOTHER_COOKS_QUEST"},
+          {"quest": "RECIPE_FOR_DISASTER__WARTFACE__BENTNOZE"},
+          {"quest": "RECIPE_FOR_DISASTER__MOUNTAIN_DWARF"},
+          {"quest": "RECIPE_FOR_DISASTER__EVIL_DAVE"},
+          {"quest": "RECIPE_FOR_DISASTER__LUMBRIDGE_GUIDE"},
+          {"quest": "RECIPE_FOR_DISASTER__PIRATE_PETE"},
+          {"quest": "RECIPE_FOR_DISASTER__SKRACH_UGLOGWEE"},
+          {"quest": "RECIPE_FOR_DISASTER__SIR_AMIK_VARZE"},
+          {"quest": "RECIPE_FOR_DISASTER__KING_AWOWOGEI"},
+          {"quest": "RECIPE_FOR_DISASTER__CULINAROMANCER"}
+        ]
+      },
+      {"questPoints": 175},
+      {
+        "title": "Skills for Recipe for Disaster",
+        "aggregate": true,
+        "children": [
+          {"skill": "COOKING", "level": 70},
+          {"skill": "AGILITY", "level": 48},
+          {"skill": "MINING", "level": 50},
+          {"skill": "FISHING", "level": 53},
+          {"skill": "THIEVING", "level": 53},
+          {"skill": "HERBLORE", "level": 25},
+          {"skill": "MAGIC", "level": 59},
+          {"skill": "SMITHING", "level": 40},
+          {"skill": "FIREMAKING", "level": 50},
+          {"skill": "RANGED", "level": 40},
+          {"skill": "CRAFTING", "level": 40},
+          {"skill": "FLETCHING", "level": 10},
+          {"skill": "WOODCUTTING", "level": 36}
+        ]
+      }
+    ]
+  }
+}

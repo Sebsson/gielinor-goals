@@ -27,6 +27,7 @@ package com.gielinorgoals.template;
 import com.gielinorgoals.model.DiaryArea;
 import com.gielinorgoals.model.DiaryRequirement;
 import com.gielinorgoals.model.DiaryTier;
+import com.gielinorgoals.model.Requirement;
 import java.util.Map;
 
 /**
@@ -45,6 +46,12 @@ public class DiaryCapeTemplate implements GoalTemplate
 	public String getDescription()
 	{
 		return "Every achievement diary, Easy to Elite, grouped by area";
+	}
+
+	@Override
+	public Requirement getIconRequirement()
+	{
+		return new DiaryRequirement(DiaryArea.values()[0], DiaryTier.EASY);
 	}
 
 	@Override

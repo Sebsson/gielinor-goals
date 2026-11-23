@@ -76,7 +76,7 @@ class GoalRow extends JPanel
 	// Bakgrund för målet som visas från Completed-fliken.
 	private static final Color HIGHLIGHT_COLOR = new Color(74, 60, 30);
 	// Liten länkikon för delmål som finns under flera föräldrar; ritas en gång.
-	private static final ImageIcon LINK_ICON = new ImageIcon(drawLinkIcon());
+	static final ImageIcon LINK_ICON = new ImageIcon(drawLinkIcon());
 
 	private final Goal goal;
 	// Föräldern raden visas under och dess förälder; null betyder rotnivå.

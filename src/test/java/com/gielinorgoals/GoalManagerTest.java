@@ -133,6 +133,31 @@ public class GoalManagerTest
 	}
 
 	@Test
+	public void collapseAllCollapsesEveryGoalWithSubGoalsInOneSave()
+	{
+		manager.addGoal(null, "Parent", null, null);
+		Goal parent = manager.getTree().getRoots().get(0);
+		manager.addGoal(parent.getId(), "Child", null, null);
+		Goal child = manager.getTree().getChildren(parent).get(0);
+		manager.addGoal(child.getId(), "Grandchild", null, null);
+		manager.addGoal(null, "Leaf", null, null);
+		Goal leaf = manager.getTree().getRoots().get(1);
+		assertTrue(parent.isExpanded());
+		assertTrue(child.isExpanded());
+		String before = stored.get(PROFILE + ".goals");
+
+		manager.collapseAll();
+
+		assertFalse(parent.isExpanded());
+		assertFalse(child.isExpanded());
+		// Ett mål utan delmål rörs inte; det har ingen fäll-knapp.
+		assertTrue(leaf.isExpanded());
+		assertFalse(before.equals(stored.get(PROFILE + ".goals")));
+		manager.loadProfile(PROFILE);
+		assertFalse(manager.getTree().find(parent.getId()).isExpanded());
+	}
+
+	@Test
 	public void revealExpandsCollapsedAncestors()
 	{
 		manager.addGoal(null, "Parent", null, null);

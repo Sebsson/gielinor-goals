@@ -481,6 +481,26 @@ public class GoalManager
 		apply(tree -> tree.setCompleted(id, completed, System.currentTimeMillis()));
 	}
 
+	/**
+	 * Fäller ihop alla mål som har delmål, i en ändring och en sparning.
+	 */
+	public void collapseAll()
+	{
+		apply(tree ->
+		{
+			boolean changed = false;
+			for (Goal goal : tree.flatten())
+			{
+				if (goal.hasChildren() && goal.isExpanded())
+				{
+					goal.setExpanded(false);
+					changed = true;
+				}
+			}
+			return changed;
+		});
+	}
+
 	public void toggleExpanded(String id)
 	{
 		apply(tree ->

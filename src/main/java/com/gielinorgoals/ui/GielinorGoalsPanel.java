@@ -30,6 +30,9 @@ import com.gielinorgoals.model.Goal;
 import com.gielinorgoals.model.GoalTree;
 import com.gielinorgoals.model.ItemRequirement;
 import com.gielinorgoals.persistence.LoadResult;
+import com.gielinorgoals.template.TemplateCatalog;
+import com.gielinorgoals.template.TemplateInserter;
+import com.gielinorgoals.template.TemplateNode;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.util.List;
@@ -69,9 +72,12 @@ public class GielinorGoalsPanel extends PluginPanel
 
 	private final JTextField newGoalField = new JTextField();
 	private final JButton addButton = new JButton("Add goal...");
+	private final JButton templateButton = new JButton("Add from template...");
+	private final TemplateCatalog templateCatalog;
 	private final JLabel summaryLabel = new JLabel();
 	private final ProgressBar summaryBar = new ProgressBar();
 	private final JCheckBox hideCompletedBox = new JCheckBox("Hide completed");
+	private final JButton collapseAllButton = new JButton("Collapse all");
 	private final JLabel statusLabel = new JLabel();
 	private final JLabel bankLabel = new JLabel();
 	private final JPanel listPanel = new JPanel(new DynamicGridLayout(0, 1, 0, 2));
@@ -87,9 +93,10 @@ public class GielinorGoalsPanel extends PluginPanel
 
 	@Inject
 	GielinorGoalsPanel(GoalManager goalManager, GielinorGoalsConfig config, ConfigManager configManager,
-		DialogServices services)
+		DialogServices services, TemplateCatalog templateCatalog)
 	{
 		super(false);
+		this.templateCatalog = templateCatalog;
 		this.goalManager = goalManager;
 		this.config = config;
 		this.configManager = configManager;
@@ -144,6 +151,9 @@ public class GielinorGoalsPanel extends PluginPanel
 		addButton.setFocusPainted(false);
 		addButton.setToolTipText("Add a skill, item, quest, diary or combat achievement goal");
 		addButton.addActionListener(e -> openNewGoalDialog());
+		templateButton.setFocusPainted(false);
+		templateButton.setToolTipText("Quest cape, diary cape, base levels, Barrows gloves and more");
+		templateButton.addActionListener(e -> openTemplateDialog());
 
 		summaryLabel.setFont(FontManager.getRunescapeSmallFont());
 		summaryLabel.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
@@ -181,8 +191,18 @@ public class GielinorGoalsPanel extends PluginPanel
 		JPanel controls = new JPanel(new DynamicGridLayout(0, 1, 0, 5));
 		controls.setOpaque(false);
 		controls.add(addButton);
+		controls.add(templateButton);
 		controls.add(newGoalField);
-		controls.add(hideCompletedBox);
+
+		// "Collapse all" på samma rad som "Hide completed", så att den inte tar egen plats.
+		collapseAllButton.setFocusPainted(false);
+		collapseAllButton.setToolTipText("Collapse every goal with sub-goals");
+		collapseAllButton.addActionListener(e -> goalManager.collapseAll());
+		JPanel viewRow = new JPanel(new BorderLayout(6, 0));
+		viewRow.setOpaque(false);
+		viewRow.add(hideCompletedBox, BorderLayout.CENTER);
+		viewRow.add(collapseAllButton, BorderLayout.EAST);
+		controls.add(viewRow);
 		controls.add(statusLabel);
 		controls.add(bankLabel);
 		return controls;
@@ -246,6 +266,22 @@ public class GielinorGoalsPanel extends PluginPanel
 		}
 	}
 
+	private void openTemplateDialog()
+	{
+		TemplateNode template = TemplateDialog.show(this, templateCatalog.getTemplates(), goalManager.getTree(),
+			services.currentGameData(), services.getIcons());
+		if (template == null)
+		{
+			return;
+		}
+		TemplateInserter.Result result = goalManager.insertTemplate(template);
+		if (result != null)
+		{
+			// Den nya roten markeras och scrollas fram i trädet.
+			showInTree(result.getRoot().getId());
+		}
+	}
+
 	/**
 	 * Bygger om hela listan från modellen. Anropas på EDT.
 	 */
@@ -254,6 +290,8 @@ public class GielinorGoalsPanel extends PluginPanel
 		boolean editable = goalManager.isEditable();
 		newGoalField.setEnabled(editable);
 		addButton.setEnabled(editable);
+		templateButton.setEnabled(editable);
+		collapseAllButton.setEnabled(editable);
 		hideCompletedBox.setSelected(config.hideCompleted());
 
 		listPanel.removeAll();

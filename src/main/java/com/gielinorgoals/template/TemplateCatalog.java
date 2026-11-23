@@ -25,6 +25,8 @@
 package com.gielinorgoals.template;
 
 import com.google.gson.Gson;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -40,10 +42,13 @@ public class TemplateCatalog
 	@Inject
 	public TemplateCatalog(Gson gson)
 	{
-		templates = List.of(
-			new QuestCapeTemplate(QuestCapeExclusions.load(gson)),
-			new DiaryCapeTemplate(),
-			new BaseLevelTemplate());
+		List<GoalTemplate> all = new ArrayList<>();
+		all.add(new QuestCapeTemplate(QuestCapeExclusions.load(gson)));
+		all.add(new DiaryCapeTemplate());
+		all.add(new BaseLevelTemplate());
+		// Handplockade templates från JSON-filer i resources.
+		all.addAll(JsonTemplates.load(gson));
+		templates = Collections.unmodifiableList(all);
 	}
 
 	public List<GoalTemplate> getTemplates()

@@ -24,7 +24,9 @@
  */
 package com.gielinorgoals.template;
 
+import com.gielinorgoals.model.Requirement;
 import com.gielinorgoals.model.SkillRequirement;
+import com.gielinorgoals.model.TotalLevelRequirement;
 import java.util.List;
 import java.util.Map;
 import net.runelite.api.Experience;
@@ -48,6 +50,13 @@ public class BaseLevelTemplate implements GoalTemplate
 	public String getDescription()
 	{
 		return "The same level in every skill, e.g. base 70";
+	}
+
+	@Override
+	public Requirement getIconRequirement()
+	{
+		// Stats-ikonen, samma som för total level.
+		return new TotalLevelRequirement(TotalLevelRequirement.MIN);
 	}
 
 	@Override

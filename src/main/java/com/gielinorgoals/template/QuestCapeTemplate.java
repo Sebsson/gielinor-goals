@@ -25,6 +25,7 @@
 package com.gielinorgoals.template;
 
 import com.gielinorgoals.model.QuestRequirement;
+import com.gielinorgoals.model.Requirement;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -54,6 +55,12 @@ public class QuestCapeTemplate implements GoalTemplate
 	public String getDescription()
 	{
 		return "Every quest needed for the quest point cape (no miniquests)";
+	}
+
+	@Override
+	public Requirement getIconRequirement()
+	{
+		return new QuestRequirement(Quest.COOKS_ASSISTANT.getId(), Quest.COOKS_ASSISTANT.getName());
 	}
 
 	@Override

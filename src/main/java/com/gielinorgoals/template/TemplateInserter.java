@@ -101,6 +101,13 @@ public final class TemplateInserter
 			}
 		}
 
+		// Bara mål som fanns före insättningen räknas som inkopplade befintliga mål.
+		java.util.Set<String> before = new java.util.HashSet<>();
+		for (Goal goal : withRequirement)
+		{
+			before.add(goal.getId());
+		}
+
 		Goal root = create(template);
 		tree.add(null, root);
 		Result result = new Result(root);
@@ -109,7 +116,7 @@ public final class TemplateInserter
 		{
 			withRequirement.add(root);
 		}
-		insertChildren(tree, template, root, withRequirement, result);
+		insertChildren(tree, template, root, withRequirement, before, result);
 
 		// tree.add fäller ut föräldern; räknarmål ska vara ihopfällda som standard.
 		for (Goal goal : result.created)
@@ -123,7 +130,7 @@ public final class TemplateInserter
 	}
 
 	private static void insertChildren(GoalTree tree, TemplateNode node, Goal parent, List<Goal> withRequirement,
-		Result result)
+		java.util.Set<String> before, Result result)
 	{
 		for (TemplateNode child : node.getChildren())
 		{
@@ -136,7 +143,9 @@ public final class TemplateInserter
 			if (existing != null)
 			{
 				// Kopplingen kan redan finnas om templaten har samma krav två gånger.
-				if (tree.link(parent.getId(), existing.getId()))
+				// Ett mål som skapades tidigare i samma insättning kopplas in men räknas inte
+				// som ett befintligt mål.
+				if (tree.link(parent.getId(), existing.getId()) && before.contains(existing.getId()))
 				{
 					result.linked.add(existing);
 				}
@@ -150,7 +159,7 @@ public final class TemplateInserter
 			{
 				withRequirement.add(goal);
 			}
-			insertChildren(tree, child, goal, withRequirement, result);
+			insertChildren(tree, child, goal, withRequirement, before, result);
 		}
 	}
 

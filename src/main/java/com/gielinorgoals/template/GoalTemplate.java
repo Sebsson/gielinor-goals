@@ -24,9 +24,11 @@
  */
 package com.gielinorgoals.template;
 
+import com.gielinorgoals.model.Requirement;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nullable;
 
 /**
  * En färdig mall som bygger ett förslag på mål. Rotnoden blir ett nytt rotmål när
@@ -37,6 +39,15 @@ public interface GoalTemplate
 	String getName();
 
 	String getDescription();
+
+	/**
+	 * Ett krav vars ikon representerar templaten i listan, eller null för ingen ikon.
+	 */
+	@Nullable
+	default Requirement getIconRequirement()
+	{
+		return null;
+	}
 
 	default List<TemplateParameter> getParameters()
 	{

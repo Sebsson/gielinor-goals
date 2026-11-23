@@ -1,0 +1,6 @@
+{
+  "_comment": "Handplockade templates i den här katalogen. En ny template läggs till genom att lägga en JSON-fil här och skriva filnamnet i listan. Filerna läses via klassladdarens resurser, så en katalog kan inte listas och därför behövs den här listan.",
+  "templates": [
+    "barrows-gloves.json"
+  ]
+}
