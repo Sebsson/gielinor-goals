@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 3,
+  "goals": [
+    {"id": "gloves", "title": "Barrows gloves", "completed": false, "expanded": true,
+      "requirement": {"type": "ITEM", "itemId": 7462, "itemName": "Barrows gloves", "quantity": 1, "includeVariants": false},
+      "children": [
+        {"id": "cooking", "title": "", "completed": true, "completedAt": 1710000000000, "expanded": true, "children": [],
+          "requirement": {"type": "SKILL", "skill": "COOKING", "mode": "LEVEL", "target": 70}},
+        {"id": "manual", "title": "Buy a pie dish", "note": "From the Culinaromancer", "completed": false, "expanded": true, "children": []}
+      ]}
+  ]
+}

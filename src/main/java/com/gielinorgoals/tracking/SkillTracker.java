@@ -27,6 +27,8 @@ package com.gielinorgoals.tracking;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.function.Supplier;
+import java.util.function.ToIntFunction;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -42,7 +44,9 @@ import net.runelite.api.Skill;
 @Singleton
 public class SkillTracker
 {
-	private final Client client;
+	// Klientens läge och XP; utbytbart i tester.
+	private final Supplier<GameState> gameState;
+	private final ToIntFunction<Skill> experience;
 	private final Map<Skill, Long> xp = new EnumMap<>(Skill.class);
 	private boolean dirty;
 	private boolean needFullRead;
@@ -50,7 +54,13 @@ public class SkillTracker
 	@Inject
 	SkillTracker(Client client)
 	{
-		this.client = client;
+		this(client::getGameState, client::getSkillExperience);
+	}
+
+	SkillTracker(Supplier<GameState> gameState, ToIntFunction<Skill> experience)
+	{
+		this.gameState = gameState;
+		this.experience = experience;
 	}
 
 	public void reset(boolean loggedIn)
@@ -86,13 +96,13 @@ public class SkillTracker
 	@Nullable
 	public Map<Skill, Long> onGameTick()
 	{
-		if (needFullRead && client.getGameState() == GameState.LOGGED_IN)
+		if (needFullRead && gameState.get() == GameState.LOGGED_IN)
 		{
 			for (Skill skill : Skill.values())
 			{
 				if (isTrackable(skill))
 				{
-					xp.put(skill, (long) client.getSkillExperience(skill));
+					xp.put(skill, (long) experience.applyAsInt(skill));
 				}
 			}
 			needFullRead = false;

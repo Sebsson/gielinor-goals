@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "goals": [
+    {"id": "cape", "title": "Quest cape", "note": "All the quests", "completed": false, "expanded": true, "children": [
+      {"id": "rfd", "title": "Recipe for Disaster", "completed": true, "completedAt": 1700000000000, "expanded": false, "children": [
+        {"id": "cook", "title": "Cook's Assistant", "completed": true, "completedAt": 1690000000000, "expanded": true, "children": []}
+      ]}
+    ]},
+    {"id": "fish", "title": "Catch a shark", "completed": false, "expanded": true, "children": []}
+  ]
+}

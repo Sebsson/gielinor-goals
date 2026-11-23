@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 6,
+  "goals": [
+    {"id": "base", "title": "Base 70", "completed": false, "expanded": false, "createdAt": 1720000000000, "children": [
+      {"id": "attack", "title": "", "completed": true, "completedAt": 1721000000000, "completedAtApprox": true,
+        "createdAt": 1720000000000, "expanded": true, "children": [],
+        "requirement": {"type": "SKILL", "skill": "ATTACK", "mode": "LEVEL", "target": 70}},
+      {"id": "mining", "title": "", "completed": false, "createdAt": 1720000000000, "expanded": true, "children": [],
+        "requirement": {"type": "SKILL", "skill": "MINING", "mode": "XP_GAIN", "target": 100000, "startXp": 500000}}
+    ]}
+  ]
+}

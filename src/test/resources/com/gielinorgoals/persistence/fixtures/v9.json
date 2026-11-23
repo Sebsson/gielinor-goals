@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 9,
+  "rootIds": ["gloves", "cape"],
+  "goals": [
+    {"id": "gloves", "title": "Barrows gloves", "aggregate": true, "expanded": false, "createdAt": 1730000000000,
+      "childIds": ["rfd", "zulrah"]},
+    {"id": "cape", "title": "Quest cape", "aggregate": true, "createdAt": 1730000000000, "childIds": ["rfd"]},
+    {"id": "rfd", "title": "", "completed": true, "completedAt": 1731000000000, "createdAt": 1730000000000, "childIds": [],
+      "requirement": {"type": "QUEST", "questId": 117, "questName": "Recipe for Disaster"}},
+    {"id": "zulrah", "title": "", "createdAt": 1730000000000, "childIds": [],
+      "requirement": {"type": "KILL_COUNT", "activityType": "HISCORE", "activityId": "ZULRAH", "activityName": "Zulrah", "target": 500}}
+  ],
+  "counters": {
+    "hiscore:ZULRAH": {"value": 321, "source": "CHAT", "updatedAt": 1732000000000},
+    "npc:lizardman shaman": {"value": 45, "source": "LOOT", "updatedAt": 1732000000000}
+  }
+}

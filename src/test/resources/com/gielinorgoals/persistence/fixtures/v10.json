@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 10,
+  "rootIds": ["cape"],
+  "goals": [
+    {"id": "cape", "title": "Quest cape", "aggregate": true, "templateId": "quest-cape",
+      "templateParams": {"questChains": 1}, "templateIgnoredKeys": ["quest:17"], "templateNodeKey": "group:quest cape",
+      "wikiPage": "Quest point cape", "childIds": ["cook"]},
+    {"id": "cook", "title": "", "completed": true, "completedAt": 1740000000000, "templateNodeKey": "quest:17", "childIds": [],
+      "requirement": {"type": "QUEST", "questId": 17, "questName": "Cook's Assistant"}}
+  ]
+}
