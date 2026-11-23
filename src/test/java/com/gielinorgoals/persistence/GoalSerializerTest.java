@@ -1,5 +1,8 @@
 package com.gielinorgoals.persistence;
 
+import net.runelite.client.hiscore.HiscoreSkill;
+import com.gielinorgoals.model.KillCountRequirement;
+import com.gielinorgoals.model.ActivityCounters;
 import com.gielinorgoals.model.TotalLevelRequirement;
 import com.gielinorgoals.model.QuestPointsRequirement;
 import com.gielinorgoals.model.CombatLevelRequirement;
@@ -406,7 +409,7 @@ public class GoalSerializerTest
 	@Test
 	public void accountLevelRequirementsAreReadFromJson()
 	{
-		String json = "{\"schemaVersion\":8,\"rootIds\":[\"a\",\"b\",\"c\",\"d\"],\"goals\":["
+		String json = "{\"schemaVersion\":" + SchemaMigrator.CURRENT_VERSION + ",\"rootIds\":[\"a\",\"b\",\"c\",\"d\"],\"goals\":["
 			+ "{\"id\":\"a\",\"title\":\"\",\"requirement\":{\"type\":\"TOTAL_LEVEL\",\"target\":2000}},"
 			+ "{\"id\":\"b\",\"title\":\"\",\"requirement\":{\"type\":\"COMBAT_LEVEL\",\"target\":126}},"
 			+ "{\"id\":\"c\",\"title\":\"\",\"requirement\":{\"type\":\"QUEST_POINTS\",\"target\":1}},"
@@ -450,6 +453,58 @@ public class GoalSerializerTest
 		assertEquals(new QuestRequirement(159, "Recipe for Disaster"), rfd.getRequirement());
 
 		JsonObject saved = new Gson().fromJson(serializer.serialize(result.getTree()), JsonObject.class);
-		assertEquals(8, saved.get("schemaVersion").getAsInt());
+		assertEquals(SchemaMigrator.CURRENT_VERSION, saved.get("schemaVersion").getAsInt());
+	}
+
+	@Test
+	public void countersAndKillCountGoalsRoundTrip()
+	{
+		Goal goal = new Goal("");
+		goal.setRequirement(KillCountRequirement.hiscore(HiscoreSkill.ZULRAH, 150));
+		ActivityCounters counters = new ActivityCounters();
+		counters.applyChat("hiscore:ZULRAH", 120, 1_763_000_000_000L);
+		counters.setManual("manual:birdhouse runs", 4, 1_763_000_000_001L);
+
+		String json = serializer.serialize(treeOf(goal), counters);
+		LoadResult loaded = serializer.deserialize(json);
+
+		assertTrue(json.contains("\"type\":\"KILL_COUNT\""));
+		assertEquals(KillCountRequirement.hiscore(HiscoreSkill.ZULRAH, 150), loaded.getGoals().get(0).getRequirement());
+		ActivityCounters.Counter zulrah = loaded.getCounters().get("hiscore:ZULRAH");
+		assertEquals(120, zulrah.getValue());
+		assertEquals(ActivityCounters.Source.CHAT, zulrah.getSource());
+		assertEquals(1_763_000_000_000L, zulrah.getUpdatedAt());
+		assertEquals(4, loaded.getCounters().value("manual:birdhouse runs"));
+	}
+
+	@Test
+	public void version8LoadsIntoVersion9WithEmptyCounters()
+	{
+		String json = "{\"schemaVersion\":8,\"rootIds\":[\"a\"],\"goals\":["
+			+ "{\"id\":\"a\",\"title\":\"\",\"completed\":true,\"completedAt\":1763000000000,\"childIds\":[],"
+			+ "\"requirement\":{\"type\":\"QUEST_POINTS\",\"target\":150}}]}";
+
+		LoadResult result = serializer.deserialize(json);
+
+		assertEquals(LoadResult.Status.OK, result.getStatus());
+		assertTrue(result.isMigrated());
+		assertEquals(new QuestPointsRequirement(150), result.getTree().find("a").getRequirement());
+		assertTrue(result.getTree().find("a").isCompleted());
+		assertTrue(result.getCounters().asMap().isEmpty());
+		JsonObject saved = new Gson().fromJson(serializer.serialize(result.getTree(), result.getCounters()),
+			JsonObject.class);
+		assertEquals(9, saved.get("schemaVersion").getAsInt());
+		// Utan räknare skrivs ingen tom sektion.
+		assertFalse(saved.has("counters"));
+	}
+
+	@Test
+	public void killCountWithUnknownBossBecomesManualGoal()
+	{
+		String json = "{\"schemaVersion\":9,\"rootIds\":[\"a\"],\"goals\":[{\"id\":\"a\",\"title\":\"Old boss\","
+			+ "\"childIds\":[],\"requirement\":{\"type\":\"KILL_COUNT\",\"activityType\":\"HISCORE\","
+			+ "\"activityId\":\"NOT_A_BOSS\",\"activityName\":\"Gone\",\"target\":5}}]}";
+
+		assertNull(serializer.deserialize(json).getTree().find("a").getRequirement());
 	}
 }

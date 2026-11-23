@@ -24,6 +24,8 @@
  */
 package com.gielinorgoals;
 
+import com.gielinorgoals.model.ActivityCounters;
+import com.gielinorgoals.model.CountedGameData;
 import com.gielinorgoals.model.DiaryJournal;
 import com.gielinorgoals.model.DiaryRequirement;
 import com.gielinorgoals.model.GameData;
@@ -31,6 +33,7 @@ import com.gielinorgoals.model.Goal;
 import com.gielinorgoals.model.GoalEvaluator;
 import com.gielinorgoals.model.GoalProgress;
 import com.gielinorgoals.model.GoalTree;
+import com.gielinorgoals.model.KillCountRequirement;
 import com.gielinorgoals.model.Requirement;
 import com.gielinorgoals.persistence.GoalSerializer;
 import com.gielinorgoals.persistence.LoadResult;
@@ -41,9 +44,11 @@ import com.gielinorgoals.tracking.InitialSync;
 import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
@@ -95,6 +100,9 @@ public class GoalManager
 	private String profileKey;
 	@Getter
 	private GoalTree tree = new GoalTree();
+	// Nuvarande värden per aktivitet för den laddade profilen; sparas tillsammans med målen.
+	@Getter
+	private ActivityCounters counters = new ActivityCounters();
 	@Getter
 	private LoadResult.Status loadStatus = LoadResult.Status.OK;
 
@@ -220,6 +228,7 @@ public class GoalManager
 		LoadResult result = serializer.deserialize(json);
 		loadStatus = result.getStatus();
 		tree = result.getTree();
+		counters = result.getCounters();
 
 		if (result.getStatus() == LoadResult.Status.CORRUPT)
 		{
@@ -245,6 +254,7 @@ public class GoalManager
 
 	public void unload()
 	{
+		counters = new ActivityCounters();
 		profileKey = null;
 		tree = new GoalTree();
 		loadStatus = LoadResult.Status.OK;
@@ -270,6 +280,108 @@ public class GoalManager
 				markApprox(completed);
 			}
 			save();
+			completionListener.accept(completed);
+		}
+		listener.run();
+	}
+
+	/**
+	 * Spelets eget räknemeddelande i chatten. Värdet är absolut och vinner alltid.
+	 *
+	 * @param dataProfileKey profilen när meddelandet kom; ignoreras om en annan profil är laddad
+	 */
+	public void recordChatCount(@Nullable String dataProfileKey, String counterKey, long value)
+	{
+		changeCounters(dataProfileKey, counters -> counters.applyChat(counterKey, value, System.currentTimeMillis()));
+	}
+
+	/**
+	 * Värden från hiscores. Används bara där inget värde finns eller där hiscores är högre.
+	 */
+	public void recordHiscores(@Nullable String dataProfileKey, Map<String, Long> values)
+	{
+		changeCounters(dataProfileKey, counters ->
+		{
+			long now = System.currentTimeMillis();
+			boolean changed = false;
+			for (Map.Entry<String, Long> entry : values.entrySet())
+			{
+				changed |= counters.applyHiscore(entry.getKey(), entry.getValue(), now);
+			}
+			return changed;
+		});
+	}
+
+	/**
+	 * En NPC dog och gav loot. Räknas bara om något mål följer just den NPC:n.
+	 */
+	public void recordNpcKill(@Nullable String dataProfileKey, @Nullable String npcName)
+	{
+		if (npcName == null)
+		{
+			return;
+		}
+		String key = KillCountRequirement.counterKey(KillCountRequirement.ActivityType.NPC, npcName);
+		if (!watchedCounterKeys().contains(key))
+		{
+			return;
+		}
+		changeCounters(dataProfileKey, counters ->
+		{
+			counters.addLoot(key, System.currentTimeMillis());
+			return true;
+		});
+	}
+
+	/**
+	 * Användaren anger ett värde själv ("Set value...").
+	 */
+	public void setCounter(String counterKey, long value)
+	{
+		changeCounters(profileKey, counters -> counters.setManual(counterKey, value, System.currentTimeMillis()));
+	}
+
+	/**
+	 * +1/−1 från användaren.
+	 */
+	public void adjustCounter(String counterKey, long delta)
+	{
+		changeCounters(profileKey, counters -> counters.adjustManual(counterKey, delta, System.currentTimeMillis()));
+	}
+
+	/**
+	 * Räknarnycklar som något KC-mål följer.
+	 */
+	public Set<String> watchedCounterKeys()
+	{
+		Set<String> keys = new HashSet<>();
+		for (Goal goal : tree.flatten())
+		{
+			if (goal.getRequirement() instanceof KillCountRequirement)
+			{
+				keys.add(((KillCountRequirement) goal.getRequirement()).counterKey());
+			}
+		}
+		return keys;
+	}
+
+	// Ändrar räknarna och kör sedan samma väg som ett nytt spelläge: utvärdering, popup
+	// för mål som klarades (tyst med ungefärligt datum under första synken) och sparning.
+	private void changeCounters(@Nullable String dataProfileKey, Predicate<ActivityCounters> change)
+	{
+		if (!isEditable() || !Objects.equals(profileKey, dataProfileKey) || !change.test(counters))
+		{
+			return;
+		}
+
+		List<Goal> completed = evaluate();
+		if (!completed.isEmpty() && initialSync.isActive())
+		{
+			markApprox(completed);
+		}
+		save();
+		if (!completed.isEmpty())
+		{
 			completionListener.accept(completed);
 		}
 		listener.run();
@@ -638,7 +750,9 @@ public class GoalManager
 		// Utan spelläge för profilen ger kraven ingen progress, men räknarmål räknas ändå,
 		// eftersom de bara beror på delmålen.
 		GameData data = Objects.equals(profileKey, gameDataProfileKey) ? gameData : GameData.EMPTY;
-		GoalEvaluator.Result result = GoalEvaluator.evaluate(tree, data, System.currentTimeMillis());
+		// Räknarna hör till profilen och finns även utan spelläge.
+		GoalEvaluator.Result result = GoalEvaluator.evaluate(tree, new CountedGameData(data, counters),
+			System.currentTimeMillis());
 		progress = result.getProgress();
 		return result.getNewlyCompleted();
 	}
@@ -666,7 +780,7 @@ public class GoalManager
 
 		// ConfigManager håller värdet i minnet och skriver till disk själv i bakgrunden.
 		storage.set(profileKey, GOALS_KEY,
-			serializer.serialize(tree));
+			serializer.serialize(tree, counters));
 		revision++;
 		// En lyckad sparning ersätter korrupt data, så varningen behövs inte längre.
 		loadStatus = LoadResult.Status.OK;

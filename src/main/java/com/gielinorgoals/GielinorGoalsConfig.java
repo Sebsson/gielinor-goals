@@ -39,6 +39,7 @@ public interface GielinorGoalsConfig extends Config
 	String HIDE_COMPLETED_KEY = "hideCompleted";
 	String OVERLAY_GOAL_COUNT_KEY = "overlayGoalCount";
 	String SHOW_TIME_TO_COMPLETE_KEY = "showTimeToComplete";
+	String FETCH_HISCORES_KEY = "fetchHiscores";
 
 	@ConfigItem(
 		keyName = HIDE_COMPLETED_KEY,
@@ -171,6 +172,28 @@ public interface GielinorGoalsConfig extends Config
 		section = completedSection
 	)
 	default boolean showTimeToComplete()
+	{
+		return true;
+	}
+
+	@ConfigSection(
+		name = "Kill count",
+		description = "Kill count, clue and activity goals",
+		position = 30
+	)
+	String killCountSection = "killCount";
+
+	// HiscoreClient går direkt mot Jagex egna hiscores (secure/services.runescape.com),
+	// inte via en tredjepartsserver, så växeln får vara på som standard.
+	@ConfigItem(
+		keyName = FETCH_HISCORES_KEY,
+		name = "Fetch from hiscores",
+		description = "Look up your kill counts, clues and activities on the official OSRS hiscores after login"
+			+ " and when you add a kill count goal",
+		position = 31,
+		section = killCountSection
+	)
+	default boolean fetchHiscores()
 	{
 		return true;
 	}

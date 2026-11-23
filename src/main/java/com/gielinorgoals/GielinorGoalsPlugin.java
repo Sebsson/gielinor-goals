@@ -29,7 +29,10 @@ import com.gielinorgoals.model.Goal;
 import com.gielinorgoals.model.NextGoals;
 import com.gielinorgoals.tracking.AchievementTracker;
 import com.gielinorgoals.tracking.DiaryJournalParser;
+import com.gielinorgoals.model.KillCountRequirement;
 import com.gielinorgoals.tracking.GameSnapshot;
+import com.gielinorgoals.tracking.HiscoreFetcher;
+import com.gielinorgoals.tracking.KillCountMessages;
 import com.gielinorgoals.tracking.InitialSync;
 import com.gielinorgoals.tracking.ItemTracker;
 import com.gielinorgoals.tracking.SkillTracker;
@@ -42,9 +45,11 @@ import com.google.inject.Provides;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import javax.inject.Inject;
 import javax.swing.SwingUtilities;
 import lombok.extern.slf4j.Slf4j;
@@ -52,6 +57,7 @@ import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.Skill;
+import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ItemContainerChanged;
@@ -68,6 +74,7 @@ import net.runelite.client.chat.QueuedMessage;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
+import net.runelite.client.events.NpcLootReceived;
 import net.runelite.client.events.RuneScapeProfileChanged;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -129,6 +136,14 @@ public class GielinorGoalsPlugin extends Plugin
 
 	@Inject
 	private InitialSync initialSync;
+
+	@Inject
+	private HiscoreFetcher hiscoreFetcher;
+
+	// Hiscores hämtas på första tick efter inloggning när spelarens namn finns. Klienttråden.
+	private boolean hiscoreFetchPending;
+	// Hiscore-aktiviteter som har KC-mål; ett nytt mål ger en hämtning av startvärdet. EDT.
+	private Set<String> watchedHiscoreKeys;
 
 	private GielinorGoalsPanel panel;
 	private NavigationButton navigationButton;
@@ -225,6 +240,7 @@ public class GielinorGoalsPlugin extends Plugin
 		{
 			// Första synken efter inloggning (och världsbyte) ska bara bocka av tyst.
 			initialSync.start();
+			hiscoreFetchPending = true;
 		}
 		else if (event.getGameState() == GameState.LOGIN_SCREEN)
 		{
@@ -296,6 +312,57 @@ public class GielinorGoalsPlugin extends Plugin
 			.build());
 	}
 
+	/**
+	 * Spelets räknemeddelanden: kill count, chest count och klarade clues. Absoluta värden.
+	 */
+	@Subscribe
+	public void onChatMessage(ChatMessage event)
+	{
+		if (event.getType() != ChatMessageType.GAMEMESSAGE && event.getType() != ChatMessageType.SPAM)
+		{
+			return;
+		}
+		KillCountMessages.Count count = KillCountMessages.parse(event.getMessage());
+		if (count == null)
+		{
+			return;
+		}
+		String profile = configManager.getRSProfileKey();
+		String key = KillCountRequirement.counterKey(KillCountRequirement.ActivityType.HISCORE, count.getSkill().name());
+		SwingUtilities.invokeLater(() -> goalManager.recordChatCount(profile, key, count.getCount()));
+	}
+
+	/**
+	 * En NPC dog och gav loot; räknar upp NPC-mål med samma namn.
+	 */
+	@Subscribe
+	public void onNpcLootReceived(NpcLootReceived event)
+	{
+		String profile = configManager.getRSProfileKey();
+		String name = event.getNpc().getName();
+		SwingUtilities.invokeLater(() -> goalManager.recordNpcKill(profile, name));
+	}
+
+	// Körs på EDT efter varje ändring i målen. Har ett KC-mål för en hiscore-aktivitet
+	// tillkommit hämtas hiscores, så att målet får ett startvärde.
+	private void requestHiscoresForNewGoals()
+	{
+		Set<String> keys = new HashSet<>();
+		for (String key : goalManager.watchedCounterKeys())
+		{
+			if (key.startsWith("hiscore:"))
+			{
+				keys.add(key);
+			}
+		}
+		boolean added = watchedHiscoreKeys != null && !watchedHiscoreKeys.containsAll(keys);
+		watchedHiscoreKeys = keys;
+		if (added)
+		{
+			clientThread.invokeLater(() -> hiscoreFetcher.request(configManager.getRSProfileKey(), true));
+		}
+	}
+
 	@Subscribe
 	public void onVarbitChanged(VarbitChanged event)
 	{
@@ -314,6 +381,14 @@ public class GielinorGoalsPlugin extends Plugin
 	{
 		// Profilen fångas här på klienttråden, tillsammans med datan den hör till.
 		String profile = configManager.getRSProfileKey();
+
+		// Spelarens namn finns först en bit efter inloggningen; cooldownen sköts av hämtaren.
+		if (hiscoreFetchPending && profile != null && client.getLocalPlayer() != null
+			&& client.getLocalPlayer().getName() != null)
+		{
+			hiscoreFetchPending = false;
+			hiscoreFetcher.request(profile, false);
+		}
 
 		Map<Skill, Long> xp = skillTracker.onGameTick();
 		GameSnapshot.Items items = itemTracker.onGameTick(profile);
@@ -348,6 +423,7 @@ public class GielinorGoalsPlugin extends Plugin
 			panel.rebuild();
 		}
 		achievementTracker.setWatched(WatchedAchievements.from(goalManager.getTree()));
+		requestHiscoresForNewGoals();
 		nextGoalOverlay.setEntries(goalManager.hasProfile()
 			? NextGoals.select(goalManager.getTree(), goalManager::getProgress, config.overlayGoalCount())
 			: Collections.emptyList());

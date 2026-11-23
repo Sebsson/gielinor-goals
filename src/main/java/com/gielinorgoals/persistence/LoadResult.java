@@ -24,6 +24,7 @@
  */
 package com.gielinorgoals.persistence;
 
+import com.gielinorgoals.model.ActivityCounters;
 import com.gielinorgoals.model.Goal;
 import com.gielinorgoals.model.GoalTree;
 import java.util.List;
@@ -48,6 +49,8 @@ public class LoadResult
 	Status status;
 	GoalTree tree;
 	boolean migrated;
+	// Nuvarande värden per aktivitet; tomt för filer utan räknare.
+	ActivityCounters counters;
 
 	/**
 	 * Rotmålen, för enkel åtkomst i tester och kod som bara bryr sig om översta nivån.

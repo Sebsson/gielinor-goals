@@ -81,6 +81,14 @@ public interface GameData
 	}
 
 	/**
+	 * @return nuvarande värde för en aktivitet i räknarlagret, eller -1 om det inte är känt
+	 */
+	default long getActivityCount(String counterKey)
+	{
+		return -1;
+	}
+
+	/**
 	 * @return antal quest points, eller -1 om det inte är läst
 	 */
 	default int getQuestPoints()

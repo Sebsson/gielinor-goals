@@ -24,6 +24,7 @@
  */
 package com.gielinorgoals.persistence;
 
+import com.gielinorgoals.model.ActivityCounters;
 import com.gielinorgoals.model.Goal;
 import com.gielinorgoals.model.GoalTree;
 import com.gielinorgoals.model.Requirement;
@@ -48,6 +49,10 @@ public class GoalSerializer
 {
 	static final String GOALS_FIELD = "goals";
 	static final String ROOT_IDS_FIELD = "rootIds";
+	static final String COUNTERS_FIELD = "counters";
+	private static final Type COUNTERS_TYPE = new TypeToken<java.util.LinkedHashMap<String, ActivityCounters.Counter>>()
+	{
+	}.getType();
 	private static final Type ROOT_IDS_TYPE = new TypeToken<List<String>>()
 	{
 	}.getType();
@@ -69,11 +74,20 @@ public class GoalSerializer
 
 	public String serialize(GoalTree tree)
 	{
+		return serialize(tree, new ActivityCounters());
+	}
+
+	public String serialize(GoalTree tree, ActivityCounters counters)
+	{
 		JsonObject root = new JsonObject();
 		root.addProperty(SchemaMigrator.VERSION_FIELD, SchemaMigrator.CURRENT_VERSION);
 		root.add(ROOT_IDS_FIELD, gson.toJsonTree(tree.getRootIds(), ROOT_IDS_TYPE));
 		// Varje mål en gång, i visningsordning, så att filen är lätt att läsa.
 		root.add(GOALS_FIELD, gson.toJsonTree(tree.flatten(), GOAL_LIST_TYPE));
+		if (!counters.asMap().isEmpty())
+		{
+			root.add(COUNTERS_FIELD, gson.toJsonTree(new java.util.LinkedHashMap<>(counters.asMap()), COUNTERS_TYPE));
+		}
 		return gson.toJson(root);
 	}
 
@@ -81,7 +95,7 @@ public class GoalSerializer
 	{
 		if (json == null || json.trim().isEmpty())
 		{
-			return new LoadResult(LoadResult.Status.OK, new GoalTree(), false);
+			return new LoadResult(LoadResult.Status.OK, new GoalTree(), false, new ActivityCounters());
 		}
 
 		try
@@ -116,8 +130,11 @@ public class GoalSerializer
 			}
 			List<String> rootIds = gson.fromJson(root.get(ROOT_IDS_FIELD), ROOT_IDS_TYPE);
 			sanitize(goals);
+			java.util.LinkedHashMap<String, ActivityCounters.Counter> counters =
+				gson.fromJson(root.get(COUNTERS_FIELD), COUNTERS_TYPE);
 			// load() lagar trasiga kopplingar och gör mål utan förälder till rötter.
-			return new LoadResult(status, GoalTree.load(rootIds, goals), migrated);
+			return new LoadResult(status, GoalTree.load(rootIds, goals), migrated,
+				new ActivityCounters(counters == null ? new java.util.LinkedHashMap<>() : counters));
 		}
 		catch (JsonParseException | IllegalStateException | UnsupportedOperationException | NumberFormatException e)
 		{
@@ -127,7 +144,7 @@ public class GoalSerializer
 
 	private static LoadResult corrupt()
 	{
-		return new LoadResult(LoadResult.Status.CORRUPT, new GoalTree(), false);
+		return new LoadResult(LoadResult.Status.CORRUPT, new GoalTree(), false, new ActivityCounters());
 	}
 
 	// Gson hoppar över konstruktorn, så saknade fält och null-poster rättas till här.
