@@ -60,4 +60,14 @@ public abstract class Requirement
 	{
 		return null;
 	}
+
+	/**
+	 * Om kravet beskriver exakt samma mål som {@code other}. Används för att koppla in
+	 * befintliga mål i stället för att skapa dubbletter. Bara visningsfält (t.ex. ett
+	 * sparat namn) får skilja; liknande krav (Attack 85 och Attack 80) är olika mål.
+	 */
+	public boolean isSameGoal(@Nullable Requirement other)
+	{
+		return equals(other);
+	}
 }

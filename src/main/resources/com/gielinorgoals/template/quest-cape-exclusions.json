@@ -1,0 +1,44 @@
+{
+  "_comment": [
+    "Quests i RuneLites Quest-enum som inte räknas till Quest point cape. API:t kan inte skilja ut dem,",
+    "så de listas här med enum-namn. Källa: OSRS Wiki, hämtad 2026-11-23.",
+    "miniquests: https://oldschool.runescape.wiki/w/Miniquests (\"There are a total of 19 miniquests\").",
+    "Kappan kräver alla quests \"excluding miniquests\": https://oldschool.runescape.wiki/w/Quest_point_cape",
+    "subquests: Recipe for Disasters tio delar. Spelets quest-lista räknar RFD som en quest, och",
+    "RFD blir klar först när alla delar är klara, så delarna räknas inte för sig. Med båda listorna",
+    "ger enumen 191 quests, samma som https://oldschool.runescape.wiki/w/Quests/List."
+  ],
+  "miniquests": [
+    "ALFRED_GRIMHANDS_BARCRAWL",
+    "ENTER_THE_ABYSS",
+    "THE_GENERALS_SHADOW",
+    "BARBARIAN_TRAINING",
+    "SKIPPY_AND_THE_MOGRES",
+    "CURSE_OF_THE_EMPTY_LORD",
+    "LAIR_OF_TARN_RAZORLOR",
+    "BEAR_YOUR_SOUL",
+    "THE_ENCHANTED_KEY",
+    "MAGE_ARENA_I",
+    "FAMILY_PEST",
+    "MAGE_ARENA_II",
+    "IN_SEARCH_OF_KNOWLEDGE",
+    "THE_FROZEN_DOOR",
+    "HOPESPEARS_WILL",
+    "INTO_THE_TOMBS",
+    "HIS_FAITHFUL_SERVANTS",
+    "VALE_TOTEMS",
+    "THE_FRACTURED_ARCHIVE"
+  ],
+  "subquests": [
+    "RECIPE_FOR_DISASTER__ANOTHER_COOKS_QUEST",
+    "RECIPE_FOR_DISASTER__MOUNTAIN_DWARF",
+    "RECIPE_FOR_DISASTER__WARTFACE__BENTNOZE",
+    "RECIPE_FOR_DISASTER__PIRATE_PETE",
+    "RECIPE_FOR_DISASTER__LUMBRIDGE_GUIDE",
+    "RECIPE_FOR_DISASTER__EVIL_DAVE",
+    "RECIPE_FOR_DISASTER__SKRACH_UGLOGWEE",
+    "RECIPE_FOR_DISASTER__SIR_AMIK_VARZE",
+    "RECIPE_FOR_DISASTER__KING_AWOWOGEI",
+    "RECIPE_FOR_DISASTER__CULINAROMANCER"
+  ]
+}

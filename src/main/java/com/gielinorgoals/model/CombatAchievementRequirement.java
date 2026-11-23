@@ -82,4 +82,11 @@ public class CombatAchievementRequirement extends Requirement
 		}
 		return new GoalProgress(complete ? 1 : 0, 1, complete, complete ? "Done" : "Not done");
 	}
+
+	// Namn och tier är bara för visning.
+	@Override
+	public boolean isSameGoal(@Nullable Requirement other)
+	{
+		return other instanceof CombatAchievementRequirement && ((CombatAchievementRequirement) other).taskId == taskId;
+	}
 }

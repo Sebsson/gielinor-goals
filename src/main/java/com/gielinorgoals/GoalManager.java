@@ -35,6 +35,8 @@ import com.gielinorgoals.model.Requirement;
 import com.gielinorgoals.persistence.GoalSerializer;
 import com.gielinorgoals.persistence.LoadResult;
 import com.gielinorgoals.persistence.SchemaMigrator;
+import com.gielinorgoals.template.TemplateInserter;
+import com.gielinorgoals.template.TemplateNode;
 import com.gielinorgoals.tracking.InitialSync;
 import com.google.gson.Gson;
 import java.util.ArrayList;
@@ -491,6 +493,30 @@ public class GoalManager
 			goal.setExpanded(!goal.isExpanded());
 			return true;
 		});
+	}
+
+	/**
+	 * Sätter in ett template-förslag som ett nytt rotmål, med befintliga mål med samma
+	 * krav inkopplade i stället för dubbletter. Allt sker i en operation: en utvärdering,
+	 * en sparning och en ombyggnad av panelen. Mål som redan är uppfyllda bockas av tyst
+	 * med ungefärligt datum, som när ett redan uppfyllt mål läggs till, och ger ingen popup.
+	 *
+	 * @return vad som skapades och kopplades in, eller null om målen inte går att ändra
+	 */
+	@Nullable
+	public TemplateInserter.Result insertTemplate(TemplateNode template)
+	{
+		if (!isEditable())
+		{
+			return null;
+		}
+
+		TemplateInserter.Result result = TemplateInserter.insert(tree, template);
+		// Ingen completionListener här: inga popups eller chattmeddelanden för en insättning.
+		markApprox(evaluate());
+		save();
+		listener.run();
+		return result;
 	}
 
 	/**

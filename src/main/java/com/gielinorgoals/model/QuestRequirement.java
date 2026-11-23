@@ -90,4 +90,11 @@ public class QuestRequirement extends Requirement
 				return new GoalProgress(0, 2, false, "Not started");
 		}
 	}
+
+	// Namnet är bara för visning och kan skilja om RuneLite byter namn på questen.
+	@Override
+	public boolean isSameGoal(@Nullable Requirement other)
+	{
+		return other instanceof QuestRequirement && ((QuestRequirement) other).questId == questId;
+	}
 }

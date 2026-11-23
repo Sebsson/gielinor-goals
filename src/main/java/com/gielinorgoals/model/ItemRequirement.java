@@ -132,4 +132,16 @@ public class ItemRequirement extends Requirement
 			+ QuantityFormatter.formatNumber(progress.getTarget())
 			+ (progress.isComplete() ? "" : "\n" + QuantityFormatter.formatNumber(left) + " left");
 	}
+
+	// Föremålets namn är bara för visning.
+	@Override
+	public boolean isSameGoal(@Nullable Requirement other)
+	{
+		if (!(other instanceof ItemRequirement))
+		{
+			return false;
+		}
+		ItemRequirement item = (ItemRequirement) other;
+		return item.itemId == itemId && item.quantity == quantity && item.includeVariants == includeVariants;
+	}
 }
