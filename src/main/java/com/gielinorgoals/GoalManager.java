@@ -619,8 +619,35 @@ public class GoalManager
 		apply(tree -> tree.remove(id));
 	}
 
+	/**
+	 * Om målet är klart för att ett mål det nämner i {@code doneWhen} är klart. Ett sådant
+	 * mål går inte att avmarkera: utvärderingen skulle bocka av det igen direkt, och då med
+	 * dagens datum som ungefärligt i stället för det riktiga.
+	 */
+	public boolean isDoneByOtherGoal(Goal goal)
+	{
+		if (!goal.isCompleted() || goal.getDoneWhen() == null || goal.getDoneWhen().isEmpty())
+		{
+			return false;
+		}
+		Set<String> keys = new HashSet<>(goal.getDoneWhen());
+		for (Goal other : tree.flatten())
+		{
+			if (other != goal && other.isCompleted() && keys.contains(TemplateKeys.of(other)))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public void setCompleted(String id, boolean completed)
 	{
+		Goal target = tree.find(id);
+		if (!completed && target != null && isDoneByOtherGoal(target))
+		{
+			return;
+		}
 		apply(tree ->
 		{
 			if (!tree.setCompleted(id, completed, System.currentTimeMillis()))
@@ -886,12 +913,21 @@ public class GoalManager
 			// Ett mål med krav som blir klart direkt av ändringen var redan uppfyllt när det
 			// lades till, så datumet är ungefärligt. Ett räknarmål som blir klart för att
 			// användaren bockade av sista delmålet klarades däremot just nu, och får popup.
+			// Ett mål som blir klart via doneWhen när användaren bockar av det senare målet
+			// klarades också just nu, men utan popup så att en hel kedja inte ger en flod.
 			List<Goal> completed = evaluate();
 			List<Goal> counters = new ArrayList<>();
 			List<Goal> others = new ArrayList<>();
 			for (Goal goal : completed)
 			{
-				(goal.isAggregate() && goal.getRequirement() == null ? counters : others).add(goal);
+				if (goal.isAggregate() && goal.getRequirement() == null)
+				{
+					counters.add(goal);
+				}
+				else if (!isDoneByOtherGoal(goal))
+				{
+					others.add(goal);
+				}
 			}
 			markApprox(others);
 			save();

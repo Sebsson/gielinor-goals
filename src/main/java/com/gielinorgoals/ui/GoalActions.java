@@ -101,7 +101,7 @@ final class GoalActions
 		menu.add(item("Edit", true, this::edit));
 		GoalProgress progress = goalManager.getProgress(id);
 		// Ett uppfyllt automatiskt mål skulle bara bockas av igen, så valet är låst då.
-		boolean lockedByGame = progress != null && progress.isComplete();
+		boolean lockedByGame = progress != null && progress.isComplete() || goalManager.isDoneByOtherGoal(goal);
 		menu.add(item(goal.isCompleted() ? "Mark as not done" : "Mark as done", !lockedByGame,
 			() -> goalManager.setCompleted(id, !goal.isCompleted())));
 

@@ -88,9 +88,8 @@ public final class GoalMapWindow extends JFrame
 	private final GoalMapCanvas canvas;
 	private final GoalMapDetails details;
 	private final DialogServices services;
-	// Klara mål vid förra uppdateringen, för pulsen; null tills fönstret visats.
-	@Nullable
-	private Set<String> completedBefore;
+	// Vilka mål som var klara förra gången, för pulsen.
+	private final CompletionWatcher completions = new CompletionWatcher();
 
 	private final JComboBox<RootOption> rootBox = new JComboBox<>();
 	private final JTextField searchField = new JTextField(16);
@@ -250,7 +249,7 @@ public final class GoalMapWindow extends JFrame
 		if (!isVisible())
 		{
 			// Mål som klarades medan fönstret var stängt ska inte pulsera när det öppnas.
-			completedBefore = null;
+			completions.reset();
 			setVisible(true);
 		}
 		if (getExtendedState() == ICONIFIED)
@@ -336,22 +335,12 @@ public final class GoalMapWindow extends JFrame
 				completed.add(goal.getId());
 			}
 		});
-		if (completedBefore != null)
+		Set<String> fresh = new HashSet<>(completions.update(goalManager.getProfileKey(), completed));
+		fresh.removeIf(id -> !graph.contains(id));
+		if (!fresh.isEmpty())
 		{
-			Set<String> fresh = new HashSet<>();
-			for (String id : completed)
-			{
-				if (!completedBefore.contains(id) && graph.contains(id))
-				{
-					fresh.add(id);
-				}
-			}
-			if (!fresh.isEmpty())
-			{
-				canvas.pulse(fresh);
-			}
+			canvas.pulse(fresh);
 		}
-		completedBefore = completed;
 	}
 
 	/**

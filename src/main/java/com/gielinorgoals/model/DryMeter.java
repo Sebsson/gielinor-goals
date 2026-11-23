@@ -107,7 +107,8 @@ public final class DryMeter
 	}
 
 	/**
-	 * T.ex. "Got it at 1,240 kc" för ett klart mål där KC sparades.
+	 * T.ex. "Got it at 1,240 kc" för ett klart mål där KC sparades. Upptäcktes målet först
+	 * vid inloggning är KC räknarens värde då, så det visas som ungefärligt.
 	 */
 	@Nullable
 	public static String completedText(Goal goal)
@@ -116,7 +117,8 @@ public final class DryMeter
 		{
 			return null;
 		}
-		return "Got it at " + QuantityFormatter.formatNumber(goal.getObtainedAtKc()) + " kc";
+		return "Got it at " + (goal.isCompletedAtApprox() ? "about " : "")
+			+ QuantityFormatter.formatNumber(goal.getObtainedAtKc()) + " kc";
 	}
 
 	/**

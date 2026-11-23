@@ -69,8 +69,9 @@ public class CombatAchievementCatalog
 
 	private final Client client;
 	private final ClientThread clientThread;
+	private final java.util.function.Supplier<List<Task>> loader;
 
-	// Byggs och läses bara på klienttråden.
+	// Byggs och läses bara på klienttråden. Null tills uppgifterna har gått att läsa.
 	private List<Task> tasks;
 
 	@Inject
@@ -78,6 +79,15 @@ public class CombatAchievementCatalog
 	{
 		this.client = client;
 		this.clientThread = clientThread;
+		this.loader = this::load;
+	}
+
+	// För tester: en egen källa i stället för spelets cache.
+	CombatAchievementCatalog(java.util.function.Supplier<List<Task>> loader)
+	{
+		this.client = null;
+		this.clientThread = null;
+		this.loader = loader;
 	}
 
 	/**
@@ -87,13 +97,28 @@ public class CombatAchievementCatalog
 	{
 		clientThread.invokeLater(() ->
 		{
-			if (tasks == null)
-			{
-				tasks = load();
-			}
-			List<Task> results = SearchRanking.rank(tasks, Task::getName, query, maxResults);
+			List<Task> results = SearchRanking.rank(tasks(), Task::getName, query, maxResults);
 			SwingUtilities.invokeLater(() -> callback.accept(results));
 		});
+	}
+
+	/**
+	 * Uppgifterna, lästa en gång. En tom lista (t.ex. om enumarna inte gick att läsa än)
+	 * sparas inte, så att nästa sökning försöker igen i stället för att vara tom för gott.
+	 * Klienttråden.
+	 */
+	List<Task> tasks()
+	{
+		if (tasks != null)
+		{
+			return tasks;
+		}
+		List<Task> loaded = loader.get();
+		if (!loaded.isEmpty())
+		{
+			tasks = loaded;
+		}
+		return loaded;
 	}
 
 	private List<Task> load()

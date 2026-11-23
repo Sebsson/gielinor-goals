@@ -239,12 +239,18 @@ class GoalRow extends JPanel
 		checkBox.setFocusPainted(false);
 		checkBox.setSelected(goal.isCompleted());
 
-		// Ett uppfyllt automatiskt mål skulle bara bockas av igen, så rutan låses.
+		// Ett uppfyllt automatiskt mål skulle bara bockas av igen, så rutan låses. Samma sak
+		// för ett mål som är klart för att ett senare mål är klart (doneWhen).
 		boolean lockedByGame = progress != null && progress.isComplete();
-		checkBox.setEnabled(editable && !lockedByGame);
+		boolean doneByOther = goalManager.isDoneByOtherGoal(goal);
+		checkBox.setEnabled(editable && !lockedByGame && !doneByOther);
 		if (lockedByGame)
 		{
 			checkBox.setToolTipText("Completed automatically");
+		}
+		else if (doneByOther)
+		{
+			checkBox.setToolTipText("Done because a later goal is done");
 		}
 		else
 		{
