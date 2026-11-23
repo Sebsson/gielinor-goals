@@ -35,8 +35,13 @@ import com.gielinorgoals.template.TemplateCatalog;
 import com.gielinorgoals.template.TemplateInserter;
 import com.gielinorgoals.template.TemplateNode;
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.swing.BorderFactory;
@@ -84,6 +89,10 @@ public class GielinorGoalsPanel extends PluginPanel
 	private Runnable openMap = () ->
 	{
 	};
+	// Vad listan senast byggdes för. Är det oförändrat har bara spelläget ändrats (t.ex. XP),
+	// och då uppdateras raderna i stället för att byggas om.
+	@Nullable
+	private List<Object> builtFor;
 	private final JLabel statusLabel = new JLabel();
 	private final JLabel bankLabel = new JLabel();
 	private final JPanel listPanel = new JPanel(new DynamicGridLayout(0, 1, 0, 2));
@@ -318,9 +327,21 @@ public class GielinorGoalsPanel extends PluginPanel
 		collapseAllButton.setEnabled(editable);
 		hideCompletedBox.setSelected(config.hideCompleted());
 
-		listPanel.removeAll();
 		GoalTree tree = goalManager.getTree();
-		GoalRow highlighted = addRows(tree, tree.getRoots(), null, null, 0, editable);
+		List<Object> key = Arrays.asList(goalManager.getRevision(), goalManager.getProfileKey(), editable,
+			config.hideCompleted(), highlightId, tree);
+		if (key.equals(builtFor) && !scrollToHighlight && updateRows())
+		{
+			updateStatus(tree);
+			updateBankStatus(tree);
+			completedTab.refresh();
+			return;
+		}
+		builtFor = key;
+
+		listPanel.removeAll();
+		Map<String, List<Goal>> parents = parentsOf(tree);
+		GoalRow highlighted = addRows(tree, tree.getRoots(), null, null, 0, editable, parents);
 
 		updateStatus(tree);
 		updateSummary(tree);
@@ -343,9 +364,40 @@ public class GielinorGoalsPanel extends PluginPanel
 	 *
 	 * @return första raden för det markerade målet, om den lades till
 	 */
+	// Bara progressen på befintliga rader; false om någon rad behöver byggas om.
+	private boolean updateRows()
+	{
+		for (Component component : listPanel.getComponents())
+		{
+			if (component instanceof GoalRow)
+			{
+				GoalRow row = (GoalRow) component;
+				if (!row.updateProgress(goalManager.getProgress(row.getGoalId())))
+				{
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	// Alla mål → deras föräldrar i lagringsordning, en genomgång i stället för en per rad.
+	private static Map<String, List<Goal>> parentsOf(GoalTree tree)
+	{
+		Map<String, List<Goal>> parents = new HashMap<>();
+		for (Goal goal : tree.flatten())
+		{
+			for (String childId : goal.getChildIds())
+			{
+				parents.computeIfAbsent(childId, id -> new ArrayList<>()).add(goal);
+			}
+		}
+		return parents;
+	}
+
 	@Nullable
 	private GoalRow addRows(GoalTree tree, List<Goal> goals, @Nullable String parentId,
-		@Nullable String grandparentId, int depth, boolean editable)
+		@Nullable String grandparentId, int depth, boolean editable, Map<String, List<Goal>> parents)
 	{
 		GoalRow highlighted = null;
 		for (Goal goal : goals)
@@ -357,7 +409,8 @@ public class GielinorGoalsPanel extends PluginPanel
 
 			boolean isHighlighted = goal.getId().equals(highlightId);
 			GoalRow row = new GoalRow(goal, parentId, grandparentId, goalManager.getProgress(goal.getId()), depth,
-				tree, goalManager, services, editable, isHighlighted && highlighted == null);
+				tree, goalManager, services, editable, isHighlighted && highlighted == null,
+				parents.getOrDefault(goal.getId(), List.of()));
 			listPanel.add(row);
 			if (isHighlighted && highlighted == null)
 			{
@@ -365,7 +418,8 @@ public class GielinorGoalsPanel extends PluginPanel
 			}
 			if (goal.isExpanded())
 			{
-				GoalRow below = addRows(tree, tree.getChildren(goal), goal.getId(), parentId, depth + 1, editable);
+				GoalRow below = addRows(tree, tree.getChildren(goal), goal.getId(), parentId, depth + 1, editable,
+					parents);
 				highlighted = highlighted != null ? highlighted : below;
 			}
 		}

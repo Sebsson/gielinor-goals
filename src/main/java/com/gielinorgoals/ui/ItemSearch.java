@@ -44,12 +44,15 @@ import net.runelite.client.util.AsyncBufferedImage;
 /**
  * Söker bland alla föremål i spelets cache, även otradeable (viktigt för ironmen,
  * till skillnad från ItemManager.search som bara täcker GE-föremål).
- * Namnindexet byggs en gång på klienttråden vid första sökningen.
+ * Namnindexet byggs en gång på klienttråden vid första sökningen, i portioner så att
+ * spelet inte hackar medan alla föremål gås igenom.
  */
 @Singleton
 public class ItemSearch
 {
 	static final int MAX_RESULTS = 50;
+	// Föremål per klientvarv när indexet byggs.
+	static final int INDEX_CHUNK = 2000;
 
 	@Value
 	public static class ItemOption
@@ -70,6 +73,7 @@ public class ItemSearch
 
 	// Byggs och läses bara på klienttråden.
 	private List<ItemOption> index;
+	private IndexBuilder builder;
 
 	@Inject
 	ItemSearch(Client client, ClientThread clientThread, ItemManager itemManager)
@@ -91,14 +95,25 @@ public class ItemSearch
 			return;
 		}
 
+		// Körs om varje klientvarv tills indexet är klart (false = försök igen nästa varv).
 		clientThread.invokeLater(() ->
 		{
 			if (index == null)
 			{
-				index = buildIndex();
+				if (builder == null)
+				{
+					builder = new IndexBuilder(client.getItemCount(), this::entry);
+				}
+				if (!builder.step(INDEX_CHUNK))
+				{
+					return false;
+				}
+				index = builder.result();
+				builder = null;
 			}
 			List<ItemOption> results = filter(index, needle);
 			SwingUtilities.invokeLater(() -> callback.accept(results));
+			return true;
 		});
 	}
 
@@ -107,28 +122,63 @@ public class ItemSearch
 		return itemManager.getImage(itemId);
 	}
 
-	private List<ItemOption> buildIndex()
+	// Ett föremål som det ser ut i indexet, eller null om det inte ska vara med.
+	@javax.annotation.Nullable
+	private String entry(int id)
 	{
-		List<ItemOption> options = new ArrayList<>();
-		Set<String> seenNames = new HashSet<>();
-		for (int id = 0; id < client.getItemCount(); id++)
+		ItemComposition composition = itemManager.getItemComposition(id);
+		String name = composition.getName();
+		// Hoppa över noterade föremål, placeholders och namnlösa poster.
+		if (name == null || name.isEmpty() || "null".equalsIgnoreCase(name)
+			|| composition.getNote() != -1 || composition.getPlaceholderTemplateId() != -1)
 		{
-			ItemComposition composition = itemManager.getItemComposition(id);
-			String name = composition.getName();
-			// Hoppa över noterade föremål, placeholders och namnlösa poster.
-			if (name == null || name.isEmpty() || "null".equalsIgnoreCase(name)
-				|| composition.getNote() != -1 || composition.getPlaceholderTemplateId() != -1)
-			{
-				continue;
-			}
-
-			// Samma namn finns ofta på många id:n (t.ex. quest-versioner); lägsta id vinner.
-			if (seenNames.add(name.toLowerCase(Locale.ROOT)))
-			{
-				options.add(new ItemOption(id, name));
-			}
+			return null;
 		}
-		return options;
+		return name;
+	}
+
+	/**
+	 * Bygger namnindexet en portion i taget. Samma namn finns ofta på många id:n (t.ex.
+	 * quest-versioner); lägsta id vinner.
+	 */
+	static final class IndexBuilder
+	{
+		private final int count;
+		private final java.util.function.IntFunction<String> names;
+		private final List<ItemOption> options = new ArrayList<>();
+		private final Set<String> seenNames = new HashSet<>();
+		private int next;
+
+		/**
+		 * @param names föremålets namn, eller null om det inte ska vara med
+		 */
+		IndexBuilder(int count, java.util.function.IntFunction<String> names)
+		{
+			this.count = count;
+			this.names = names;
+		}
+
+		/**
+		 * @return true när alla föremål är genomgångna
+		 */
+		boolean step(int budget)
+		{
+			int end = Math.min(count, next + budget);
+			for (; next < end; next++)
+			{
+				String name = names.apply(next);
+				if (name != null && seenNames.add(name.toLowerCase(Locale.ROOT)))
+				{
+					options.add(new ItemOption(next, name));
+				}
+			}
+			return next >= count;
+		}
+
+		List<ItemOption> result()
+		{
+			return Collections.unmodifiableList(options);
+		}
 	}
 
 	static List<ItemOption> filter(List<ItemOption> index, String needle)

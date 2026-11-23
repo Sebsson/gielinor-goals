@@ -136,6 +136,8 @@ final class GoalMapCanvas extends JComponent
 
 	private final Map<String, Image> iconCache = new HashMap<>();
 	private final Set<String> iconsLoading = new HashSet<>();
+	// Vad ikonen laddades för (kravet eller den egna ikonen), så att bara ändrade mål läses om.
+	private final Map<String, Object> iconSource = new HashMap<>();
 	private final Map<String, String> titleCache = new HashMap<>();
 	private final Font titleFont = FontManager.getRunescapeFont();
 	private final Font smallFont = FontManager.getRunescapeSmallFont();
@@ -350,8 +352,19 @@ final class GoalMapCanvas extends JComponent
 		}
 		if (goalsChanged)
 		{
-			iconCache.clear();
-			iconsLoading.clear();
+			// Bara ikoner för mål som tagits bort eller fått ett annat krav eller en annan ikon;
+			// övriga behålls, så att kartan inte laddar om allt vid varje sparning.
+			iconSource.keySet().removeIf(id ->
+			{
+				Goal goal = goals.get(id);
+				boolean stale = goal == null || !java.util.Objects.equals(iconSource.get(id), iconSourceOf(goal));
+				if (stale)
+				{
+					iconCache.remove(id);
+					iconsLoading.remove(id);
+				}
+				return stale;
+			});
 			titleCache.clear();
 		}
 		if (newLayout)
@@ -876,6 +889,7 @@ final class GoalMapCanvas extends JComponent
 		{
 			return cached;
 		}
+		iconSource.put(id, iconSourceOf(goal));
 		Consumer<BufferedImage> store = image -> SwingUtilities.invokeLater(() ->
 		{
 			if (iconsLoading.contains(id))
@@ -893,6 +907,12 @@ final class GoalMapCanvas extends JComponent
 			icons.loadImage(goal.getIcon(), store);
 		}
 		return null;
+	}
+
+	@Nullable
+	private static Object iconSourceOf(Goal goal)
+	{
+		return goal.getRequirement() != null ? goal.getRequirement() : goal.getIcon();
 	}
 
 	// Föremålsbilder är 36x32; de skalas en gång till dubbel ikonstorlek (skarpa vid inzoomning)

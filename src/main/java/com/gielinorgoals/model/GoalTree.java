@@ -98,9 +98,10 @@ public class GoalTree
 			hasParent.addAll(goal.getChildIds());
 		}
 		tree.rootIds.removeIf(hasParent::contains);
+		Set<String> roots = new HashSet<>(tree.rootIds);
 		for (String id : tree.goals.keySet())
 		{
-			if (!hasParent.contains(id) && !tree.rootIds.contains(id))
+			if (!hasParent.contains(id) && roots.add(id))
 			{
 				tree.rootIds.add(id);
 			}

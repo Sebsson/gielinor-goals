@@ -85,8 +85,9 @@ class GoalRow extends JPanel
 	private final String parentId;
 	@Nullable
 	private final String grandparentId;
+	// Byts av updateProgress() när bara spelläget ändrats; allt annat kräver en ny rad.
 	@Nullable
-	private final GoalProgress progress;
+	private GoalProgress progress;
 	private final GoalTree tree;
 	private final GoalManager goalManager;
 	private final DialogServices services;
@@ -97,10 +98,19 @@ class GoalRow extends JPanel
 	// Räknaren för ett aggregerat mål ("142/170"), annars null.
 	@Nullable
 	private final GoalProgress counter;
+	// Delarna som updateProgress() ändrar.
+	private final JPanel center;
+	private final JLabel titleLabel;
+	private final JCheckBox checkBox;
+	@Nullable
+	private final ProgressBar bar;
 
+	/**
+	 * @param parents alla föräldrar till målet, räknade en gång av panelen för hela listan
+	 */
 	GoalRow(Goal goal, @Nullable String parentId, @Nullable String grandparentId, @Nullable GoalProgress progress,
 		int depth, GoalTree tree, GoalManager goalManager, DialogServices services, boolean editable,
-		boolean highlighted)
+		boolean highlighted, List<Goal> parents)
 	{
 		this.goal = goal;
 		this.parentId = parentId;
@@ -111,7 +121,7 @@ class GoalRow extends JPanel
 		this.services = services;
 		this.editable = editable;
 		this.baseBackground = highlighted ? HIGHLIGHT_COLOR : ColorScheme.DARKER_GRAY_COLOR;
-		this.parents = tree.getParents(goal.getId());
+		this.parents = parents;
 		this.counter = goal.isAggregate() ? GoalEvaluator.aggregateProgress(tree, goal) : null;
 
 		setLayout(new BorderLayout(4, 0));
@@ -124,23 +134,29 @@ class GoalRow extends JPanel
 		JPanel left = new JPanel(new BorderLayout(2, 0));
 		left.setOpaque(false);
 		left.add(buildExpandToggle(), BorderLayout.WEST);
-		left.add(buildCheckBox(), BorderLayout.CENTER);
+		checkBox = buildCheckBox();
+		left.add(checkBox, BorderLayout.CENTER);
 
 		// Samma hover-text på hela raden, så att siffrorna syns var man än håller musen.
 		String tooltip = buildTooltip();
 		setToolTipText(tooltip);
 
-		JPanel center = new JPanel(new BorderLayout(0, 3));
+		center = new JPanel(new BorderLayout(0, 3));
 		center.setOpaque(false);
 		center.setToolTipText(tooltip);
-		center.add(buildTitle(depth, tooltip), BorderLayout.CENTER);
+		titleLabel = buildTitle(depth, tooltip);
+		center.add(titleLabel, BorderLayout.CENTER);
 		// Räknarmål visar hur många delmål som är klara i stället för kravets progress.
 		GoalProgress shown = counter != null ? counter : progress;
 		if (shown != null && !goal.isCompleted())
 		{
-			ProgressBar bar = buildProgressBar(shown, counter != null);
+			bar = buildProgressBar(shown, counter != null);
 			bar.setToolTipText(tooltip);
 			center.add(bar, BorderLayout.SOUTH);
+		}
+		else
+		{
+			bar = null;
 		}
 
 		JPanel right = new JPanel(new BorderLayout(3, 0));
@@ -232,13 +248,59 @@ class GoalRow extends JPanel
 		return toggle;
 	}
 
+	String getGoalId()
+	{
+		return goal.getId();
+	}
+
+	/**
+	 * Ny progress när bara spelläget ändrats (t.ex. XP), utan att raden byggs om.
+	 *
+	 * @return false om raden behöver byggas om, t.ex. för att progressbaren ska dyka upp
+	 * eller försvinna
+	 */
+	boolean updateProgress(@Nullable GoalProgress newProgress)
+	{
+		// Räknarmålens siffror beror på delmålen, som bara ändras när målen sparas.
+		if (counter != null)
+		{
+			return true;
+		}
+		boolean wantsBar = newProgress != null && !goal.isCompleted();
+		if (wantsBar != (bar != null))
+		{
+			return false;
+		}
+		progress = newProgress;
+		if (bar != null)
+		{
+			applyProgress(bar, newProgress, false);
+		}
+		updateCheckBox(checkBox);
+		String tooltip = buildTooltip();
+		setToolTipText(tooltip);
+		center.setToolTipText(tooltip);
+		titleLabel.setToolTipText(tooltip);
+		if (bar != null)
+		{
+			bar.setToolTipText(tooltip);
+		}
+		return true;
+	}
+
 	private JCheckBox buildCheckBox()
 	{
 		JCheckBox checkBox = new JCheckBox();
 		checkBox.setOpaque(false);
 		checkBox.setFocusPainted(false);
 		checkBox.setSelected(goal.isCompleted());
+		updateCheckBox(checkBox);
+		checkBox.addActionListener(e -> goalManager.setCompleted(goal.getId(), checkBox.isSelected()));
+		return checkBox;
+	}
 
+	private void updateCheckBox(JCheckBox checkBox)
+	{
 		// Ett uppfyllt automatiskt mål skulle bara bockas av igen, så rutan låses. Samma sak
 		// för ett mål som är klart för att ett senare mål är klart (doneWhen).
 		boolean lockedByGame = progress != null && progress.isComplete();
@@ -256,8 +318,6 @@ class GoalRow extends JPanel
 		{
 			checkBox.setToolTipText(goal.isCompleted() ? "Mark as not done" : "Mark as done");
 		}
-		checkBox.addActionListener(e -> goalManager.setCompleted(goal.getId(), checkBox.isSelected()));
-		return checkBox;
 	}
 
 	/**
@@ -267,6 +327,14 @@ class GoalRow extends JPanel
 	{
 		ProgressBar bar = new ProgressBar();
 		bar.setMaximumValue(PROGRESS_STEPS);
+		applyProgress(bar, progress, counterColors);
+		bar.setBackground(ColorScheme.DARK_GRAY_COLOR);
+		bar.setPreferredSize(new Dimension(0, 12));
+		return bar;
+	}
+
+	private static void applyProgress(ProgressBar bar, GoalProgress progress, boolean counterColors)
+	{
 		bar.setValue((int) Math.round(progress.fraction() * PROGRESS_STEPS));
 		bar.setCenterLabel(progress.getLabel());
 		bar.setLeftLabel("");
@@ -281,9 +349,6 @@ class GoalRow extends JPanel
 				? ColorScheme.PROGRESS_COMPLETE_COLOR
 				: ColorScheme.PROGRESS_INPROGRESS_COLOR);
 		}
-		bar.setBackground(ColorScheme.DARK_GRAY_COLOR);
-		bar.setPreferredSize(new Dimension(0, 12));
-		return bar;
 	}
 
 	private JLabel buildTitle(int depth, String tooltip)
