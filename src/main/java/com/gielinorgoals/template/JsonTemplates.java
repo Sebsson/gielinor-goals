@@ -69,7 +69,7 @@ final class JsonTemplates
 			JsonTemplate.FileSpec spec = read(gson, DIRECTORY + file, JsonTemplate.FileSpec.class);
 			try
 			{
-				templates.add(JsonTemplate.from(spec));
+				templates.add(JsonTemplate.from(spec, file.endsWith(".json") ? file.substring(0, file.length() - 5) : file));
 			}
 			catch (IllegalArgumentException e)
 			{

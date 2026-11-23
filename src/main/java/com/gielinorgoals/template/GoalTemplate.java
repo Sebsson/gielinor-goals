@@ -36,6 +36,11 @@ import javax.annotation.Nullable;
  */
 public interface GoalTemplate
 {
+	/**
+	 * Stabilt id som sparas på template-roten, t.ex. "quest-cape". Får inte ändras.
+	 */
+	String getId();
+
 	String getName();
 
 	String getDescription();

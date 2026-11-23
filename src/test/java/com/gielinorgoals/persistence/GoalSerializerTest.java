@@ -493,7 +493,7 @@ public class GoalSerializerTest
 		assertTrue(result.getCounters().asMap().isEmpty());
 		JsonObject saved = new Gson().fromJson(serializer.serialize(result.getTree(), result.getCounters()),
 			JsonObject.class);
-		assertEquals(9, saved.get("schemaVersion").getAsInt());
+		assertEquals(SchemaMigrator.CURRENT_VERSION, saved.get("schemaVersion").getAsInt());
 		// Utan räknare skrivs ingen tom sektion.
 		assertFalse(saved.has("counters"));
 	}
@@ -506,5 +506,33 @@ public class GoalSerializerTest
 			+ "\"activityId\":\"NOT_A_BOSS\",\"activityName\":\"Gone\",\"target\":5}}]}";
 
 		assertNull(serializer.deserialize(json).getTree().find("a").getRequirement());
+	}
+
+	@Test
+	public void version9LoadsIntoVersion10AndTemplateFieldsRoundTrip()
+	{
+		String json = "{\"schemaVersion\":9,\"rootIds\":[\"a\"],\"goals\":["
+			+ "{\"id\":\"a\",\"title\":\"Quest cape\",\"aggregate\":true,\"childIds\":[]}]}";
+
+		LoadResult result = serializer.deserialize(json);
+		assertTrue(result.isMigrated());
+		Goal goal = result.getTree().find("a");
+		assertEquals("Quest cape", goal.getTitle());
+		assertTrue(goal.isAggregate());
+		assertNull(goal.getTemplateId());
+		assertNull(goal.getTemplateNodeKey());
+
+		goal.setTemplateId("quest-cape");
+		goal.setTemplateParams(java.util.Map.of("questChains", 0));
+		goal.setTemplateIgnoredKeys(List.of("quest:17"));
+		goal.setTemplateNodeKey("group:quest cape");
+		LoadResult reloaded = serializer.deserialize(serializer.serialize(result.getTree()));
+
+		Goal again = reloaded.getTree().find("a");
+		assertFalse(reloaded.isMigrated());
+		assertEquals("quest-cape", again.getTemplateId());
+		assertEquals(Integer.valueOf(0), again.getTemplateParams().get("questChains"));
+		assertEquals(List.of("quest:17"), again.getTemplateIgnoredKeys());
+		assertEquals("group:quest cape", again.getTemplateNodeKey());
 	}
 }

@@ -46,6 +46,12 @@ public class QuestCapeTemplate implements GoalTemplate
 	}
 
 	@Override
+	public String getId()
+	{
+		return "quest-cape";
+	}
+
+	@Override
 	public String getName()
 	{
 		return "Quest cape";

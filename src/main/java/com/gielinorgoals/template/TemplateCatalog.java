@@ -55,4 +55,20 @@ public class TemplateCatalog
 	{
 		return templates;
 	}
+
+	/**
+	 * @return templaten med id:t, eller null om den inte finns (t.ex. borttagen i en senare version)
+	 */
+	@javax.annotation.Nullable
+	public GoalTemplate find(@javax.annotation.Nullable String id)
+	{
+		for (GoalTemplate template : templates)
+		{
+			if (template.getId().equals(id))
+			{
+				return template;
+			}
+		}
+		return null;
+	}
 }

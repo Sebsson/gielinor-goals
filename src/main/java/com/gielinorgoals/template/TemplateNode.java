@@ -50,6 +50,15 @@ public class TemplateNode
 	@Setter
 	private boolean included = true;
 
+	// Bara på roten: vilken template förslaget kommer från och med vilka parametrar,
+	// så att en insatt template kan byggas om och jämföras senare.
+	@Setter
+	@Nullable
+	private String templateId;
+	@Setter
+	@Nullable
+	private java.util.Map<String, Integer> templateParams;
+
 	public TemplateNode(String title, @Nullable Requirement requirement, boolean aggregate)
 	{
 		this.title = title;
@@ -91,6 +100,14 @@ public class TemplateNode
 			return requirement.describe();
 		}
 		return title;
+	}
+
+	/**
+	 * Stabil nyckel för noden, t.ex. "quest:117"; se {@link TemplateKeys}.
+	 */
+	public String getKey()
+	{
+		return TemplateKeys.of(this);
 	}
 
 	/**

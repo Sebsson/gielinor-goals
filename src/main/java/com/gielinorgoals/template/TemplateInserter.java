@@ -117,6 +117,16 @@ public final class TemplateInserter
 		}
 
 		Goal root = create(template);
+		if (template.getTemplateId() != null)
+		{
+			// Så att templaten kan byggas om och jämföras med målen senare.
+			root.setTemplateId(template.getTemplateId());
+			root.setTemplateParams(template.getTemplateParams() == null ? null
+				: new java.util.LinkedHashMap<>(template.getTemplateParams()));
+			List<String> ignored = new ArrayList<>();
+			collectExcludedKeys(template, ignored);
+			root.setTemplateIgnoredKeys(ignored.isEmpty() ? null : ignored);
+		}
 		tree.add(parentId, root);
 		Result result = new Result(root);
 		result.created.add(root);
@@ -126,7 +136,38 @@ public final class TemplateInserter
 		}
 		insertChildren(tree, template, root, withRequirement, before, result);
 
-		// tree.add fäller ut föräldern; räknarmål ska vara ihopfällda som standard.
+		collapseCounters(result);
+		return result;
+	}
+
+	/**
+	 * Sätter in noder under ett befintligt mål, med samma dubblettregel som en hel template.
+	 * Används vid "Update from template". Resultatets rot är föräldern, som inte räknas som skapad.
+	 */
+	public static Result insertUnder(GoalTree tree, Goal parent, List<TemplateNode> nodes)
+	{
+		List<Goal> withRequirement = new ArrayList<>();
+		java.util.Set<String> before = new java.util.HashSet<>();
+		for (Goal goal : tree.flatten())
+		{
+			if (goal.getRequirement() != null)
+			{
+				withRequirement.add(goal);
+				before.add(goal.getId());
+			}
+		}
+
+		TemplateNode container = new TemplateNode("", null, false);
+		nodes.forEach(container::add);
+		Result result = new Result(parent);
+		insertChildren(tree, container, parent, withRequirement, before, result);
+		collapseCounters(result);
+		return result;
+	}
+
+	// tree.add fäller ut föräldern; räknarmål ska vara ihopfällda som standard.
+	private static void collapseCounters(Result result)
+	{
 		for (Goal goal : result.created)
 		{
 			if (goal.isAggregate())
@@ -134,7 +175,22 @@ public final class TemplateInserter
 				goal.setExpanded(false);
 			}
 		}
-		return result;
+	}
+
+	// Nycklar för noder användaren bockat ur; deras delmål räknas som bortvalda via föräldern.
+	private static void collectExcludedKeys(TemplateNode node, List<String> out)
+	{
+		for (TemplateNode child : node.getChildren())
+		{
+			if (!child.isIncluded())
+			{
+				out.add(child.getKey());
+			}
+			else
+			{
+				collectExcludedKeys(child, out);
+			}
+		}
 	}
 
 	private static void insertChildren(GoalTree tree, TemplateNode node, Goal parent, List<Goal> withRequirement,
@@ -196,6 +252,7 @@ public final class TemplateInserter
 		Goal goal = new Goal(node.getTitle());
 		goal.setRequirement(node.getRequirement());
 		goal.setAggregate(node.isAggregate());
+		goal.setTemplateNodeKey(node.getKey());
 		return goal;
 	}
 }

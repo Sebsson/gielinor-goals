@@ -1,5 +1,8 @@
 package com.gielinorgoals;
 
+import com.gielinorgoals.template.QuestRequirementsDb;
+import com.gielinorgoals.template.TemplateUpdates;
+import com.gielinorgoals.template.TemplateCatalog;
 import com.gielinorgoals.model.GameData;
 import com.gielinorgoals.model.Goal;
 import com.gielinorgoals.model.QuestRequirement;
@@ -159,5 +162,71 @@ public class GoalManagerTemplateTest
 				return finished.contains(questId) ? QuestState.FINISHED : QuestState.NOT_STARTED;
 			}
 		};
+	}
+
+	@Test
+	public void updateFromTemplateRestoresDeletedGoalsInOneSave()
+	{
+		TemplateCatalog catalog = new TemplateCatalog(new Gson());
+		TemplateUpdates updates = new TemplateUpdates(catalog, QuestRequirementsDb.load(new Gson()));
+		TemplateNode node = catalog.find("base-level").build(Map.of("level", 60));
+		node.setTemplateId("base-level");
+		node.setTemplateParams(Map.of("level", 60));
+		Goal root = manager.insertTemplate(node).getRoot();
+		Goal attack = manager.getTree().getChildren(root).get(0);
+		manager.removeGoal(attack.getId());
+		int size = manager.getTree().size();
+
+		TemplateUpdates.Plan plan = updates.plan(manager.getTree(), root);
+		assertEquals(1, plan.getAdditions().size());
+		goalSaves = 0;
+		rebuilds = 0;
+		manager.applyTemplateUpdate(root.getId(), plan.getAdditions(), List.of(), List.of());
+
+		assertEquals(size + 1, manager.getTree().size());
+		assertTrue(updates.plan(manager.getTree(), root).isEmpty());
+		assertEquals(1, goalSaves);
+		assertEquals(1, rebuilds);
+		assertTrue(announced.isEmpty());
+	}
+
+	@Test
+	public void declinedAdditionsAreNotSuggestedAgain()
+	{
+		TemplateCatalog catalog = new TemplateCatalog(new Gson());
+		TemplateUpdates updates = new TemplateUpdates(catalog, QuestRequirementsDb.load(new Gson()));
+		TemplateNode node = catalog.find("base-level").build(Map.of());
+		node.setTemplateId("base-level");
+		node.setTemplateParams(Map.of());
+		Goal root = manager.insertTemplate(node).getRoot();
+		Goal attack = manager.getTree().getChildren(root).get(0);
+		manager.removeGoal(attack.getId());
+
+		TemplateUpdates.Plan plan = updates.plan(manager.getTree(), root);
+		manager.applyTemplateUpdate(root.getId(), List.of(), List.of(),
+			List.of(plan.getAdditions().get(0).getNode().getKey()));
+
+		assertTrue(updates.plan(manager.getTree(), root).isEmpty());
+	}
+
+	@Test
+	public void removedNodeSharedWithAnotherGoalIsOnlyUnlinked()
+	{
+		manager.addGoal(null, "Elsewhere", null, null);
+		Goal elsewhere = manager.getTree().getRoots().get(0);
+		TemplateCatalog catalog = new TemplateCatalog(new Gson());
+		TemplateNode node = catalog.find("base-level").build(Map.of());
+		node.setTemplateId("base-level");
+		node.setTemplateParams(Map.of());
+		Goal root = manager.insertTemplate(node).getRoot();
+		Goal attack = manager.getTree().getChildren(root).get(0);
+		Goal defence = manager.getTree().getChildren(root).get(1);
+		manager.link(elsewhere.getId(), attack.getId());
+
+		manager.applyTemplateUpdate(root.getId(), List.of(), List.of(attack.getId(), defence.getId()), List.of());
+
+		// Attack finns kvar under det andra målet; Defence fanns bara i templaten och tas bort.
+		assertEquals(List.of(elsewhere), manager.getTree().getParents(attack.getId()));
+		assertEquals(null, manager.getTree().find(defence.getId()));
 	}
 }

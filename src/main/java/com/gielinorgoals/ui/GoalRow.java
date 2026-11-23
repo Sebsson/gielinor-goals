@@ -32,6 +32,7 @@ import com.gielinorgoals.model.GoalProgress;
 import com.gielinorgoals.model.GoalTree;
 import com.gielinorgoals.model.ActivityCounters;
 import com.gielinorgoals.model.KillCountRequirement;
+import com.gielinorgoals.template.TemplateUpdates;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -285,6 +286,10 @@ class GoalRow extends JPanel
 	{
 		int width = Math.max(MIN_TEXT_WIDTH, BASE_TEXT_WIDTH - depth * INDENT_PX);
 		String text = escapeHtml(goal.getDisplayTitle());
+		if (hasTemplateUpdate())
+		{
+			text += " <font color='#ff9800'>(update)</font>";
+		}
 		// Räknarmål har siffrorna i progressbaren i stället.
 		if (goal.hasChildren() && counter == null)
 		{
@@ -377,6 +382,10 @@ class GoalRow extends JPanel
 		{
 			menu.add(item("Set value...", true, this::setCounterValue));
 		}
+		if (goal.getTemplateId() != null)
+		{
+			menu.add(item("Update from template...", true, this::updateFromTemplate));
+		}
 		menu.add(item("Link to another goal...", true, this::linkToAnotherGoal));
 		if (parentId != null && parents.size() > 1)
 		{
@@ -391,6 +400,30 @@ class GoalRow extends JPanel
 		menu.addSeparator();
 		menu.add(item("Delete", true, this::delete));
 		return menu;
+	}
+
+	// Templaten byggs om bara när målen har ändrats; resultatet cachas per revision.
+	private boolean hasTemplateUpdate()
+	{
+		return goal.getTemplateId() != null
+			&& services.getTemplateUpdates().hasUpdate(tree, goal, goalManager.getRevision());
+	}
+
+	private void updateFromTemplate()
+	{
+		TemplateUpdates.Plan plan = services.getTemplateUpdates().plan(tree, goal);
+		if (plan == null)
+		{
+			JOptionPane.showMessageDialog(this, "The template this goal came from is no longer available.",
+				"Update from template", JOptionPane.INFORMATION_MESSAGE);
+			return;
+		}
+		TemplateUpdateDialog.Selection selection = TemplateUpdateDialog.show(this, plan, tree);
+		if (selection != null)
+		{
+			goalManager.applyTemplateUpdate(goal.getId(), selection.getAdditions(), selection.getRemoveGoalIds(),
+				selection.getDeclinedKeys());
+		}
 	}
 
 	private boolean isManualCounter()
@@ -587,6 +620,10 @@ class GoalRow extends JPanel
 		if (goal.getRequirement() instanceof KillCountRequirement)
 		{
 			html.append("<br><i>").append(counterSource()).append("</i>");
+		}
+		if (hasTemplateUpdate())
+		{
+			html.append("<br><i>The template has changed. Right-click and choose \"Update from template...\".</i>");
 		}
 		if (parents.size() > 1)
 		{

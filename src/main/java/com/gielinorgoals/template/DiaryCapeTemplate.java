@@ -37,6 +37,12 @@ import java.util.Map;
 public class DiaryCapeTemplate implements GoalTemplate
 {
 	@Override
+	public String getId()
+	{
+		return "diary-cape";
+	}
+
+	@Override
 	public String getName()
 	{
 		return "Achievement diary cape";

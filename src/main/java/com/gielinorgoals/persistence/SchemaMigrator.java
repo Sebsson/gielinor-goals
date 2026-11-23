@@ -59,8 +59,10 @@ public class SchemaMigrator
 	 *     målen manuella när de inte känner igen typerna.
 	 * 9 – kravtypen KILL_COUNT och en valfri sektion "counters" med nuvarande värden
 	 *     per aktivitet. Ingen dataändring; äldre filer får inga räknare.
+	 * 10 – valfria fält templateId, templateParams, templateIgnoredKeys och templateNodeKey
+	 *     på mål, för "Update from template". Ingen dataändring; äldre mål saknar dem.
 	 */
-	public static final int CURRENT_VERSION = 9;
+	public static final int CURRENT_VERSION = 10;
 	static final String VERSION_FIELD = "schemaVersion";
 	private static final String GOALS_FIELD = GoalSerializer.GOALS_FIELD;
 	private static final String ROOT_IDS_FIELD = GoalSerializer.ROOT_IDS_FIELD;
@@ -81,7 +83,8 @@ public class SchemaMigrator
 			5, SchemaMigrator::noStructuralChange,
 			6, SchemaMigrator::v6ToV7,
 			7, SchemaMigrator::noStructuralChange,
-			8, SchemaMigrator::noStructuralChange));
+			8, SchemaMigrator::noStructuralChange,
+			9, SchemaMigrator::noStructuralChange));
 	}
 
 	/**

@@ -31,6 +31,7 @@ import com.gielinorgoals.template.GoalTemplate;
 import com.gielinorgoals.template.QuestChains;
 import com.gielinorgoals.template.QuestRequirementsDb;
 import com.gielinorgoals.template.TemplateNode;
+import com.gielinorgoals.template.TemplateUpdates;
 import com.gielinorgoals.template.TemplateParameter;
 import com.gielinorgoals.template.TemplatePlanner;
 import java.awt.BorderLayout;
@@ -234,10 +235,16 @@ final class TemplateDialog
 			current = template.build(values);
 			boolean hasQuests = QuestChains.hasQuestNodes(current);
 			questChainBox.setVisible(hasQuests);
-			if (hasQuests && questChainBox.isSelected())
+			boolean chains = hasQuests && questChainBox.isSelected();
+			if (chains)
 			{
 				QuestChains.expand(current, questRequirements, tree);
 			}
+			// Sparas på roten så att templaten kan byggas om likadant vid "Update from template".
+			Map<String, Integer> params = new HashMap<>(values);
+			params.put(TemplateUpdates.QUEST_CHAINS_PARAM, chains ? 1 : 0);
+			current.setTemplateId(template.getId());
+			current.setTemplateParams(params);
 			addRows(current, null, 0);
 		}
 		refreshStatuses();

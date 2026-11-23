@@ -40,6 +40,7 @@ import com.gielinorgoals.persistence.LoadResult;
 import com.gielinorgoals.persistence.SchemaMigrator;
 import com.gielinorgoals.template.TemplateInserter;
 import com.gielinorgoals.template.TemplateNode;
+import com.gielinorgoals.template.TemplateUpdates;
 import com.gielinorgoals.tracking.InitialSync;
 import com.google.gson.Gson;
 import java.util.ArrayList;
@@ -662,6 +663,104 @@ public class GoalManager
 		save();
 		listener.run();
 		return result;
+	}
+
+	/**
+	 * Uppdaterar en insatt template med det användaren valde: tillägg sätts in under sina
+	 * föräldrar (med samma dubblettregel som vid insättning), valda borttagna noder tas bort
+	 * från templaten, och tillägg som användaren bockade ur sparas som bortvalda så att de
+	 * inte föreslås igen. En utvärdering, en sparning, inga popups.
+	 *
+	 * @param removeGoalIds mål som ska tas bort ur templaten; bara de användaren valde
+	 */
+	public void applyTemplateUpdate(String rootId, List<TemplateUpdates.Addition> additions, List<String> removeGoalIds,
+		List<String> declinedKeys)
+	{
+		Goal root = tree.find(rootId);
+		if (!isEditable() || root == null)
+		{
+			return;
+		}
+
+		for (TemplateUpdates.Addition addition : additions)
+		{
+			Goal parent = tree.find(addition.getParentGoalId());
+			if (parent != null)
+			{
+				TemplateInserter.insertUnder(tree, parent, List.of(addition.getNode()));
+			}
+		}
+
+		Set<String> inTemplate = new HashSet<>();
+		inTemplate.add(rootId);
+		for (Goal goal : descendants(root))
+		{
+			inTemplate.add(goal.getId());
+		}
+		for (String id : removeGoalIds)
+		{
+			removeFromTemplate(id, inTemplate);
+		}
+
+		if (!declinedKeys.isEmpty())
+		{
+			List<String> ignored = root.getTemplateIgnoredKeys() == null
+				? new ArrayList<>()
+				: new ArrayList<>(root.getTemplateIgnoredKeys());
+			for (String key : declinedKeys)
+			{
+				if (!ignored.contains(key))
+				{
+					ignored.add(key);
+				}
+			}
+			root.setTemplateIgnoredKeys(ignored);
+		}
+
+		markApprox(evaluate());
+		save();
+		listener.run();
+	}
+
+	// Ett mål som bara finns i templaten tas bort; finns det även under andra mål tas bara
+	// kopplingarna inom templaten bort, så att det inte försvinner därifrån.
+	private void removeFromTemplate(String goalId, Set<String> inTemplate)
+	{
+		List<Goal> parents = tree.getParents(goalId);
+		List<Goal> templateParents = new ArrayList<>();
+		for (Goal parent : parents)
+		{
+			if (inTemplate.contains(parent.getId()))
+			{
+				templateParents.add(parent);
+			}
+		}
+		if (templateParents.size() == parents.size())
+		{
+			tree.remove(goalId);
+			return;
+		}
+		for (Goal parent : templateParents)
+		{
+			tree.unlink(parent.getId(), goalId);
+		}
+	}
+
+	private List<Goal> descendants(Goal root)
+	{
+		List<Goal> out = new ArrayList<>();
+		Set<String> visited = new HashSet<>();
+		java.util.Deque<Goal> stack = new java.util.ArrayDeque<>(tree.getChildren(root));
+		while (!stack.isEmpty())
+		{
+			Goal goal = stack.pop();
+			if (visited.add(goal.getId()))
+			{
+				out.add(goal);
+				stack.addAll(tree.getChildren(goal));
+			}
+		}
+		return out;
 	}
 
 	/**

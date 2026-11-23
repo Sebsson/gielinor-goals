@@ -58,6 +58,8 @@ public class JsonTemplate implements GoalTemplate
 	// Fälten fylls av Gson.
 	static final class FileSpec
 	{
+		// Stabilt id; om det saknas används filnamnet utan .json.
+		String id;
 		String name;
 		String description;
 		NodeSpec root;
@@ -92,12 +94,14 @@ public class JsonTemplate implements GoalTemplate
 		Boolean variants;
 	}
 
+	private final String id;
 	private final String name;
 	private final String description;
 	private final NodeSpec root;
 
-	private JsonTemplate(String name, String description, NodeSpec root)
+	private JsonTemplate(String id, String name, String description, NodeSpec root)
 	{
+		this.id = id;
 		this.name = name;
 		this.description = description;
 		this.root = root;
@@ -108,15 +112,32 @@ public class JsonTemplate implements GoalTemplate
 	 */
 	static JsonTemplate from(FileSpec spec)
 	{
+		return from(spec, null);
+	}
+
+	/**
+	 * @param fallbackId id om filen inte anger något, normalt filnamnet utan .json
+	 */
+	static JsonTemplate from(FileSpec spec, @Nullable String fallbackId)
+	{
 		if (spec == null || spec.name == null || spec.root == null)
 		{
 			throw new IllegalArgumentException("Template needs a name and a root");
 		}
-		JsonTemplate template = new JsonTemplate(spec.name, spec.description == null ? "" : spec.description,
+		String id = spec.id != null ? spec.id
+			: fallbackId != null ? fallbackId
+			: spec.name.trim().toLowerCase(java.util.Locale.ROOT).replaceAll("[^a-z0-9]+", "-");
+		JsonTemplate template = new JsonTemplate(id, spec.name, spec.description == null ? "" : spec.description,
 			spec.root);
 		// Bygg en gång direkt, så att fel i filen märks när den läses och inte i dialogen.
 		template.build(Map.of());
 		return template;
+	}
+
+	@Override
+	public String getId()
+	{
+		return id;
 	}
 
 	@Override

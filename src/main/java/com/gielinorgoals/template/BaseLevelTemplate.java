@@ -41,6 +41,12 @@ public class BaseLevelTemplate implements GoalTemplate
 		SkillRequirement.MIN_LEVEL, Experience.MAX_REAL_LEVEL, 70);
 
 	@Override
+	public String getId()
+	{
+		return "base-level";
+	}
+
+	@Override
 	public String getName()
 	{
 		return "Base N";

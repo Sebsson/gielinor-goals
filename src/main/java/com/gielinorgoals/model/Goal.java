@@ -53,6 +53,14 @@ public class Goal
 	// Visas som räknare "X/Y" över de direkta delmålen. Utan eget krav blir målet klart
 	// när alla direkta delmål är klara. Valfritt fält, false för äldre data.
 	private boolean aggregate;
+	// Templaten målet är rot för (t.ex. "quest-cape"); null för vanliga mål.
+	private String templateId;
+	// Parametrarna templaten byggdes med (t.ex. N i Base N); bara på template-roten.
+	private java.util.Map<String, Integer> templateParams;
+	// Nycklar för noder användaren valt bort; de föreslås inte vid uppdatering. Bara på roten.
+	private List<String> templateIgnoredKeys;
+	// Stabil nyckel för noden i templaten målet skapades från, t.ex. "quest:117".
+	private String templateNodeKey;
 	// Null betyder ett manuellt mål som bara bockas av för hand.
 	private Requirement requirement;
 	// Delmålens id:n i användarens ordning. Målen själva ligger i GoalTree, så att ett
