@@ -42,6 +42,7 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
@@ -116,13 +117,18 @@ final class TemplateDialog
 		for (GoalTemplate template : templates)
 		{
 			Requirement iconRequirement = template.getIconRequirement();
+			Consumer<java.awt.image.BufferedImage> show = image -> SwingUtilities.invokeLater(() ->
+			{
+				templateIcons.put(template, new ImageIcon(image));
+				templateList.repaint();
+			});
 			if (iconRequirement != null)
 			{
-				icons.loadImage(iconRequirement, image -> SwingUtilities.invokeLater(() ->
-				{
-					templateIcons.put(template, new ImageIcon(image));
-					templateList.repaint();
-				}));
+				icons.loadImage(iconRequirement, show);
+			}
+			else
+			{
+				icons.loadImage(template.getIcon(), show);
 			}
 		}
 	}

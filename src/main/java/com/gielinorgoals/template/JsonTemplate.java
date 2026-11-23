@@ -29,6 +29,7 @@ import com.gielinorgoals.model.DiaryArea;
 import com.gielinorgoals.model.DiaryRequirement;
 import com.gielinorgoals.model.DiaryTier;
 import com.gielinorgoals.model.DropSource;
+import com.gielinorgoals.model.GoalIcon;
 import com.gielinorgoals.model.ItemRequirement;
 import com.gielinorgoals.model.KillCountRequirement;
 import com.gielinorgoals.model.QuestPointsRequirement;
@@ -63,6 +64,8 @@ import net.runelite.client.hiscore.HiscoreSkill;
  * <pre>
  * "dropSource": {"npc": "Lizardman shaman", "rate": 5000}
  * </pre>
+ * Noder utan krav kan ha en egen ikon: {@code "icon": {"item": 25865}},
+ * {@code {"activity": "THE_HUEYCOATL"}} eller {@code {"sideIcon": "QUEST"}}.
  * Filen valideras när den läses; en trasig fil ger ingen template alls, aldrig en halv.
  */
 public class JsonTemplate implements GoalTemplate
@@ -93,6 +96,7 @@ public class JsonTemplate implements GoalTemplate
 		// Bara på item-noder.
 		ActivitySpec dropSource;
 		ActivitySpec killCount;
+		IconSpec icon;
 		String quest;
 		String skill;
 		Integer level;
@@ -118,6 +122,14 @@ public class JsonTemplate implements GoalTemplate
 		// "includeVariants" som i målens sparformat; "variants" finns kvar för äldre filer.
 		Boolean includeVariants;
 		Boolean variants;
+	}
+
+	// Exakt en av item (item-id), activity (HiscoreSkill-namn) eller sideIcon (GoalIcon.SideIcon).
+	static final class IconSpec
+	{
+		Integer item;
+		String activity;
+		String sideIcon;
 	}
 
 	// En aktivitet: exakt en av hiscore (HiscoreSkill-namn), npc eller manual (räknarnamn).
@@ -218,6 +230,13 @@ public class JsonTemplate implements GoalTemplate
 		return toRequirement(root);
 	}
 
+	@Nullable
+	@Override
+	public GoalIcon getIcon()
+	{
+		return root.icon == null ? null : toIcon(root.icon);
+	}
+
 	// Handplockade templates visar hela quest-kedjorna som standard.
 	@Override
 	public boolean defaultExpandQuestChains()
@@ -249,6 +268,10 @@ public class JsonTemplate implements GoalTemplate
 				throw new IllegalArgumentException("expandChain is only for quest nodes");
 			}
 			node.setExpandChain(spec.expandChain);
+		}
+		if (spec.icon != null)
+		{
+			node.setIcon(toIcon(spec.icon));
 		}
 		if (spec.dropSource != null)
 		{
@@ -349,6 +372,24 @@ public class JsonTemplate implements GoalTemplate
 			default:
 				return DropSource.manual(spec.manual, spec.rate);
 		}
+	}
+
+	private static GoalIcon toIcon(IconSpec spec)
+	{
+		int set = (spec.item != null ? 1 : 0) + (spec.activity != null ? 1 : 0) + (spec.sideIcon != null ? 1 : 0);
+		if (set != 1)
+		{
+			throw new IllegalArgumentException("An icon needs exactly one of item, activity or sideIcon");
+		}
+		if (spec.item != null)
+		{
+			return GoalIcon.item(spec.item);
+		}
+		if (spec.activity != null)
+		{
+			return GoalIcon.activity(HiscoreSkill.valueOf(spec.activity));
+		}
+		return GoalIcon.side(GoalIcon.SideIcon.valueOf(spec.sideIcon));
 	}
 
 	private static KillCountRequirement.ActivityType activityKind(ActivitySpec spec)

@@ -230,7 +230,7 @@ class CompletedTab extends JPanel
 		icon.setPreferredSize(new Dimension(ICON_WIDTH, 16));
 		icon.setHorizontalAlignment(SwingConstants.CENTER);
 		icon.setVerticalAlignment(SwingConstants.TOP);
-		services.getIcons().apply(goal.getRequirement(), icon);
+		services.getIcons().apply(goal, icon);
 
 		JPanel text = new JPanel(new DynamicGridLayout(0, 1, 0, 1));
 		text.setOpaque(false);

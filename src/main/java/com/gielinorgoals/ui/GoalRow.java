@@ -308,14 +308,14 @@ class GoalRow extends JPanel
 			text += "<br><font color='#a0a0a0'>" + escapeHtml(dry) + "</font>";
 		}
 
-		if (goal.getRequirement() != null)
+		if (GoalIcons.hasIcon(goal))
 		{
 			// Ikonen tar plats, så texten får krympa lika mycket.
 			width = Math.max(MIN_TEXT_WIDTH, width - ICON_WIDTH);
 		}
 		JLabel title = new JLabel("<html><body style='width:" + width + "px'>" + text + "</body></html>");
 		title.setIconTextGap(4);
-		services.getIcons().apply(goal.getRequirement(), title);
+		services.getIcons().apply(goal, title);
 		title.setFont(FontManager.getRunescapeSmallFont());
 		title.setForeground(goal.isCompleted() ? ColorScheme.MEDIUM_GRAY_COLOR : Color.WHITE);
 		title.setToolTipText(tooltip);

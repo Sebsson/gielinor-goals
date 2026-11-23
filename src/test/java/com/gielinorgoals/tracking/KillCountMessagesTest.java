@@ -58,6 +58,16 @@ public class KillCountMessagesTest
 	}
 
 	@Test
+	public void gauntletAndHueycoatlNamesMatchTheirHiscores()
+	{
+		// Namnen i spelet saknar "The"; RuneLites egen lista över KC-namn har dem så här.
+		assertCount(HiscoreSkill.THE_GAUNTLET, 12, "Your Gauntlet completion count is: <col=ff0000>12</col>.");
+		assertCount(HiscoreSkill.THE_CORRUPTED_GAUNTLET, 3,
+			"Your Corrupted Gauntlet completion count is: <col=ff0000>3</col>.");
+		assertCount(HiscoreSkill.THE_HUEYCOATL, 7, "Your Hueycoatl kill count is: <col=ff0000>7</col>.");
+	}
+
+	@Test
 	public void unknownCountsAreIgnored()
 	{
 		assertNull(KillCountMessages.parse("Your Gnome Stronghold Agility Course lap count is: <col=ff0000>50</col>."));

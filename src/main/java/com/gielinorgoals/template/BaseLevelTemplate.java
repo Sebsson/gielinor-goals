@@ -24,6 +24,7 @@
  */
 package com.gielinorgoals.template;
 
+import com.gielinorgoals.model.GoalIcon;
 import com.gielinorgoals.model.Requirement;
 import com.gielinorgoals.model.SkillRequirement;
 import com.gielinorgoals.model.TotalLevelRequirement;
@@ -90,6 +91,7 @@ public class BaseLevelTemplate implements GoalTemplate
 	{
 		int level = LEVEL.valueIn(parameters);
 		TemplateNode root = TemplateNode.aggregate("Base " + level);
+		root.setIcon(GoalIcon.side(GoalIcon.SideIcon.STATS));
 		for (Skill skill : Skill.values())
 		{
 			if (skill != Skill.OVERALL)

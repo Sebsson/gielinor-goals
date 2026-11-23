@@ -27,6 +27,8 @@ package com.gielinorgoals.ui;
 import com.gielinorgoals.model.CombatAchievementRequirement;
 import com.gielinorgoals.model.CombatLevelRequirement;
 import com.gielinorgoals.model.DiaryRequirement;
+import com.gielinorgoals.model.Goal;
+import com.gielinorgoals.model.GoalIcon;
 import com.gielinorgoals.model.ItemRequirement;
 import com.gielinorgoals.model.KillCountRequirement;
 import com.gielinorgoals.model.QuestPointsRequirement;
@@ -71,6 +73,87 @@ public class GoalIcons
 		this.itemManager = itemManager;
 		this.skillIconManager = skillIconManager;
 		this.spriteManager = spriteManager;
+	}
+
+	/**
+	 * Kravets ikon, eller målets egen ikon om det saknar krav (t.ex. grupper från templates).
+	 */
+	public void apply(Goal goal, JLabel label)
+	{
+		if (goal.getRequirement() != null)
+		{
+			apply(goal.getRequirement(), label);
+		}
+		else
+		{
+			apply(goal.getIcon(), label);
+		}
+	}
+
+	public static boolean hasIcon(Goal goal)
+	{
+		return goal.getRequirement() != null || (goal.getIcon() != null && goal.getIcon().isValid());
+	}
+
+	public void apply(@Nullable GoalIcon icon, JLabel label)
+	{
+		if (icon == null || !icon.isValid())
+		{
+			label.setIcon(null);
+		}
+		else if (icon.getItemId() != null)
+		{
+			applyItem(icon.getItemId(), label);
+		}
+		else
+		{
+			applySprite(spriteFor(icon), label);
+		}
+	}
+
+	/**
+	 * Som {@link #loadImage(Requirement, Consumer)} men för en egen ikon.
+	 */
+	public void loadImage(@Nullable GoalIcon icon, Consumer<BufferedImage> consumer)
+	{
+		if (icon == null || !icon.isValid())
+		{
+			return;
+		}
+		if (icon.getItemId() != null)
+		{
+			AsyncBufferedImage image = itemManager.getImage(icon.getItemId());
+			image.onLoaded(() -> consumer.accept(image));
+		}
+		else
+		{
+			loadSprite(spriteFor(icon), consumer);
+		}
+	}
+
+	private static int spriteFor(GoalIcon icon)
+	{
+		if (icon.hiscoreSkill() != null)
+		{
+			return KillCountIcons.spriteFor(icon.hiscoreSkill());
+		}
+		switch (icon.getSideIcon())
+		{
+			case QUEST:
+				return SpriteID.SideIcons.QUEST;
+			case STATS:
+				return SpriteID.SideIcons.STATS;
+			case INVENTORY:
+				return SpriteID.SideIcons.INVENTORY;
+			case EQUIPMENT:
+				return SpriteID.SideIcons.EQUIPMENT;
+			case ACHIEVEMENT_DIARIES:
+				return SpriteID.SideIcons.ACHIEVEMENT_DIARIES;
+			case MINIGAMES:
+				return SpriteID.SideIcons.MINIGAMES;
+			default:
+				return SpriteID.SideIcons.COMBAT;
+		}
 	}
 
 	/**

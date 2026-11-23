@@ -1,0 +1,64 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-23):",
+    "https://oldschool.runescape.wiki/w/Bow_of_Faerdhinen - 100 crystal shards + enhanced crystal weapon seed i en singing bowl;",
+    "kräver Song of the Elves samt 82 Smithing och 82 Crafting (får boostas). Conwenna/Reese sjunger den för 50 shards extra.",
+    "https://oldschool.runescape.wiki/w/Crystal_helm , /Crystal_body , /Crystal_legs - hjälm 1 seed + 50 shards (nivå 70),",
+    "kropp 3 seeds + 150 shards (nivå 74), ben 2 seeds + 100 shards (nivå 72); samma nivå i Smithing och Crafting.",
+    "https://oldschool.runescape.wiki/w/Enhanced_crystal_weapon_seed - 1/2,000 (Gauntlet), 1/400 (Corrupted Gauntlet).",
+    "https://oldschool.runescape.wiki/w/Crystal_armour_seed - 1/120 (Gauntlet), 1/50 (Corrupted Gauntlet).",
+    "https://oldschool.runescape.wiki/w/The_Gauntlet - 'After completing the Gauntlet once, players may try the Corrupted Gauntlet.'",
+    "Item-id (gameval ItemID, kontrolleras i test): 25859 PRIF_WEAPON_SEED_ENHANCED, 23956 PRIF_ARMOUR_SEED, 23962 PRIF_CRYSTAL_SHARD,",
+    "25862 BOW_OF_FAERDHINEN_INACTIVE, 23973 CRYSTAL_HELMET_INACTIVE, 23977 CRYSTAL_CHESTPLATE_INACTIVE, 23981 CRYSTAL_PLATELEGS_INACTIVE.",
+    "Lås upp tar bara med nivåerna för bågen (82), som täcker rustningens 70/72/74. Krav för att bära utrustningen är inte med.",
+    "Armour seeds behövs sex stycken, så de har ingen drop-källa (torrhetsmätaren gäller en drop); KC-målet för Corrupted Gauntlet",
+    "är satt till 400, det förväntade antalet för vapenfröet på 1/400. Det är ett eget val, inte en siffra från wikin."
+  ],
+  "id": "bowfa-crystal",
+  "name": "Bow of Faerdhinen + crystal armour",
+  "description": "Song of the Elves, singing levels, Gauntlet seeds and crystal shards for the bow and full crystal armour",
+  "category": "Ironman · Mid",
+  "tags": ["bowfa", "bofa", "faerdhinen", "crystal armour", "crystal", "cg", "corrupted gauntlet", "gauntlet", "ironman"],
+  "root": {
+    "title": "Bow of Faerdhinen + crystal armour",
+    "aggregate": true,
+    "wikiPage": "Bow of Faerdhinen",
+    "icon": {"item": 25865},
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {"sideIcon": "QUEST"},
+        "children": [
+          {"quest": "SONG_OF_THE_ELVES"},
+          {"skill": "SMITHING", "level": 82,
+            "note": "To sing the bow at a singing bowl (helm 70, legs 72, body 74). Can be boosted. Without it, Conwenna or Reese sing the bow for 50 extra shards."},
+          {"skill": "CRAFTING", "level": 82,
+            "note": "To sing the bow at a singing bowl (helm 70, legs 72, body 74). Can be boosted. Without it, Conwenna or Reese sing the bow for 50 extra shards."},
+          {"killCount": {"hiscore": "THE_GAUNTLET", "count": 1},
+            "note": "Completing the Gauntlet once unlocks the Corrupted Gauntlet."}
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {"sideIcon": "INVENTORY"},
+        "children": [
+          {"item": {"id": 25859, "name": "Enhanced crystal weapon seed"},
+            "dropSource": {"hiscore": "THE_CORRUPTED_GAUNTLET", "rate": 400},
+            "note": "1/400 in the Corrupted Gauntlet, 1/2,000 in the regular Gauntlet."},
+          {"item": {"id": 23956, "name": "Crystal armour seed", "quantity": 6},
+            "note": "Helm 1, legs 2, body 3. 1/50 in the Corrupted Gauntlet, 1/120 in the regular Gauntlet."},
+          {"item": {"id": 23962, "name": "Crystal shard", "quantity": 400},
+            "note": "Bow 100, helm 50, legs 100, body 150."},
+          {"killCount": {"hiscore": "THE_CORRUPTED_GAUNTLET", "count": 400},
+            "note": "The expected count for the enhanced weapon seed (1/400). Six armour seeds at 1/50 take about 300."},
+          {"item": {"id": 25862, "name": "Bow of Faerdhinen", "includeVariants": true}},
+          {"item": {"id": 23973, "name": "Crystal helm", "includeVariants": true}},
+          {"item": {"id": 23977, "name": "Crystal body", "includeVariants": true}},
+          {"item": {"id": 23981, "name": "Crystal legs", "includeVariants": true}}
+        ]
+      }
+    ]
+  }
+}

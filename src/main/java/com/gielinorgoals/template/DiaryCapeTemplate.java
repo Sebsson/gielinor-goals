@@ -27,8 +27,10 @@ package com.gielinorgoals.template;
 import com.gielinorgoals.model.DiaryArea;
 import com.gielinorgoals.model.DiaryRequirement;
 import com.gielinorgoals.model.DiaryTier;
+import com.gielinorgoals.model.GoalIcon;
 import com.gielinorgoals.model.Requirement;
 import java.util.Map;
+import net.runelite.api.gameval.ItemID;
 
 /**
  * Achievement diary cape: ett räknarmål per område med ett diary-mål per nivå,
@@ -76,9 +78,11 @@ public class DiaryCapeTemplate implements GoalTemplate
 	public TemplateNode build(Map<String, Integer> parameters)
 	{
 		TemplateNode root = TemplateNode.aggregate("Achievement diary cape");
+		root.setIcon(GoalIcon.item(ItemID.SKILLCAPE_AD));
 		for (DiaryArea area : DiaryArea.values())
 		{
 			TemplateNode areaNode = TemplateNode.aggregate(area.getDisplayName() + " diary");
+			areaNode.setIcon(GoalIcon.side(GoalIcon.SideIcon.ACHIEVEMENT_DIARIES));
 			for (DiaryTier tier : DiaryTier.values())
 			{
 				areaNode.add(TemplateNode.requirement(new DiaryRequirement(area, tier)));

@@ -1,0 +1,61 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-23):",
+    "https://oldschool.runescape.wiki/w/Doom_of_Mokhaiotl - bossen 'accessed during The Final Dawn quest', i Ruins of Mokhaiotl",
+    "under Tlati Rainforest. Wikin har ingen egen kravsektion; The Final Dawn används som krav (osäkert om delvis räcker).",
+    "Unika drops (tabellen Uniques; raten stiger med delve-nivå till delve 9):",
+    "Avernic treads 31088 (AVERNIC_TREADS) 1/1,350-1/540 från delve 4; Eye of Ayak (uncharged) 31115 (EYE_OF_AYAK_UNCHARGED)",
+    "1/2,000-1/540 från delve 3; Mokhaiotl cloth 31109 (MOKHAIOTL_CLOTH) 1/2,500-1/540 från delve 2; Dom 31130 (DOMPET)",
+    "1/1,000-1/250 från delve 6. Torrhetsmätaren använder delve 9-raten (540 och 250), raten där man farmar.",
+    "Hiscores: KC syns först efter fem deep delves. RuneLite läser inte Doom-KC från chatten, så räknaren fylls från hiscores.",
+    "The Final Dawn med förkrav lades till i quest-requirements.json samma dag."
+  ],
+  "id": "doom-of-mokhaiotl",
+  "name": "Doom of Mokhaiotl",
+  "description": "The Final Dawn chain and the boss's unique drops with dry-streak meters",
+  "category": "Ironman · Late",
+  "tags": ["doom", "mokhaiotl", "avernic treads", "eye of ayak", "ayak", "mokhaiotl cloth", "boss", "ironman"],
+  "root": {
+    "title": "Doom of Mokhaiotl",
+    "aggregate": true,
+    "wikiPage": "Doom of Mokhaiotl",
+    "icon": {"activity": "DOOM_OF_MOKHAIOTL"},
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {"sideIcon": "QUEST"},
+        "children": [
+          {"quest": "THE_FINAL_DAWN",
+            "note": "The boss is first reached during The Final Dawn."}
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {"sideIcon": "INVENTORY"},
+        "children": [
+          {
+            "title": "Unique drops",
+            "aggregate": true,
+            "icon": {"activity": "DOOM_OF_MOKHAIOTL"},
+            "children": [
+              {"item": {"id": 31088, "name": "Avernic treads"},
+                "dropSource": {"hiscore": "DOOM_OF_MOKHAIOTL", "rate": 540},
+                "note": "From delve 4: 1/1,350, rising to 1/540 at delve 9."},
+              {"item": {"id": 31115, "name": "Eye of Ayak (uncharged)", "includeVariants": true},
+                "dropSource": {"hiscore": "DOOM_OF_MOKHAIOTL", "rate": 540},
+                "note": "From delve 3: 1/2,000, rising to 1/540 at delve 9."},
+              {"item": {"id": 31109, "name": "Mokhaiotl cloth"},
+                "dropSource": {"hiscore": "DOOM_OF_MOKHAIOTL", "rate": 540},
+                "note": "From delve 2: 1/2,500, rising to 1/540 at delve 9."},
+              {"item": {"id": 31130, "name": "Dom"},
+                "dropSource": {"hiscore": "DOOM_OF_MOKHAIOTL", "rate": 250},
+                "note": "Pet. From delve 6: 1/1,000, rising to 1/250 at delve 9."}
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

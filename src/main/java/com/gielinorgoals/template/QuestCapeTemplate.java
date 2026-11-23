@@ -24,6 +24,7 @@
  */
 package com.gielinorgoals.template;
 
+import com.gielinorgoals.model.GoalIcon;
 import com.gielinorgoals.model.QuestRequirement;
 import com.gielinorgoals.model.Requirement;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import net.runelite.api.Quest;
+import net.runelite.api.gameval.ItemID;
 
 /**
  * Quest point cape: ett räknarmål med ett quest-mål per quest i RuneLites {@link Quest},
@@ -96,6 +98,7 @@ public class QuestCapeTemplate implements GoalTemplate
 		quests.sort(Comparator.comparing(Quest::getName, String.CASE_INSENSITIVE_ORDER));
 
 		TemplateNode root = TemplateNode.aggregate("Quest cape");
+		root.setIcon(GoalIcon.item(ItemID.SKILLCAPE_QP));
 		for (Quest quest : quests)
 		{
 			root.add(TemplateNode.requirement(new QuestRequirement(quest.getId(), quest.getName())));

@@ -37,6 +37,7 @@
       {
         "title": "Skills for Recipe for Disaster",
         "aggregate": true,
+        "icon": {"sideIcon": "STATS"},
         "children": [
           {"skill": "COOKING", "level": 70},
           {"skill": "AGILITY", "level": 48},

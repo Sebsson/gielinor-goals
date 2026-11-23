@@ -67,6 +67,8 @@ public class Goal
 	private DropSource dropSource;
 	// Räknarens värde när ett mål med drop-källa klarades; null om det inte var känt.
 	private Long obtainedAtKc;
+	// Egen ikon för mål utan krav, t.ex. grupper från en template; null = ingen.
+	private GoalIcon icon;
 	// Null betyder ett manuellt mål som bara bockas av för hand.
 	private Requirement requirement;
 	// Delmålens id:n i användarens ordning. Målen själva ligger i GoalTree, så att ett

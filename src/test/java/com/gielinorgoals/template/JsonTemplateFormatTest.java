@@ -2,6 +2,7 @@ package com.gielinorgoals.template;
 
 import com.gielinorgoals.model.DropSource;
 import com.gielinorgoals.model.Goal;
+import com.gielinorgoals.model.GoalIcon;
 import com.gielinorgoals.model.GoalTree;
 import com.gielinorgoals.model.ItemRequirement;
 import com.gielinorgoals.model.KillCountRequirement;
@@ -104,6 +105,29 @@ public class JsonTemplateFormatTest
 
 		assertTrue(root.getChildren().get(0).getChildren().isEmpty());
 		assertFalse(root.getChildren().get(1).getChildren().isEmpty());
+	}
+
+	@Test
+	public void groupsCanHaveTheirOwnIcons()
+	{
+		String json = "{\"name\":\"I\",\"root\":{\"title\":\"Root\",\"icon\":{\"item\":25865},\"children\":["
+			+ "{\"title\":\"Unlock\",\"icon\":{\"sideIcon\":\"QUEST\"}},"
+			+ "{\"title\":\"Uniques\",\"icon\":{\"activity\":\"THE_HUEYCOATL\"}}]}}";
+		JsonTemplate template = parse(json);
+		TemplateNode root = template.build(Map.of());
+
+		assertEquals(GoalIcon.item(25865), root.getIcon());
+		assertEquals(GoalIcon.item(25865), template.getIcon());
+		assertEquals(GoalIcon.side(GoalIcon.SideIcon.QUEST), root.getChildren().get(0).getIcon());
+		assertEquals(GoalIcon.activity(HiscoreSkill.THE_HUEYCOATL), root.getChildren().get(1).getIcon());
+
+		GoalTree tree = new GoalTree();
+		TemplateInserter.insert(tree, root, null);
+		assertEquals(GoalIcon.side(GoalIcon.SideIcon.QUEST), find(tree, "group:unlock").getIcon());
+
+		rejects("{\"name\":\"X\",\"root\":{\"title\":\"R\",\"icon\":{\"item\":1,\"sideIcon\":\"QUEST\"}}}");
+		rejects("{\"name\":\"X\",\"root\":{\"title\":\"R\",\"icon\":{\"sideIcon\":\"NOPE\"}}}");
+		rejects("{\"name\":\"X\",\"root\":{\"title\":\"R\",\"icon\":{\"activity\":\"NOT_A_BOSS\"}}}");
 	}
 
 	@Test

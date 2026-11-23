@@ -1,0 +1,43 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-23):",
+    "https://oldschool.runescape.wiki/w/Dragon_warhammer - Item ID 13576 (gameval DRAGON_WARHAMMER, kontrolleras i test).",
+    "Enda källa: Lizardman shaman, 1/3,000 ('now drops at a rate of 1/3,000, up from 1/5,000', 29 maj 2024).",
+    "https://oldschool.runescape.wiki/w/Lizardman_shaman - västra Lizardman Canyon (3), Lizardman Temple under Molch (6),",
+    "Lizardman Caves (8, kräver Slayer-uppgift). Kourend favour är borttaget sedan 2024.",
+    "Wikin anger inga quest- eller skillkrav för Canyon eller Temple, därför är Lås upp bara ett manuellt mål med vägbeskrivning.",
+    "Shamans har inget KC-meddelande i chatten; räknaren går upp via loot-eventet (NPC-räknaren 'Lizardman shaman')."
+  ],
+  "id": "dragon-warhammer",
+  "name": "Dragon warhammer",
+  "description": "Lizardman shamans with a dry-streak meter on the 1/3,000 warhammer",
+  "category": "Ironman · Mid",
+  "tags": ["dwh", "warhammer", "dragon warhammer", "lizardman", "shaman", "ironman"],
+  "root": {
+    "title": "Dragon warhammer",
+    "aggregate": true,
+    "wikiPage": "Dragon warhammer",
+    "icon": {"item": 13576},
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {"sideIcon": "QUEST"},
+        "children": [
+          {"title": "Reach the lizardman shamans", "wikiPage": "Lizardman shaman", "icon": {"item": 13393},
+            "note": "West Lizardman Canyon (3 shamans): fairy ring DJR, or walk south from Xeric's Inferno. Lizardman Temple beneath Molch (6). The caves under the Lizardman Settlement (8) need a lizardman Slayer task. The wiki lists no quest or skill requirements for the canyon or the temple."}
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {"sideIcon": "INVENTORY"},
+        "children": [
+          {"item": {"id": 13576, "name": "Dragon warhammer", "includeVariants": true},
+            "dropSource": {"npc": "Lizardman shaman", "rate": 3000},
+            "note": "1/3,000 from lizardman shamans."}
+        ]
+      }
+    ]
+  }
+}

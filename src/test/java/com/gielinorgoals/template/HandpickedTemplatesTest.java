@@ -28,7 +28,8 @@ public class HandpickedTemplatesTest
 		List<String> names = new ArrayList<>();
 		new TemplateCatalog(new Gson()).getTemplates().forEach(template -> names.add(template.getName()));
 
-		assertEquals(List.of("Quest cape", "Achievement diary cape", "Base N", "Barrows gloves"), names);
+		assertEquals(List.of("Quest cape", "Achievement diary cape", "Base N", "Barrows gloves",
+			"Bow of Faerdhinen + crystal armour", "Dragon warhammer", "Doom of Mokhaiotl", "The Hueycoatl"), names);
 	}
 
 	@Test

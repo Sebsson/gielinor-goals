@@ -2439,6 +2439,123 @@
      "boostable": false
     }
    ]
+  },
+  {
+   "id": 5189,
+   "name": "The Final Dawn",
+   "quests": [
+    {
+     "id": 3710,
+     "name": "The Heart of Darkness"
+    },
+    {
+     "id": 3514,
+     "name": "Perilous Moons"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "THIEVING",
+     "level": 66,
+     "boostable": false
+    },
+    {
+     "skill": "RUNECRAFT",
+     "level": 52,
+     "boostable": false
+    },
+    {
+     "skill": "FLETCHING",
+     "level": 52,
+     "boostable": false
+    }
+   ]
+  },
+  {
+   "id": 3710,
+   "name": "The Heart of Darkness",
+   "quests": [
+    {
+     "id": 3512,
+     "name": "Twilight's Promise"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "MINING",
+     "level": 55,
+     "boostable": false
+    },
+    {
+     "skill": "THIEVING",
+     "level": 48,
+     "boostable": false
+    },
+    {
+     "skill": "SLAYER",
+     "level": 48,
+     "boostable": false
+    },
+    {
+     "skill": "AGILITY",
+     "level": 46,
+     "boostable": false
+    }
+   ]
+  },
+  {
+   "id": 3514,
+   "name": "Perilous Moons",
+   "quests": [
+    {
+     "id": 3512,
+     "name": "Twilight's Promise"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "SLAYER",
+     "level": 48,
+     "boostable": false
+    },
+    {
+     "skill": "HUNTER",
+     "level": 20,
+     "boostable": false
+    },
+    {
+     "skill": "FISHING",
+     "level": 20,
+     "boostable": false
+    },
+    {
+     "skill": "RUNECRAFT",
+     "level": 20,
+     "boostable": false
+    },
+    {
+     "skill": "CONSTRUCTION",
+     "level": 10,
+     "boostable": false
+    }
+   ]
+  },
+  {
+   "id": 3512,
+   "name": "Twilight's Promise",
+   "quests": [
+    {
+     "id": 3450,
+     "name": "Children of the Sun"
+    }
+   ],
+   "skills": []
+  },
+  {
+   "id": 3450,
+   "name": "Children of the Sun",
+   "quests": [],
+   "skills": []
   }
  ]
 }

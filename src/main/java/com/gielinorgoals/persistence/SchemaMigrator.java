@@ -62,7 +62,8 @@ public class SchemaMigrator
 	 * 10 – valfria fält templateId, templateParams, templateIgnoredKeys, templateNodeKey och
 	 *     wikiPage på mål, för "Update from template" och "Open on wiki". Ingen dataändring;
 	 *     äldre mål saknar dem.
-	 * 11 – valfria fält dropSource och obtainedAtKc på mål, för torrhetsmätaren. Ingen
+	 * 11 – valfria fält dropSource och obtainedAtKc på mål, för torrhetsmätaren, och icon
+	 *     (egen ikon för mål utan krav). Ingen
 	 *     dataändring; höjd så att äldre versioner blir skrivskyddade i stället för att
 	 *     tyst kasta bort drop-källorna när de sparar.
 	 */

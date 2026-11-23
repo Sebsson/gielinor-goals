@@ -284,7 +284,9 @@ public final class QuestChains
 			{
 				if (!closure.contains(partial.getId()) && partialsAdded.add(partial.getId()))
 				{
-					node.add(new TemplateNode(partial.getText() + " (partial requirement)", null, false));
+					TemplateNode partialNode = new TemplateNode(partial.getText() + " (partial requirement)", null, false);
+					partialNode.setIcon(com.gielinorgoals.model.GoalIcon.side(com.gielinorgoals.model.GoalIcon.SideIcon.QUEST));
+					node.add(partialNode);
 				}
 			}
 

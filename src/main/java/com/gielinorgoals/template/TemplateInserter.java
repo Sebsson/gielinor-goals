@@ -256,6 +256,7 @@ public final class TemplateInserter
 		goal.setWikiPage(node.getWikiPage());
 		goal.setNote(node.getNote());
 		goal.setDropSource(node.getDropSource());
+		goal.setIcon(node.getIcon());
 		return goal;
 	}
 }

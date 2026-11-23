@@ -1,0 +1,58 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-23):",
+    "https://oldschool.runescape.wiki/w/The_Hueycoatl - vid the Darkfrost i Varlamore. Inget quest- eller skillkrav;",
+    "varning under 85 combat och 43 Prayer, går ändå att gå in. Privat instans 50,000 coins (25,000 med hard combat achievements).",
+    "Unika drops (tabellen Uniques; 1/18 att rulla tabellen, skalat med bidrag):",
+    "Dragon hunter wand 30070 (DRAGONHUNTER_WAND) 1/105; Hueycoatl hide 30085 (HUEY_HIDE) 11/315, 3 st per drop;",
+    "Tome of Earth (empty) 30066 (TOME_OF_EARTH_UNCHARGED) 1/90. 11/315 ≈ 1/28.6 avrundas till 1/29 i torrhetsmätaren;",
+    "hide-sidans ändringslogg säger '~1/30' sedan 25 juni 2025, så siffran är osäker.",
+    "Huasca seed ligger under Seeds och husdjuret Huberte utanför Uniques i wikins tabeller, så de är inte med.",
+    "KC-meddelande: 'Hueycoatl' finns i RuneLites lista över KC-namn; hiscore-posten heter The Hueycoatl."
+  ],
+  "id": "the-hueycoatl",
+  "name": "The Hueycoatl",
+  "description": "Reaching the Darkfrost and the Hueycoatl's unique drops with dry-streak meters",
+  "category": "Ironman · Mid",
+  "tags": ["huey", "hueycoatl", "dragon hunter wand", "dhw", "tome of earth", "hueycoatl hide", "varlamore", "boss", "ironman"],
+  "root": {
+    "title": "The Hueycoatl",
+    "aggregate": true,
+    "wikiPage": "The Hueycoatl",
+    "icon": {"activity": "THE_HUEYCOATL"},
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {"sideIcon": "QUEST"},
+        "children": [
+          {"title": "Reach the Darkfrost in Varlamore", "wikiPage": "The Hueycoatl", "icon": {"activity": "THE_HUEYCOATL"},
+            "note": "No quest or skill requirements. Below 85 combat and 43 Prayer the game warns you, but you can still go in. A private instance costs 50,000 coins (25,000 with the hard combat achievements)."}
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {"sideIcon": "INVENTORY"},
+        "children": [
+          {
+            "title": "Unique drops",
+            "aggregate": true,
+            "icon": {"activity": "THE_HUEYCOATL"},
+            "children": [
+              {"item": {"id": 30070, "name": "Dragon hunter wand"},
+                "dropSource": {"hiscore": "THE_HUEYCOATL", "rate": 105},
+                "note": "1/105, scaled by your contribution."},
+              {"item": {"id": 30085, "name": "Hueycoatl hide", "quantity": 3},
+                "dropSource": {"hiscore": "THE_HUEYCOATL", "rate": 29},
+                "note": "11/315 (about 1/29) for 3 hides, scaled by your contribution."},
+              {"item": {"id": 30066, "name": "Tome of Earth (empty)", "includeVariants": true},
+                "dropSource": {"hiscore": "THE_HUEYCOATL", "rate": 90},
+                "note": "1/90, scaled by your contribution."}
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

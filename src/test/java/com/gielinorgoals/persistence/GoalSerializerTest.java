@@ -561,5 +561,9 @@ public class GoalSerializerTest
 		assertEquals(com.gielinorgoals.model.DropSource.npc("Lizardman shaman", 5000), again.getDropSource());
 		assertEquals(Long.valueOf(3210L), again.getObtainedAtKc());
 		assertEquals(11, new Gson().fromJson(saved, JsonObject.class).get("schemaVersion").getAsInt());
+
+		again.setIcon(com.gielinorgoals.model.GoalIcon.activity(HiscoreSkill.THE_HUEYCOATL));
+		Goal third = serializer.deserialize(serializer.serialize(reloaded.getTree())).getTree().find("a");
+		assertEquals(com.gielinorgoals.model.GoalIcon.activity(HiscoreSkill.THE_HUEYCOATL), third.getIcon());
 	}
 }

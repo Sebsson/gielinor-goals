@@ -68,6 +68,15 @@ public interface GoalTemplate
 	}
 
 	/**
+	 * Egen ikon för templaten i listan när den saknar ett ikonkrav.
+	 */
+	@Nullable
+	default com.gielinorgoals.model.GoalIcon getIcon()
+	{
+		return null;
+	}
+
+	/**
 	 * Om "Show full quest chains" ska vara ibockad från början i template-dialogen.
 	 */
 	default boolean defaultExpandQuestChains()

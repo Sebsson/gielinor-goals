@@ -74,6 +74,11 @@ public class TemplateNode
 	@Nullable
 	private com.gielinorgoals.model.DropSource dropSource;
 
+	// Egen ikon för noder utan krav, t.ex. grupperna "Unlock" och "Obtain".
+	@Setter
+	@Nullable
+	private com.gielinorgoals.model.GoalIcon icon;
+
 	// False om ett quest inte ska fällas ut med sin kedja trots att kedjor är påslagna.
 	@Setter
 	private boolean expandChain = true;
