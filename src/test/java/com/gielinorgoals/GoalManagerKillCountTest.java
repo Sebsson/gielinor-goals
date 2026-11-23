@@ -56,7 +56,7 @@ public class GoalManagerKillCountTest
 
 		manager.recordChatCount(PROFILE, ZULRAH, 99);
 		assertFalse(goal.isCompleted());
-		assertEquals("99/100", manager.getProgress(goal.getId()).getLabel());
+		assertEquals("99 / 100 kc", manager.getProgress(goal.getId()).getLabel());
 
 		manager.recordChatCount(PROFILE, ZULRAH, 100);
 		assertTrue(goal.isCompleted());
@@ -73,7 +73,7 @@ public class GoalManagerKillCountTest
 		manager.recordChatCount(PROFILE, ZULRAH, 120);
 
 		assertTrue(first.isCompleted());
-		assertEquals("120/200", manager.getProgress(second.getId()).getLabel());
+		assertEquals("120 / 200 kc", manager.getProgress(second.getId()).getLabel());
 		assertEquals(1, manager.getCounters().asMap().size());
 	}
 
@@ -83,11 +83,11 @@ public class GoalManagerKillCountTest
 		Goal goal = addGoal(KillCountRequirement.hiscore(HiscoreSkill.ZULRAH, 500));
 
 		manager.recordHiscores(PROFILE, Map.of(ZULRAH, 300L, "hiscore:VORKATH", 40L));
-		assertEquals("300/500", manager.getProgress(goal.getId()).getLabel());
+		assertEquals("300 / 500 kc", manager.getProgress(goal.getId()).getLabel());
 
 		manager.recordChatCount(PROFILE, ZULRAH, 320);
 		manager.recordHiscores(PROFILE, Map.of(ZULRAH, 310L));
-		assertEquals("320/500", manager.getProgress(goal.getId()).getLabel());
+		assertEquals("320 / 500 kc", manager.getProgress(goal.getId()).getLabel());
 		assertEquals(ActivityCounters.Source.CHAT, manager.getCounters().get(ZULRAH).getSource());
 	}
 
@@ -98,7 +98,7 @@ public class GoalManagerKillCountTest
 
 		manager.recordNpcKill(PROFILE, "Goblin");
 		manager.recordNpcKill(PROFILE, "LIZARDMAN SHAMAN");
-		assertEquals("1/2", manager.getProgress(goal.getId()).getLabel());
+		assertEquals("1 / 2 kc", manager.getProgress(goal.getId()).getLabel());
 		manager.recordNpcKill(PROFILE, "Lizardman shaman");
 
 		assertTrue(goal.isCompleted());

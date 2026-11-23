@@ -29,9 +29,12 @@ import com.gielinorgoals.model.CombatLevelRequirement;
 import com.gielinorgoals.model.DiaryArea;
 import com.gielinorgoals.model.DiaryRequirement;
 import com.gielinorgoals.model.DiaryTier;
+import com.gielinorgoals.GoalManager;
+import com.gielinorgoals.model.ActivityCounters;
 import com.gielinorgoals.model.GameData;
 import com.gielinorgoals.model.GoalProgress;
 import com.gielinorgoals.model.ItemRequirement;
+import com.gielinorgoals.model.KillCountRequirement;
 import com.gielinorgoals.model.QuestPointsRequirement;
 import com.gielinorgoals.model.QuestRequirement;
 import com.gielinorgoals.model.Requirement;
@@ -65,12 +68,15 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import lombok.Value;
 import net.runelite.api.Experience;
 import net.runelite.api.QuestState;
 import net.runelite.api.Skill;
+import net.runelite.client.hiscore.HiscoreSkill;
+import net.runelite.client.hiscore.HiscoreSkillType;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.ui.FontManager;
@@ -98,7 +104,8 @@ final class GoalEditDialog
 		COMBAT_ACHIEVEMENT("Combat achievement"),
 		TOTAL_LEVEL("Total level"),
 		COMBAT_LEVEL("Combat level"),
-		QUEST_POINTS("Quest points");
+		QUEST_POINTS("Quest points"),
+		KILL_COUNT("Kill count");
 
 		boolean isAccountLevel()
 		{
@@ -128,6 +135,43 @@ final class GoalEditDialog
 		Requirement requirement;
 		// Visa som räknare över delmålen ("X/Y").
 		boolean aggregate;
+		// Nuvarande värde för ett KC-mål om användaren angav eller ändrade det, annars null.
+		@Nullable
+		Long startCount;
+	}
+
+	/**
+	 * Ett val i KC-sökningen: en hiscore-aktivitet, eller "annan NPC" / "egen räknare".
+	 */
+	@Value
+	static class KcOption
+	{
+		KillCountRequirement.ActivityType type;
+		@Nullable
+		HiscoreSkill skill;
+		String label;
+
+		@Override
+		public String toString()
+		{
+			return label;
+		}
+	}
+
+	static final KcOption OTHER_NPC = new KcOption(KillCountRequirement.ActivityType.NPC, null,
+		"Other NPC (by name)...");
+	static final KcOption MANUAL_COUNTER = new KcOption(KillCountRequirement.ActivityType.MANUAL, null,
+		"Manual counter...");
+
+	/**
+	 * Sätter KC-målets nuvarande värde efter att målet lagts till eller ändrats.
+	 */
+	static void applyStartCount(GoalManager goalManager, Result result)
+	{
+		if (result.getStartCount() != null && result.getRequirement() instanceof KillCountRequirement)
+		{
+			goalManager.setCounter(((KillCountRequirement) result.getRequirement()).counterKey(), result.getStartCount());
+		}
 	}
 
 	@Value
@@ -188,6 +232,16 @@ final class GoalEditDialog
 	private final JTextField accountTargetField = new JTextField(20);
 	private final JLabel accountCurrentLabel = hintLabel();
 
+	// KC-kortet: sökbar aktivitet, namn för NPC/egen räknare, målantal och nuvarande värde.
+	private static final String KILL_COUNT_CARD = "KILL_COUNT";
+	private final SearchPanel<KcOption> kcPanel;
+	private final JLabel kcNameLabel = new JLabel();
+	private final JTextField kcNameField = new JTextField(20);
+	private final JTextField kcTargetField = new JTextField(20);
+	private final JTextField kcCurrentField = new JTextField(20);
+	private final JLabel kcCurrentHint = hintLabel();
+	private final Map<HiscoreSkill, Icon> activityIcons = new HashMap<>();
+
 	// Föremålskortet.
 	private final SearchPanel<ItemSearch.ItemOption> itemPanel;
 	private final JTextField quantityField = new JTextField("1", 20);
@@ -234,6 +288,32 @@ final class GoalEditDialog
 		cardPanel.add(diaryPanel, GoalKind.DIARY.name());
 		cardPanel.add(caPanel, GoalKind.COMBAT_ACHIEVEMENT.name());
 		cardPanel.add(buildAccountCard(), ACCOUNT_CARD);
+
+		kcPanel = new SearchPanel<>("Search bosses, clues and activities", this::searchActivities, KcOption::getLabel,
+			this::activityIcon, 0);
+		kcPanel.setOnSelect(option -> updateKillCountFields());
+		kcPanel.refresh();
+		kcNameField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener()
+		{
+			@Override
+			public void insertUpdate(javax.swing.event.DocumentEvent e)
+			{
+				prefillCurrentCount();
+			}
+
+			@Override
+			public void removeUpdate(javax.swing.event.DocumentEvent e)
+			{
+				prefillCurrentCount();
+			}
+
+			@Override
+			public void changedUpdate(javax.swing.event.DocumentEvent e)
+			{
+				prefillCurrentCount();
+			}
+		});
+		cardPanel.add(buildKillCountCard(), KILL_COUNT_CARD);
 
 		questPanel.setHint("Loading your quests...");
 		diaryPanel.setHint("Loading your diaries...");
@@ -337,6 +417,23 @@ final class GoalEditDialog
 			kindBox.setSelectedItem(GoalKind.COMBAT_LEVEL);
 			accountTargetField.setText(String.valueOf(((CombatLevelRequirement) requirement).getTarget()));
 		}
+		else if (requirement instanceof KillCountRequirement)
+		{
+			KillCountRequirement kc = (KillCountRequirement) requirement;
+			kindBox.setSelectedItem(GoalKind.KILL_COUNT);
+			HiscoreSkill skill = kc.hiscoreSkill();
+			if (skill != null)
+			{
+				kcPanel.preselect(new KcOption(KillCountRequirement.ActivityType.HISCORE, skill, skill.getName()));
+			}
+			else
+			{
+				kcPanel.preselect(kc.getActivityType() == KillCountRequirement.ActivityType.NPC ? OTHER_NPC : MANUAL_COUNTER);
+				kcNameField.setText(kc.getActivityName());
+			}
+			kcTargetField.setText(String.valueOf(kc.getTarget()));
+			updateKillCountFields();
+		}
 		else if (requirement instanceof QuestPointsRequirement)
 		{
 			kindBox.setSelectedItem(GoalKind.QUEST_POINTS);
@@ -407,6 +504,121 @@ final class GoalEditDialog
 		return northAligned(card);
 	}
 
+	private JPanel buildKillCountCard()
+	{
+		JPanel options = new JPanel(new DynamicGridLayout(0, 1, 0, 4));
+		options.add(kcNameLabel);
+		options.add(kcNameField);
+		options.add(new JLabel("How many? (e.g. 500 or 3k)"));
+		options.add(kcTargetField);
+		options.add(new JLabel("Current count (optional)"));
+		options.add(kcCurrentField);
+		options.add(kcCurrentHint);
+
+		JPanel card = new JPanel(new BorderLayout(0, 6));
+		card.add(kcPanel, BorderLayout.CENTER);
+		card.add(options, BorderLayout.SOUTH);
+		return card;
+	}
+
+	// Specialvalen först, sedan bossar, clues och aktiviteter som matchar söktexten.
+	private void searchActivities(String query, Consumer<List<KcOption>> callback)
+	{
+		String needle = query.toLowerCase(Locale.ROOT);
+		List<KcOption> options = new ArrayList<>();
+		options.add(OTHER_NPC);
+		options.add(MANUAL_COUNTER);
+		List<KcOption> activities = new ArrayList<>();
+		for (HiscoreSkill skill : HiscoreSkill.values())
+		{
+			if ((skill.getType() == HiscoreSkillType.BOSS || skill.getType() == HiscoreSkillType.ACTIVITY)
+				&& skill.getName().toLowerCase(Locale.ROOT).contains(needle))
+			{
+				activities.add(new KcOption(KillCountRequirement.ActivityType.HISCORE, skill, skill.getName()));
+			}
+		}
+		activities.sort(java.util.Comparator.comparing(KcOption::getLabel, String.CASE_INSENSITIVE_ORDER));
+		options.addAll(activities);
+		callback.accept(options);
+	}
+
+	// Ikonerna laddas en gång och listan ritas om när de finns.
+	@Nullable
+	private Icon activityIcon(KcOption option)
+	{
+		HiscoreSkill skill = option.getSkill();
+		if (skill == null)
+		{
+			return null;
+		}
+		if (!activityIcons.containsKey(skill))
+		{
+			activityIcons.put(skill, null);
+			services.getIcons().loadActivityImage(skill, image -> SwingUtilities.invokeLater(() ->
+			{
+				activityIcons.put(skill, new ImageIcon(image));
+				kcPanel.repaintList();
+			}));
+		}
+		return activityIcons.get(skill);
+	}
+
+	private void updateKillCountFields()
+	{
+		KcOption option = kcPanel.getSelected();
+		boolean needsName = option != null && option.getType() != KillCountRequirement.ActivityType.HISCORE;
+		kcNameLabel.setText(option != null && option.getType() == KillCountRequirement.ActivityType.MANUAL
+			? "Counter name, e.g. Birdhouse runs"
+			: "NPC name, e.g. Lizardman shaman");
+		kcNameLabel.setVisible(needsName);
+		kcNameField.setVisible(needsName);
+		prefillCurrentCount();
+	}
+
+	// Nuvarande värde från räknarlagret (chatt, hiscores, loot eller eget värde) om det finns.
+	private void prefillCurrentCount()
+	{
+		String key = selectedCounterKey();
+		ActivityCounters.Counter counter = key == null ? null : services.counters().get(key);
+		if (counter != null)
+		{
+			kcCurrentField.setText(String.valueOf(counter.getValue()));
+			kcCurrentHint.setText("From " + counter.getSource().getLabel() + ", "
+				+ GielinorGoalsPanel.formatAge(System.currentTimeMillis() - counter.getUpdatedAt()) + ".");
+			return;
+		}
+		kcCurrentField.setText("");
+		KcOption option = kcPanel.getSelected();
+		if (option == null)
+		{
+			kcCurrentHint.setText(" ");
+		}
+		else if (option.getType() == KillCountRequirement.ActivityType.HISCORE)
+		{
+			kcCurrentHint.setText("Fetched from the hiscores after you add the goal.");
+		}
+		else
+		{
+			kcCurrentHint.setText("Starts at 0 unless you enter a value.");
+		}
+	}
+
+	@Nullable
+	private String selectedCounterKey()
+	{
+		KcOption option = kcPanel.getSelected();
+		if (option == null)
+		{
+			return null;
+		}
+		if (option.getSkill() != null)
+		{
+			return KillCountRequirement.counterKey(KillCountRequirement.ActivityType.HISCORE, option.getSkill().name());
+		}
+		String name = kcNameField.getText().trim();
+		return name.isEmpty() ? null : KillCountRequirement.counterKey(option.getType(), name);
+	}
+
 	private JPanel buildAccountCard()
 	{
 		JPanel card = new JPanel(new DynamicGridLayout(0, 1, 0, 4));
@@ -465,6 +677,12 @@ final class GoalEditDialog
 			targetLabel.setText("Target total XP (e.g. 13034431 or 13m)");
 		}
 		gainBox.setVisible(kind == GoalKind.SKILL_XP);
+
+		if (kind == GoalKind.KILL_COUNT)
+		{
+			cards.show(cardPanel, KILL_COUNT_CARD);
+			return;
+		}
 
 		if (kind.isAccountLevel())
 		{
@@ -565,7 +783,25 @@ final class GoalEditDialog
 		{
 			throw new IllegalArgumentException("You already have this goal in your list.");
 		}
-		return new Result(title, note, requirement, aggregateBox.isSelected());
+		return new Result(title, note, requirement, aggregateBox.isSelected(), startCount(requirement));
+	}
+
+	// Ett angivet nuvarande värde som skiljer från räknarlagret, annars null.
+	@Nullable
+	private Long startCount(@Nullable Requirement requirement)
+	{
+		String text = kcCurrentField.getText().trim();
+		if (!(requirement instanceof KillCountRequirement) || text.isEmpty())
+		{
+			return null;
+		}
+		long value = parseAmount(text);
+		if (value < 0)
+		{
+			throw new IllegalArgumentException("Enter a current count of 0 or more, or leave it empty.");
+		}
+		String key = ((KillCountRequirement) requirement).counterKey();
+		return value == services.counters().value(key) ? null : value;
 	}
 
 	@Nullable
@@ -616,6 +852,20 @@ final class GoalEditDialog
 				int[] range = accountRange(kind);
 				return accountRequirement(kind, parseInRange(accountTargetField.getText().trim(), range[0], range[1],
 					kind.toString().toLowerCase(Locale.ROOT)));
+			}
+			case KILL_COUNT:
+			{
+				KcOption option = requireSelected(kcPanel, "Pick a boss or activity, \"Other NPC\" or \"Manual counter\".");
+				int target = parseInRange(kcTargetField.getText().trim(), 1, KillCountRequirement.MAX_TARGET, "target");
+				switch (option.getType())
+				{
+					case NPC:
+						return KillCountRequirement.npc(kcNameField.getText(), target);
+					case MANUAL:
+						return KillCountRequirement.manual(kcNameField.getText(), target);
+					default:
+						return KillCountRequirement.hiscore(option.getSkill(), target);
+				}
 			}
 			case COMBAT_ACHIEVEMENT:
 			{

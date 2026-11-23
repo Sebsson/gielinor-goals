@@ -262,6 +262,7 @@ public class GielinorGoalsPanel extends PluginPanel
 		{
 			goalManager.addGoal(null, result.getTitle(), result.getNote(), result.getRequirement(),
 				result.isAggregate());
+			GoalEditDialog.applyStartCount(goalManager, result);
 			newGoalField.setText("");
 		}
 	}

@@ -30,6 +30,8 @@ import com.gielinorgoals.model.Goal;
 import com.gielinorgoals.model.GoalEvaluator;
 import com.gielinorgoals.model.GoalProgress;
 import com.gielinorgoals.model.GoalTree;
+import com.gielinorgoals.model.ActivityCounters;
+import com.gielinorgoals.model.KillCountRequirement;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -151,6 +153,11 @@ class GoalRow extends JPanel
 			right.add(link, BorderLayout.WEST);
 		}
 		right.add(buildMenuButton(), BorderLayout.EAST);
+		// Egna räknare räknas direkt på raden.
+		if (editable && isManualCounter())
+		{
+			right.add(buildCounterButtons(), BorderLayout.CENTER);
+		}
 
 		add(left, BorderLayout.WEST);
 		add(center, BorderLayout.CENTER);
@@ -366,6 +373,10 @@ class GoalRow extends JPanel
 		menu.add(item("Move out one level", tree.canOutdent(grandparentId, parentId, id),
 			() -> goalManager.outdent(grandparentId, parentId, id)));
 		menu.addSeparator();
+		if (goal.getRequirement() instanceof KillCountRequirement)
+		{
+			menu.add(item("Set value...", true, this::setCounterValue));
+		}
 		menu.add(item("Link to another goal...", true, this::linkToAnotherGoal));
 		if (parentId != null && parents.size() > 1)
 		{
@@ -382,6 +393,70 @@ class GoalRow extends JPanel
 		return menu;
 	}
 
+	private boolean isManualCounter()
+	{
+		return goal.getRequirement() instanceof KillCountRequirement
+			&& ((KillCountRequirement) goal.getRequirement()).getActivityType() == KillCountRequirement.ActivityType.MANUAL;
+	}
+
+	private JPanel buildCounterButtons()
+	{
+		String key = ((KillCountRequirement) goal.getRequirement()).counterKey();
+		JPanel buttons = new JPanel(new BorderLayout(4, 0));
+		buttons.setOpaque(false);
+		buttons.add(counterButton("-", "Count one less", () -> goalManager.adjustCounter(key, -1)), BorderLayout.WEST);
+		buttons.add(counterButton("+", "Count one more", () -> goalManager.adjustCounter(key, 1)), BorderLayout.EAST);
+		return buttons;
+	}
+
+	private static JLabel counterButton(String text, String tooltip, Runnable action)
+	{
+		JLabel button = new JLabel(text);
+		button.setFont(FontManager.getRunescapeBoldFont());
+		button.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+		button.setToolTipText(tooltip);
+		button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		button.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mouseClicked(MouseEvent e)
+			{
+				if (SwingUtilities.isLeftMouseButton(e))
+				{
+					action.run();
+				}
+			}
+		});
+		return button;
+	}
+
+	// För alla KC-mål, t.ex. för att rätta ett fel eller ange ett startvärde.
+	private void setCounterValue()
+	{
+		KillCountRequirement kc = (KillCountRequirement) goal.getRequirement();
+		long current = goalManager.getCounters().value(kc.counterKey());
+		Object input = JOptionPane.showInputDialog(this, "Current count for " + kc.getActivityName() + ":",
+			"Set value", JOptionPane.PLAIN_MESSAGE, null, null, current < 0 ? "" : String.valueOf(current));
+		if (input == null)
+		{
+			return;
+		}
+		try
+		{
+			long value = Long.parseLong(input.toString().replace(",", "").replace(" ", "").trim());
+			if (value < 0)
+			{
+				throw new NumberFormatException();
+			}
+			goalManager.setCounter(kc.counterKey(), value);
+		}
+		catch (NumberFormatException e)
+		{
+			JOptionPane.showMessageDialog(this, "Enter a whole number of 0 or more.", "Set value",
+				JOptionPane.INFORMATION_MESSAGE);
+		}
+	}
+
 	private void linkToAnotherGoal()
 	{
 		String newParentId = LinkGoalDialog.show(this, tree, goal);
@@ -389,6 +464,19 @@ class GoalRow extends JPanel
 		{
 			goalManager.link(newParentId, goal.getId());
 		}
+	}
+
+	// T.ex. "From chat, 2 minutes ago" eller att värdet inte är känt än.
+	private String counterSource()
+	{
+		ActivityCounters.Counter counter = goalManager.getCounters()
+			.get(((KillCountRequirement) goal.getRequirement()).counterKey());
+		if (counter == null)
+		{
+			return "Count not known yet";
+		}
+		return "From " + counter.getSource().getLabel() + ", "
+			+ GielinorGoalsPanel.formatAge(System.currentTimeMillis() - counter.getUpdatedAt());
 	}
 
 	// Föräldrarna utom den raden visas under, t.ex. "Barrows gloves, Quest cape".
@@ -435,6 +523,7 @@ class GoalRow extends JPanel
 		{
 			goalManager.addGoal(goal.getId(), result.getTitle(), result.getNote(), result.getRequirement(),
 				result.isAggregate());
+			GoalEditDialog.applyStartCount(goalManager, result);
 		}
 	}
 
@@ -446,6 +535,7 @@ class GoalRow extends JPanel
 		{
 			goalManager.editGoal(goal.getId(), result.getTitle(), result.getNote(), result.getRequirement(),
 				result.isAggregate());
+			GoalEditDialog.applyStartCount(goalManager, result);
 		}
 	}
 
@@ -495,6 +585,10 @@ class GoalRow extends JPanel
 		if (numbers != null)
 		{
 			html.append("<br>").append(escapeHtml(numbers).replace("\n", "<br>"));
+		}
+		if (goal.getRequirement() instanceof KillCountRequirement)
+		{
+			html.append("<br><i>").append(counterSource()).append("</i>");
 		}
 		if (parents.size() > 1)
 		{

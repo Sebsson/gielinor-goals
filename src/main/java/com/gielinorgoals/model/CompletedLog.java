@@ -65,6 +65,7 @@ public final class CompletedLog
 		COMBAT_ACHIEVEMENT("Combat achievements"),
 		// Total level, combat level och quest points i en kategori, så att listan får plats.
 		ACCOUNT("Levels & quest points"),
+		KILL_COUNT("Kill counts"),
 		MANUAL("Manual goals");
 
 		private final String label;

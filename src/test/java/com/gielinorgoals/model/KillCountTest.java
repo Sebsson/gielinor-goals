@@ -46,7 +46,7 @@ public class KillCountTest
 
 		counters.applyChat(ZULRAH, 149, 1L);
 		GoalProgress progress = goal.progress(new CountedGameData(GameData.EMPTY, counters));
-		assertEquals("149/150", progress.getLabel());
+		assertEquals("149 / 150 kc", progress.getLabel());
 		assertFalse(progress.isComplete());
 		assertEquals("149 / 150 kc\n1 left", goal.describeProgress(progress));
 	}
@@ -145,7 +145,7 @@ public class KillCountTest
 
 		assertTrue(first.isCompleted());
 		assertFalse(second.isCompleted());
-		assertEquals("120/500", result.getProgress().get(second.getId()).getLabel());
+		assertEquals("120 / 500 kc", result.getProgress().get(second.getId()).getLabel());
 	}
 
 	@Test

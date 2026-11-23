@@ -25,6 +25,7 @@
 package com.gielinorgoals.ui;
 
 import com.gielinorgoals.GoalManager;
+import com.gielinorgoals.model.ActivityCounters;
 import com.gielinorgoals.model.GameData;
 import com.gielinorgoals.model.Requirement;
 import com.gielinorgoals.tracking.CompletionLookup;
@@ -67,6 +68,14 @@ public class DialogServices
 	public GameData currentGameData()
 	{
 		return goalManager.getCurrentGameData();
+	}
+
+	/**
+	 * Profilens räknare (kill count, clues, NPC-kills, egna räknare).
+	 */
+	public ActivityCounters counters()
+	{
+		return goalManager.getCounters();
 	}
 
 	public boolean isDuplicate(Requirement requirement, @Nullable String exceptGoalId)

@@ -193,7 +193,9 @@ public class KillCountRequirement extends Requirement
 		{
 			return null;
 		}
-		String label = QuantityFormatter.formatNumber(current) + "/" + QuantityFormatter.formatNumber(target);
+		// T.ex. "1,240 / 3,000 kc"; egna räknare har ingen enhet.
+		String label = QuantityFormatter.formatNumber(current) + " / " + QuantityFormatter.formatNumber(target)
+			+ (activityType == ActivityType.MANUAL ? "" : " kc");
 		return new GoalProgress(current, target, current >= target, label);
 	}
 

@@ -28,6 +28,7 @@ import com.gielinorgoals.model.CombatAchievementRequirement;
 import com.gielinorgoals.model.CombatLevelRequirement;
 import com.gielinorgoals.model.DiaryRequirement;
 import com.gielinorgoals.model.ItemRequirement;
+import com.gielinorgoals.model.KillCountRequirement;
 import com.gielinorgoals.model.QuestPointsRequirement;
 import com.gielinorgoals.model.QuestRequirement;
 import com.gielinorgoals.model.Requirement;
@@ -105,6 +106,10 @@ public class GoalIcons
 		{
 			applySprite(SpriteID.SideIcons.QUEST, label);
 		}
+		else if (requirement instanceof KillCountRequirement)
+		{
+			applySprite(KillCountIcons.spriteFor((KillCountRequirement) requirement), label);
+		}
 		else
 		{
 			label.setIcon(null);
@@ -146,6 +151,19 @@ public class GoalIcons
 		{
 			loadSprite(SpriteID.SideIcons.QUEST, consumer);
 		}
+		else if (requirement instanceof KillCountRequirement)
+		{
+			loadSprite(KillCountIcons.spriteFor((KillCountRequirement) requirement), consumer);
+		}
+	}
+
+	/**
+	 * Ikonen för en hiscore-aktivitet, t.ex. i sökningen i redigeringsdialogen. Kan
+	 * anropas senare från en annan tråd när bilden har laddats.
+	 */
+	public void loadActivityImage(net.runelite.client.hiscore.HiscoreSkill skill, Consumer<BufferedImage> consumer)
+	{
+		loadSprite(KillCountIcons.spriteFor(skill), consumer);
 	}
 
 	public void applyItem(int itemId, JLabel label)
