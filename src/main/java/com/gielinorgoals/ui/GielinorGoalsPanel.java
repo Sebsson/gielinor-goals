@@ -78,6 +78,11 @@ public class GielinorGoalsPanel extends PluginPanel
 	private final ProgressBar summaryBar = new ProgressBar();
 	private final JCheckBox hideCompletedBox = new JCheckBox("Hide completed");
 	private final JButton collapseAllButton = new JButton("Collapse all");
+	private final JButton mapButton = new JButton("Map");
+	// Sätts av pluginet, som äger kartfönstret.
+	private Runnable openMap = () ->
+	{
+	};
 	private final JLabel statusLabel = new JLabel();
 	private final JLabel bankLabel = new JLabel();
 	private final JPanel listPanel = new JPanel(new DynamicGridLayout(0, 1, 0, 2));
@@ -164,14 +169,24 @@ public class GielinorGoalsPanel extends PluginPanel
 		summaryBar.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		summaryBar.setPreferredSize(new Dimension(0, 8));
 
+		mapButton.setFocusPainted(false);
+		mapButton.setToolTipText("Open a map of how your goals connect");
+		mapButton.addActionListener(e -> openMap.run());
+
 		JPanel titleRow = new JPanel(new BorderLayout());
 		titleRow.setOpaque(false);
 		titleRow.add(title, BorderLayout.WEST);
-		titleRow.add(summaryLabel, BorderLayout.EAST);
+		titleRow.add(mapButton, BorderLayout.EAST);
+
+		// Summeringen har en egen rad; titelraden är för smal för både den och kartknappen.
+		JPanel summaryRow = new JPanel(new BorderLayout());
+		summaryRow.setOpaque(false);
+		summaryRow.add(summaryLabel, BorderLayout.EAST);
 
 		JPanel header = new JPanel(new DynamicGridLayout(0, 1, 0, 5));
 		header.setOpaque(false);
 		header.add(titleRow);
+		header.add(summaryRow);
 		header.add(summaryBar);
 		return header;
 	}
@@ -285,6 +300,11 @@ public class GielinorGoalsPanel extends PluginPanel
 	/**
 	 * Bygger om hela listan från modellen. Anropas på EDT.
 	 */
+	public void setOpenMap(Runnable openMap)
+	{
+		this.openMap = openMap;
+	}
+
 	public void rebuild()
 	{
 		boolean editable = goalManager.isEditable();

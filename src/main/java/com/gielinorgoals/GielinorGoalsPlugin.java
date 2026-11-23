@@ -41,6 +41,8 @@ import com.gielinorgoals.tracking.WatchedAchievements;
 import com.gielinorgoals.ui.GielinorGoalsPanel;
 import com.gielinorgoals.ui.GoalCompletedOverlay;
 import com.gielinorgoals.ui.GoalCompletionNotifier;
+import com.gielinorgoals.ui.GoalIcons;
+import com.gielinorgoals.ui.GoalMapWindow;
 import com.gielinorgoals.ui.NextGoalOverlay;
 import com.google.inject.Provides;
 import java.awt.image.BufferedImage;
@@ -152,6 +154,9 @@ public class GielinorGoalsPlugin extends Plugin
 
 	private GielinorGoalsPanel panel;
 	private NavigationButton navigationButton;
+	// Skapas första gången kartan öppnas. EDT.
+	private GoalMapWindow mapWindow;
+	private BufferedImage pluginIcon;
 
 	// Senaste data från varje tracker; används bara på klienttråden.
 	private Map<Skill, Long> latestXp = Collections.emptyMap();
@@ -162,6 +167,7 @@ public class GielinorGoalsPlugin extends Plugin
 	protected void startUp() throws Exception
 	{
 		panel = injector.getInstance(GielinorGoalsPanel.class);
+		panel.setOpenMap(this::openMap);
 		goalManager.setListener(this::onGoalsChanged);
 		goalManager.setCompletionListener(this::announceCompleted);
 
@@ -183,6 +189,7 @@ public class GielinorGoalsPlugin extends Plugin
 		});
 
 		BufferedImage icon = ImageUtil.loadImageResource(GielinorGoalsPlugin.class, "panel_icon.png");
+		pluginIcon = icon;
 		navigationButton = NavigationButton.builder()
 			.tooltip("Gielinor Goals")
 			.icon(icon)
@@ -203,6 +210,11 @@ public class GielinorGoalsPlugin extends Plugin
 	protected void shutDown() throws Exception
 	{
 		clientToolbar.removeNavigation(navigationButton);
+		if (mapWindow != null)
+		{
+			mapWindow.close();
+			mapWindow = null;
+		}
 		overlayManager.remove(nextGoalOverlay);
 		overlayManager.remove(goalCompletedOverlay);
 		completionNotifier.clear();
@@ -438,11 +450,26 @@ public class GielinorGoalsPlugin extends Plugin
 		{
 			panel.rebuild();
 		}
+		if (mapWindow != null)
+		{
+			mapWindow.refresh();
+		}
 		achievementTracker.setWatched(WatchedAchievements.from(goalManager.getTree()));
 		requestHiscoresForNewGoals();
 		nextGoalOverlay.setEntries(goalManager.hasProfile()
 			? NextGoals.select(goalManager.getTree(), goalManager::getProgress, config.overlayGoalCount())
 			: Collections.emptyList());
+	}
+
+	// Knappen "Map" i panelen; ett nytt klick tar fram det befintliga fönstret. EDT.
+	private void openMap()
+	{
+		if (mapWindow == null)
+		{
+			mapWindow = new GoalMapWindow(goalManager, config, configManager, injector.getInstance(GoalIcons.class),
+				pluginIcon);
+		}
+		mapWindow.open();
 	}
 
 	// Anropas bara för automatiskt klarade mål; manuella bockar i panelen går inte hit.

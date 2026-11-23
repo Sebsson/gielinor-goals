@@ -60,17 +60,32 @@ public final class NextGoals
 	public static List<Entry> select(GoalTree tree, Function<String, GoalProgress> progressById, int limit)
 	{
 		List<Entry> entries = new ArrayList<>();
-		collect(tree, tree.getRoots(), progressById, limit, entries, new HashSet<>());
+		for (Goal goal : selectGoals(tree, limit))
+		{
+			GoalProgress progress = progressById.apply(goal.getId());
+			entries.add(new Entry(goal.getDisplayTitle(),
+				progress == null ? null : progress.getLabel(),
+				progress == null ? 0.0 : progress.fraction()));
+		}
 		return Collections.unmodifiableList(entries);
 	}
 
+	/**
+	 * Samma urval som {@link #select} men som mål, t.ex. för att markera dem på kartan.
+	 */
+	public static List<Goal> selectGoals(GoalTree tree, int limit)
+	{
+		List<Goal> goals = new ArrayList<>();
+		collect(tree, tree.getRoots(), limit, goals, new HashSet<>());
+		return Collections.unmodifiableList(goals);
+	}
+
 	// Ett delat delmål kan nås via flera föräldrar men föreslås bara en gång.
-	private static void collect(GoalTree tree, List<Goal> goals, Function<String, GoalProgress> progressById,
-		int limit, List<Entry> entries, Set<String> visited)
+	private static void collect(GoalTree tree, List<Goal> goals, int limit, List<Goal> selected, Set<String> visited)
 	{
 		for (Goal goal : goals)
 		{
-			if (entries.size() >= limit)
+			if (selected.size() >= limit)
 			{
 				return;
 			}
@@ -79,16 +94,13 @@ public final class NextGoals
 				continue;
 			}
 
-			int before = entries.size();
-			collect(tree, tree.getChildren(goal), progressById, limit, entries, visited);
+			int before = selected.size();
+			collect(tree, tree.getChildren(goal), limit, selected, visited);
 			// Inga ej klara delmål hittades, så målet självt är nästa steg. Ett aggregat
 			// föreslås aldrig själv, så att nästa mål alltid är något konkret.
-			if (entries.size() == before && !hasIncompleteChild(tree, goal) && !goal.isAggregate())
+			if (selected.size() == before && !hasIncompleteChild(tree, goal) && !goal.isAggregate())
 			{
-				GoalProgress progress = progressById.apply(goal.getId());
-				entries.add(new Entry(goal.getDisplayTitle(),
-					progress == null ? null : progress.getLabel(),
-					progress == null ? 0.0 : progress.fraction()));
+				selected.add(goal);
 			}
 		}
 	}

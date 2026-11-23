@@ -40,6 +40,7 @@ public interface GielinorGoalsConfig extends Config
 	String OVERLAY_GOAL_COUNT_KEY = "overlayGoalCount";
 	String SHOW_TIME_TO_COMPLETE_KEY = "showTimeToComplete";
 	String FETCH_HISCORES_KEY = "fetchHiscores";
+	String MAP_WINDOW_BOUNDS_KEY = "mapWindowBounds";
 
 	@ConfigItem(
 		keyName = HIDE_COMPLETED_KEY,
@@ -196,5 +197,17 @@ public interface GielinorGoalsConfig extends Config
 	default boolean fetchHiscores()
 	{
 		return true;
+	}
+
+	// Kartfönstrets position och storlek, "x,y,bredd,höjd". Sätts av fönstret själv.
+	@ConfigItem(
+		keyName = MAP_WINDOW_BOUNDS_KEY,
+		name = "",
+		description = "",
+		hidden = true
+	)
+	default String mapWindowBounds()
+	{
+		return "";
 	}
 }
