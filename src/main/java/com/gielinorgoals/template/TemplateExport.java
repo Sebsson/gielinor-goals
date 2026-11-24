@@ -355,6 +355,18 @@ public final class TemplateExport
 			spec.item.name = item.getItemName();
 			spec.item.quantity = item.getQuantity() == 1 ? null : item.getQuantity();
 			spec.item.includeVariants = item.isIncludeVariants() ? Boolean.TRUE : null;
+			if (!item.getCountsAlso().isEmpty())
+			{
+				spec.item.countsAlso = new ArrayList<>();
+				for (ItemRequirement.CountsAlso also : item.getCountsAlso())
+				{
+					JsonTemplate.CountsAlsoSpec alsoSpec = new JsonTemplate.CountsAlsoSpec();
+					alsoSpec.item = also.getItemId();
+					alsoSpec.each = also.getEach();
+					alsoSpec.includeVariants = also.isIncludeVariants() ? Boolean.TRUE : null;
+					spec.item.countsAlso.add(alsoSpec);
+				}
+			}
 			return true;
 		}
 		if (requirement instanceof KillCountRequirement)

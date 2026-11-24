@@ -25,6 +25,8 @@
 package com.gielinorgoals.model;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.annotation.Nullable;
@@ -37,6 +39,9 @@ import net.runelite.client.util.QuantityFormatter;
  * Ha ett visst antal av ett föremål. Räknas över inventory, equipment, bank och seed vault.
  * Med {@link #includeVariants} räknas även varianter enligt RuneLites variationstabell,
  * t.ex. laddade och oladdade versioner av samma föremål.
+ * <p>
+ * {@link #countsAlso} är föremål som redan har förbrukat målets föremål, t.ex. crystal legs som
+ * gjordes av två crystal armour seeds: varje ägt exemplar räknas som {@code each} st.
  */
 @Getter
 @EqualsAndHashCode(callSuper = false)
@@ -49,6 +54,51 @@ public class ItemRequirement extends Requirement
 	private String itemName;
 	private long quantity;
 	private boolean includeVariants;
+	// Valfritt; null i äldre sparade mål och för mål utan motsvarigheter.
+	@Nullable
+	private List<CountsAlso> countsAlso;
+
+	/**
+	 * Ett föremål som räknas som {@code each} st av målets föremål, t.ex. crystal legs = 2 seeds.
+	 */
+	@Getter
+	@EqualsAndHashCode
+	public static final class CountsAlso
+	{
+		private int itemId;
+		private long each;
+		private boolean includeVariants;
+
+		// För Gson.
+		CountsAlso()
+		{
+		}
+
+		public CountsAlso(int itemId, long each, boolean includeVariants)
+		{
+			if (itemId < 0)
+			{
+				throw new IllegalArgumentException("Invalid item id");
+			}
+			if (each < 1 || each > MAX_QUANTITY)
+			{
+				throw new IllegalArgumentException("Each must be between 1 and " + MAX_QUANTITY);
+			}
+			this.itemId = itemId;
+			this.each = each;
+			this.includeVariants = includeVariants;
+		}
+
+		boolean isValid()
+		{
+			return itemId >= 0 && each >= 1 && each <= MAX_QUANTITY;
+		}
+
+		Set<Integer> countedItemIds()
+		{
+			return ids(itemId, includeVariants);
+		}
+	}
 
 	// För Gson.
 	ItemRequirement()
@@ -84,9 +134,37 @@ public class ItemRequirement extends Requirement
 		return quantity == 1 ? name : QuantityFormatter.formatNumber(quantity) + " x " + name;
 	}
 
+	/**
+	 * Samma mål med motsvarigheter som också räknas.
+	 */
+	public ItemRequirement withCountsAlso(@Nullable List<CountsAlso> countsAlso)
+	{
+		ItemRequirement copy = new ItemRequirement(itemId, itemName, quantity, includeVariants);
+		copy.countsAlso = countsAlso == null || countsAlso.isEmpty() ? null : List.copyOf(countsAlso);
+		return copy;
+	}
+
+	/**
+	 * Motsvarigheterna; tom lista om det inte finns några.
+	 */
+	public List<CountsAlso> getCountsAlso()
+	{
+		return countsAlso == null ? Collections.emptyList() : countsAlso;
+	}
+
 	@Override
 	public boolean isValid()
 	{
+		if (countsAlso != null)
+		{
+			for (CountsAlso also : countsAlso)
+			{
+				if (also == null || !also.isValid())
+				{
+					return false;
+				}
+			}
+		}
 		return itemId >= 0 && quantity >= 1 && quantity <= MAX_QUANTITY;
 	}
 
@@ -94,6 +172,11 @@ public class ItemRequirement extends Requirement
 	 * Föremåls-id som räknas mot målet.
 	 */
 	public Set<Integer> countedItemIds()
+	{
+		return ids(itemId, includeVariants);
+	}
+
+	private static Set<Integer> ids(int itemId, boolean includeVariants)
 	{
 		Set<Integer> ids = new LinkedHashSet<>();
 		ids.add(itemId);
@@ -109,19 +192,40 @@ public class ItemRequirement extends Requirement
 	@Override
 	public GoalProgress progress(GameData data)
 	{
-		long count = 0;
-		for (int id : countedItemIds())
+		long count = count(countedItemIds(), data);
+		if (count < 0)
 		{
-			long idCount = data.getItemCount(id);
-			if (idCount < 0)
+			return null;
+		}
+		// Varje ägd motsvarighet räknas som "each" st, t.ex. crystal legs som två seeds.
+		for (CountsAlso also : getCountsAlso())
+		{
+			long owned = count(also.countedItemIds(), data);
+			if (owned < 0)
 			{
 				return null;
 			}
-			count += idCount;
+			count += owned * also.getEach();
 		}
 
 		String label = QuantityFormatter.quantityToStackSize(count) + "/" + QuantityFormatter.quantityToStackSize(quantity);
 		return new GoalProgress(count, quantity, count >= quantity, label);
+	}
+
+	// Summan för id:na, eller -1 om något av dem inte är känt.
+	private static long count(Set<Integer> ids, GameData data)
+	{
+		long count = 0;
+		for (int id : ids)
+		{
+			long idCount = data.getItemCount(id);
+			if (idCount < 0)
+			{
+				return -1;
+			}
+			count += idCount;
+		}
+		return count;
 	}
 
 	@Override
@@ -130,10 +234,11 @@ public class ItemRequirement extends Requirement
 		long left = Math.max(0, progress.getTarget() - progress.getCurrent());
 		return "You have " + QuantityFormatter.formatNumber(progress.getCurrent()) + " / "
 			+ QuantityFormatter.formatNumber(progress.getTarget())
-			+ (progress.isComplete() ? "" : "\n" + QuantityFormatter.formatNumber(left) + " left");
+			+ (progress.isComplete() ? "" : "\n" + QuantityFormatter.formatNumber(left) + " left")
+			+ (getCountsAlso().isEmpty() ? "" : "\nItems already made from them count too");
 	}
 
-	// Föremålets namn är bara för visning.
+	// Föremålets namn är bara för visning, och motsvarigheterna ändrar inte vad målet är.
 	@Override
 	public boolean isSameGoal(@Nullable Requirement other)
 	{

@@ -54,12 +54,13 @@ final class ImportValidator
 		"replaces");
 	private static final Map<String, Set<String>> NESTED = Map.of(
 		"diary", Set.of("area", "tier"),
-		"item", Set.of("id", "name", "quantity", "includeVariants", "variants"),
+		"item", Set.of("id", "name", "quantity", "includeVariants", "variants", "countsAlso"),
 		"icon", Set.of("item", "activity", "sideIcon"),
 		"dropSource", Set.of("hiscore", "npc", "manual", "count", "rate", "perDrop"),
 		"killCount", Set.of("hiscore", "npc", "manual", "count", "rate", "perDrop"),
 		"combatAchievement", Set.of("id", "name", "tier"),
 		"points", Set.of("activity", "count"));
+	private static final Set<String> COUNTS_ALSO = Set.of("item", "each", "includeVariants");
 	private static final Set<String> NODE_BOOLEANS = Set.of("aggregate", "expandChain");
 	private static final Set<String> NODE_NUMBERS = Set.of("level", "xp", "questPoints", "totalLevel", "combatLevel");
 
@@ -189,6 +190,19 @@ final class ImportValidator
 		{
 			String what = name + "." + entry.getKey() + " in " + where;
 			JsonElement field = entry.getValue();
+			if (entry.getKey().equals("countsAlso"))
+			{
+				JsonArray list = array(field, what);
+				if (list.size() > MAX_DONE_WHEN)
+				{
+					throw new IllegalArgumentException(what + " has more than " + MAX_DONE_WHEN + " items");
+				}
+				for (JsonElement also : list)
+				{
+					validateNested(object(also, what), "countsAlso", COUNTS_ALSO, where);
+				}
+				continue;
+			}
 			if (field.isJsonPrimitive() && field.getAsJsonPrimitive().isBoolean())
 			{
 				continue;

@@ -172,6 +172,15 @@ public class JsonTemplate implements GoalTemplate
 		// "includeVariants" som i målens sparformat; "variants" finns kvar för äldre filer.
 		Boolean includeVariants;
 		Boolean variants;
+		// Föremål som redan har förbrukat det här, t.ex. crystal legs = 2 armour seeds.
+		List<CountsAlsoSpec> countsAlso;
+	}
+
+	static final class CountsAlsoSpec
+	{
+		Integer item;
+		Long each;
+		Boolean includeVariants;
 	}
 
 	// Exakt en av item (item-id), activity (HiscoreSkill-namn) eller sideIcon (GoalIcon.SideIcon).
@@ -610,15 +619,34 @@ public class JsonTemplate implements GoalTemplate
 			{
 				throw new IllegalArgumentException("Item needs an id and a name");
 			}
-			return new ItemRequirement(spec.item.id, spec.item.name,
+			ItemRequirement item = new ItemRequirement(spec.item.id, spec.item.name,
 				spec.item.quantity == null ? 1 : spec.item.quantity,
 				Boolean.TRUE.equals(spec.item.includeVariants) || Boolean.TRUE.equals(spec.item.variants));
+			return spec.item.countsAlso == null ? item : item.withCountsAlso(countsAlso(spec.item.countsAlso));
 		}
 		if (spec.killCount != null)
 		{
 			return toKillCount(spec.killCount);
 		}
 		return null;
+	}
+
+	private static List<ItemRequirement.CountsAlso> countsAlso(List<CountsAlsoSpec> specs)
+	{
+		List<ItemRequirement.CountsAlso> list = new java.util.ArrayList<>();
+		for (CountsAlsoSpec spec : specs)
+		{
+			if (spec == null || spec.item == null || spec.each == null)
+			{
+				throw new IllegalArgumentException("countsAlso needs an item and an each");
+			}
+			if (spec.item < 0 || spec.item > MAX_ITEM_ID)
+			{
+				throw new IllegalArgumentException("Item id " + spec.item + " is not a valid item");
+			}
+			list.add(new ItemRequirement.CountsAlso(spec.item, spec.each, Boolean.TRUE.equals(spec.includeVariants)));
+		}
+		return list;
 	}
 
 	// Nycklar som "item:12954", kontrollerade på samma sätt som doneWhen.

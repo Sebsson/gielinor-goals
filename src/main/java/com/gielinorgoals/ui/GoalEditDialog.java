@@ -1013,8 +1013,15 @@ final class GoalEditDialog
 			case ITEM:
 			{
 				ItemSearch.ItemOption item = requireSelected(itemPanel, "Search for an item and pick it in the list.");
-				return new ItemRequirement(item.getId(), item.getName(),
+				ItemRequirement requirement = new ItemRequirement(item.getId(), item.getName(),
 					parseQuantity(quantityField.getText().trim()), variantsBox.isSelected());
+				// Motsvarigheter från en template behålls när samma föremål redigeras.
+				if (originalRequirement instanceof ItemRequirement
+					&& ((ItemRequirement) originalRequirement).getItemId() == item.getId())
+				{
+					requirement = requirement.withCountsAlso(((ItemRequirement) originalRequirement).getCountsAlso());
+				}
+				return requirement;
 			}
 			case QUEST:
 			{

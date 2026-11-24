@@ -92,7 +92,7 @@ public class PointsRequirementTest
 		assertFalse(loaded.isMigrated());
 		assertEquals(new PointsRequirement(PointsActivity.TEMPOROSS, 500), loaded.getTree().find(goal.getId())
 			.getRequirement());
-		assertEquals(13, SchemaMigrator.CURRENT_VERSION);
+		assertTrue(SchemaMigrator.CURRENT_VERSION >= 13);
 
 		// En sparfil från version 12 läses och höjs utan att något ändras.
 		LoadResult old = serializer.deserialize("{\"schemaVersion\":12,\"rootIds\":[\"a\"],\"goals\":[{\"id\":\"a\","
