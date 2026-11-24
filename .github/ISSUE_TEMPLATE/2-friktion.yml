@@ -1,0 +1,32 @@
+name: Friktion
+description: Något fungerar men är krångligt eller onaturligt
+title: "[Friktion] "
+labels: ["friktion"]
+body:
+  - type: textarea
+    id: vad
+    attributes:
+      label: Vad var krångligt?
+    validations:
+      required: true
+  - type: dropdown
+    id: var
+    attributes:
+      label: Var i pluginet?
+      options:
+        - Panelen
+        - Completed-fliken
+        - Template-dialogen
+        - Redigeringsdialogen
+        - Kartan
+        - Popup och ljud
+        - Overlays
+        - Export och import
+        - Config
+        - Annat
+    validations:
+      required: true
+  - type: textarea
+    id: forslag
+    attributes:
+      label: Förslag

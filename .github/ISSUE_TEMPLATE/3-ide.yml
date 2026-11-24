@@ -1,0 +1,23 @@
+name: Idé
+description: En ny funktion eller förbättring
+title: "[Idé] "
+labels: ["idé", "behöver-beslut"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Vad är svårt eller saknas i dag?
+    validations:
+      required: true
+  - type: textarea
+    id: forslag
+    attributes:
+      label: Förslag
+    validations:
+      required: true
+  - type: textarea
+    id: vem
+    attributes:
+      label: Vem hjälper det?
+      placeholder: "T.ex. nya ironmen, maxade konton, alla som kör raids"

@@ -1,0 +1,26 @@
+name: Datafel
+description: Fel nivå, föremål, drop rate eller quest i en template
+title: "[Datafel] "
+labels: ["data"]
+body:
+  - type: input
+    id: template
+    attributes:
+      label: Vilken template?
+      placeholder: "Namnet i template-dialogen eller filnamnet, t.ex. fire-cape.json"
+    validations:
+      required: true
+  - type: textarea
+    id: fel
+    attributes:
+      label: Vad är fel?
+      description: Vad templaten säger och vad det borde vara
+    validations:
+      required: true
+  - type: input
+    id: kalla
+    attributes:
+      label: Wiki-källa
+      placeholder: "https://oldschool.runescape.wiki/w/..."
+    validations:
+      required: true

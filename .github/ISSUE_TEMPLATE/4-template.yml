@@ -1,0 +1,33 @@
+name: Template-önskemål
+description: Önska en ny template
+title: "[Template] "
+labels: ["template", "behöver-beslut"]
+body:
+  - type: input
+    id: mal
+    attributes:
+      label: Mål
+      placeholder: "T.ex. Avernic defender"
+    validations:
+      required: true
+  - type: input
+    id: wiki
+    attributes:
+      label: Wiki-länk
+      placeholder: "https://oldschool.runescape.wiki/w/..."
+    validations:
+      required: true
+  - type: dropdown
+    id: kontotyp
+    attributes:
+      label: Kontotyp
+      options:
+        - Alla
+        - Ironman
+        - Vanligt konto
+    validations:
+      required: true
+  - type: textarea
+    id: ovrigt
+    attributes:
+      label: Delmål eller annat att tänka på

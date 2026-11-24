@@ -1,0 +1,48 @@
+name: Bugg
+description: Något fungerar inte som det ska
+title: "[Bugg] "
+labels: ["bugg"]
+body:
+  - type: textarea
+    id: vad
+    attributes:
+      label: Vad hände?
+    validations:
+      required: true
+  - type: textarea
+    id: forvantat
+    attributes:
+      label: Vad förväntade du dig?
+    validations:
+      required: true
+  - type: textarea
+    id: steg
+    attributes:
+      label: Steg för att återskapa
+      placeholder: "1. Öppna panelen\n2. Klicka på ...\n3. ..."
+    validations:
+      required: true
+  - type: dropdown
+    id: kontotyp
+    attributes:
+      label: Kontotyp
+      options:
+        - Vanligt konto
+        - Ironman
+        - Hardcore ironman
+        - Ultimate ironman
+        - Group ironman
+        - Annat
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Pluginversion eller commit (dev-klienten)
+    validations:
+      required: true
+  - type: textarea
+    id: ovrigt
+    attributes:
+      label: Skärmdumpar, loggar eller annat
