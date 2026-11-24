@@ -48,6 +48,15 @@
     "package-early-iron.json",
     "package-mid-iron.json",
     "package-late-iron.json",
-    "package-all-capes.json"
+    "package-all-capes.json",
+    "blowpipe-serp.json",
+    "trident-seas.json",
+    "trident-swamp.json",
+    "dhcb.json",
+    "moons-of-peril.json",
+    "sunfire-fanatic.json",
+    "torture-tormented.json",
+    "dragonfire-shield.json",
+    "dt2-rings.json"
   ]
 }

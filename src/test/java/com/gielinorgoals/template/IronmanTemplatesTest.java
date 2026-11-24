@@ -121,12 +121,14 @@ public class IronmanTemplatesTest
 		assertEquals(List.of("Fire cape", "Dragon defender", "Fighter torso", "Graceful outfit", "Rune pouch",
 			"Ardougne cloak and fairy rings", "Arceuus spellbook", "Ectophial", "Gnome gliders", "Herb sack", "Seed box"),
 			names(grouped.get(TemplateCategories.IRONMAN_EARLY)));
-		assertEquals(List.of("Barrows gloves", "Bow of Faerdhinen + crystal armour", "Dragon warhammer", "The Hueycoatl",
-			"Ava's assembler", "Imbued god cape", "Lunar spellbook", "Ancient Magicks", "Fossil Island",
+		assertEquals(List.of("Barrows gloves", "Bow of Faerdhinen + crystal armour", "Dragon warhammer",
+			"The Hueycoatl", "Ava's assembler", "Imbued god cape", "Lunar spellbook", "Ancient Magicks", "Fossil Island",
 			"Kingdom of Miscellania", "Dragon scimitar", "Spirit trees", "Bonecrusher", "Ash sanctifier", "Slayer helmet",
-			"Void Knight equipment"), names(grouped.get(TemplateCategories.IRONMAN_MID)));
-		assertEquals(List.of("Doom of Mokhaiotl", "Infernal cape", "Zenyte jewellery", "Prifddinas access", "Elite void"),
-			names(grouped.get(TemplateCategories.IRONMAN_LATE)));
+			"Void Knight equipment", "Toxic blowpipe + Serpentine helm", "Trident of the seas", "Trident of the swamp",
+			"Moons of Peril", "Dragonfire shield"), names(grouped.get(TemplateCategories.IRONMAN_MID)));
+		assertEquals(List.of("Doom of Mokhaiotl", "Infernal cape", "Zenyte jewellery", "Prifddinas access", "Elite void",
+			"Dragon hunter crossbow", "Sunfire fanatic armour", "Tormented bracelet + Amulet of torture",
+			"Desert Treasure II rings"), names(grouped.get(TemplateCategories.IRONMAN_LATE)));
 	}
 
 	@Test

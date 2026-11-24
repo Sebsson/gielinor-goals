@@ -1,0 +1,67 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Trident_of_the_seas (ändrad 13 okt 2026) - Kraken (boss) 1/512 (full trident); cave kraken",
+    "1/200 (okladdad), bara på slayer-uppdrag, 87 Slayer. Sidan kopplar 87 Slayer även till bossen. 75 Magic är wield-krav.",
+    "Item-id: 11908 TOTS_UNCHARGED, 11905 TOTS (full); målet är den okladdade med varianter."
+  ],
+  "id": "trident-seas",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Trident of the seas",
+  "description": "The Kraken for the trident of the seas",
+  "category": "Ironman · Mid",
+  "tags": [
+    "trident",
+    "trident of the seas",
+    "tots",
+    "kraken",
+    "magic weapon",
+    "ironman"
+  ],
+  "root": {
+    "title": "Trident of the seas",
+    "aggregate": true,
+    "wikiPage": "Trident of the seas",
+    "icon": {
+      "item": 11905
+    },
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "QUEST"
+        },
+        "children": [
+          {
+            "skill": "SLAYER",
+            "level": 87,
+            "note": "Krakens are only killed on a slayer task."
+          }
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "INVENTORY"
+        },
+        "children": [
+          {
+            "item": {
+              "id": 11908,
+              "name": "Uncharged trident",
+              "includeVariants": true
+            },
+            "dropSource": {
+              "hiscore": "KRAKEN",
+              "rate": 512
+            },
+            "note": "1/512 from the Kraken boss, 1/200 from cave krakens. Charge it with death, chaos and fire runes."
+          }
+        ]
+      }
+    ]
+  }
+}

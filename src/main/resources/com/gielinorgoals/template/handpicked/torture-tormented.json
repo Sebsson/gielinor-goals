@@ -1,0 +1,85 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Tormented_bracelet (ändrad 12 nov 2026), https://oldschool.runescape.wiki/w/Amulet_of_torture",
+    "(ändrad 22 apr 2026) - Lvl-7 Enchant, 93 Magic, 20 soul + 20 blood + 1 cosmic. Crafting-nivåerna (bracelet 95, amulet 98)",
+    "kommer från Zenyte-templatens källa (https://oldschool.runescape.wiki/w/Zenyte). Zenyte-templaten är en referens; dess",
+    "nivåer och smycken kopplas ihop med de här via dubblettregeln. 75 Hitpoints är wield-krav."
+  ],
+  "id": "torture-tormented",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Tormented bracelet + Amulet of torture",
+  "description": "The zenyte template plus the levels to make and enchant the bracelet and amulet",
+  "category": "Ironman · Late",
+  "tags": [
+    "torture",
+    "amulet of torture",
+    "tormented",
+    "tormented bracelet",
+    "zenyte",
+    "zenytes",
+    "ironman"
+  ],
+  "root": {
+    "title": "Tormented bracelet + Amulet of torture",
+    "aggregate": true,
+    "wikiPage": "Amulet of torture",
+    "icon": {
+      "item": 19553
+    },
+    "children": [
+      {
+        "template": "zenyte-jewellery",
+        "note": "Shards, onyx and all four pieces of zenyte jewellery."
+      },
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "QUEST"
+        },
+        "children": [
+          {
+            "skill": "CRAFTING",
+            "level": 95,
+            "note": "Zenyte bracelet."
+          },
+          {
+            "skill": "CRAFTING",
+            "level": 98,
+            "note": "Zenyte amulet (u); string it with a ball of wool."
+          },
+          {
+            "skill": "MAGIC",
+            "level": 93,
+            "note": "Lvl-7 Enchant: 20 soul, 20 blood and 1 cosmic rune."
+          }
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "INVENTORY"
+        },
+        "children": [
+          {
+            "item": {
+              "id": 19544,
+              "name": "Tormented bracelet",
+              "includeVariants": true
+            }
+          },
+          {
+            "item": {
+              "id": 19553,
+              "name": "Amulet of torture",
+              "includeVariants": true
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

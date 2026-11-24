@@ -1,0 +1,126 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Zulrah (ändrad 30 okt 2026) - kräver Regicide till Port Tyras och samtalet med",
+    "Zul-Harcinqa; Regicide är målet här (delvis räcker, se anteckningen). Tanzanite fang, magic fang och serpentine visage är",
+    "var för sig 2 × 1/1,024 per kill (wikin: ungefär 1/512 per kill för ett visst unikt föremål). Zulrah's scales 100-299 per kill.",
+    "https://oldschool.runescape.wiki/w/Toxic_blowpipe - chisel på tanzanite fang, 78 Fletching (var 53 före 8 maj 2024).",
+    "https://oldschool.runescape.wiki/w/Serpentine_helm - chisel på serpentine visage, 52 Crafting; full laddning 11 000 scales.",
+    "Item-id (wiki, kontrolleras mot gameval): 12922 BLOWPIPE_FANG, 12924 TOXIC_BLOWPIPE, 12927 SERPENTINE_VISAGE,",
+    "12929 SERPENTINE_HELM, 12934 SNAKEBOSS_SCALE. 75 Ranged/Defence är wield-krav och inte med.",
+    "Scales: 11 000 = en full laddning av hjälmen, ett eget val som rimlig mängd."
+  ],
+  "id": "blowpipe-serp",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Toxic blowpipe + Serpentine helm",
+  "description": "Zulrah for the tanzanite fang and serpentine visage, and the levels to make them",
+  "category": "Ironman · Mid",
+  "tags": [
+    "bp",
+    "blowpipe",
+    "toxic blowpipe",
+    "serp",
+    "serp helm",
+    "serpentine helm",
+    "zulrah",
+    "zul",
+    "tanzanite fang",
+    "serpentine visage",
+    "ironman"
+  ],
+  "root": {
+    "title": "Toxic blowpipe + Serpentine helm",
+    "aggregate": true,
+    "wikiPage": "Zulrah",
+    "icon": {
+      "item": 12924
+    },
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "QUEST"
+        },
+        "children": [
+          {
+            "quest": "REGICIDE",
+            "note": "Zulrah needs Regicide as far as Port Tyras, and talking to High Priestess Zul-Harcinqa."
+          },
+          {
+            "skill": "FLETCHING",
+            "level": 78,
+            "note": "Use a chisel on the tanzanite fang."
+          },
+          {
+            "skill": "CRAFTING",
+            "level": 52,
+            "note": "Use a chisel on the serpentine visage."
+          }
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "INVENTORY"
+        },
+        "children": [
+          {
+            "item": {
+              "id": 12922,
+              "name": "Tanzanite fang",
+              "includeVariants": true
+            },
+            "dropSource": {
+              "hiscore": "ZULRAH",
+              "rate": 512
+            },
+            "doneWhen": [
+              "item:12924"
+            ],
+            "note": "2 × 1/1,024 per Zulrah kill (about 1/512)."
+          },
+          {
+            "item": {
+              "id": 12924,
+              "name": "Toxic blowpipe",
+              "includeVariants": true
+            }
+          },
+          {
+            "item": {
+              "id": 12927,
+              "name": "Serpentine visage",
+              "includeVariants": true
+            },
+            "dropSource": {
+              "hiscore": "ZULRAH",
+              "rate": 512
+            },
+            "doneWhen": [
+              "item:12929"
+            ],
+            "note": "2 × 1/1,024 per Zulrah kill (about 1/512)."
+          },
+          {
+            "item": {
+              "id": 12929,
+              "name": "Serpentine helm",
+              "includeVariants": true
+            }
+          },
+          {
+            "item": {
+              "id": 12934,
+              "name": "Zulrah's scales",
+              "quantity": 11000
+            },
+            "note": "One full charge of the serpentine helm. Zulrah drops 100-299 per kill; the blowpipe uses them too."
+          }
+        ]
+      }
+    ]
+  }
+}

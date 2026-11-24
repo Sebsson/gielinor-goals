@@ -28,7 +28,7 @@ public class TemplateCategoriesTest
 		assertEquals(List.of("Combat Achievements tier"), names(grouped.get(TemplateCategories.BOSSES)));
 		assertEquals(List.of("Quest series"), names(grouped.get(TemplateCategories.QUESTS)));
 		assertEquals(List.of("All diaries in a tier", "Diary reward items"), names(grouped.get(TemplateCategories.DIARIES)));
-		assertEquals("Barrows gloves", names(grouped.get(TemplateCategories.IRONMAN_MID)).get(0));
+		assertTrue(names(grouped.get(TemplateCategories.IRONMAN_MID)).contains("Barrows gloves"));
 		assertEquals(List.of("Base N", "Skill ladder", "Total level N", "Combat level N"),
 			names(grouped.get(TemplateCategories.SKILLS)));
 	}

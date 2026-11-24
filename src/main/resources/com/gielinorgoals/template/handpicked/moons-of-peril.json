@@ -1,0 +1,213 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Moons_of_Peril (ändrad 23 nov 2026) - kräver Perilous Moons.",
+    "https://oldschool.runescape.wiki/w/Lunar_Chest (ändrad 16 sep 2026) - varje unikt föremål 1/224; varje besegrad måne ger",
+    "en 1/56-chans på en del av sitt set, och dubbletter spärras tills setet är klart. Tabellen anger inte chansen per antal månar.",
+    "Item-id (gameval): Blood Moon 29028 helm, 29022 chestplate, 29025 tassets, 28997 Dual macuahuitl; Blue Moon (FROST_MOON)",
+    "29019 helm, 29013 chestplate, 29016 tassets, 28988 spear (FROSTMOON_SPEAR); Eclipse Moon 29010 helm, 29004 chestplate,",
+    "29007 tassets, 29000 atlatl. Osäkert: item-id markerade (gameval) är tagna från gameval-namnen, inte från wikins infoboxar."
+  ],
+  "id": "moons-of-peril",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Moons of Peril",
+  "description": "Blood moon, Blue moon and Eclipse moon armour from the Lunar Chest",
+  "category": "Ironman · Mid",
+  "tags": [
+    "moons",
+    "moons of peril",
+    "blood moon",
+    "blue moon",
+    "eclipse moon",
+    "lunar chest",
+    "perilous moons",
+    "atlatl",
+    "macuahuitl",
+    "ironman"
+  ],
+  "root": {
+    "title": "Moons of Peril",
+    "aggregate": true,
+    "wikiPage": "Moons of Peril",
+    "icon": {
+      "item": 29022
+    },
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "QUEST"
+        },
+        "children": [
+          {
+            "quest": "PERILOUS_MOONS"
+          }
+        ]
+      },
+      {
+        "title": "Blood Moon",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "COMBAT"
+        },
+        "children": [
+          {
+            "item": {
+              "id": 29028,
+              "name": "Blood Moon helm",
+              "includeVariants": true
+            },
+            "dropSource": {
+              "hiscore": "LUNAR_CHESTS",
+              "rate": 224
+            },
+            "note": "1/224 per Lunar Chest (each subdued moon gives a 1/56 roll for a piece of its set)."
+          },
+          {
+            "item": {
+              "id": 29022,
+              "name": "Blood Moon chestplate",
+              "includeVariants": true
+            },
+            "dropSource": {
+              "hiscore": "LUNAR_CHESTS",
+              "rate": 224
+            }
+          },
+          {
+            "item": {
+              "id": 29025,
+              "name": "Blood Moon tassets",
+              "includeVariants": true
+            },
+            "dropSource": {
+              "hiscore": "LUNAR_CHESTS",
+              "rate": 224
+            }
+          },
+          {
+            "item": {
+              "id": 28997,
+              "name": "Dual macuahuitl",
+              "includeVariants": true
+            },
+            "dropSource": {
+              "hiscore": "LUNAR_CHESTS",
+              "rate": 224
+            }
+          }
+        ]
+      },
+      {
+        "title": "Blue Moon",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "COMBAT"
+        },
+        "children": [
+          {
+            "item": {
+              "id": 29019,
+              "name": "Blue Moon helm",
+              "includeVariants": true
+            },
+            "dropSource": {
+              "hiscore": "LUNAR_CHESTS",
+              "rate": 224
+            },
+            "note": "1/224 per Lunar Chest (each subdued moon gives a 1/56 roll for a piece of its set)."
+          },
+          {
+            "item": {
+              "id": 29013,
+              "name": "Blue Moon chestplate",
+              "includeVariants": true
+            },
+            "dropSource": {
+              "hiscore": "LUNAR_CHESTS",
+              "rate": 224
+            }
+          },
+          {
+            "item": {
+              "id": 29016,
+              "name": "Blue Moon tassets",
+              "includeVariants": true
+            },
+            "dropSource": {
+              "hiscore": "LUNAR_CHESTS",
+              "rate": 224
+            }
+          },
+          {
+            "item": {
+              "id": 28988,
+              "name": "Blue Moon spear",
+              "includeVariants": true
+            },
+            "dropSource": {
+              "hiscore": "LUNAR_CHESTS",
+              "rate": 224
+            }
+          }
+        ]
+      },
+      {
+        "title": "Eclipse Moon",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "COMBAT"
+        },
+        "children": [
+          {
+            "item": {
+              "id": 29010,
+              "name": "Eclipse Moon helm",
+              "includeVariants": true
+            },
+            "dropSource": {
+              "hiscore": "LUNAR_CHESTS",
+              "rate": 224
+            },
+            "note": "1/224 per Lunar Chest (each subdued moon gives a 1/56 roll for a piece of its set)."
+          },
+          {
+            "item": {
+              "id": 29004,
+              "name": "Eclipse Moon chestplate",
+              "includeVariants": true
+            },
+            "dropSource": {
+              "hiscore": "LUNAR_CHESTS",
+              "rate": 224
+            }
+          },
+          {
+            "item": {
+              "id": 29007,
+              "name": "Eclipse Moon tassets",
+              "includeVariants": true
+            },
+            "dropSource": {
+              "hiscore": "LUNAR_CHESTS",
+              "rate": 224
+            }
+          },
+          {
+            "item": {
+              "id": 29000,
+              "name": "Eclipse atlatl",
+              "includeVariants": true
+            },
+            "dropSource": {
+              "hiscore": "LUNAR_CHESTS",
+              "rate": 224
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

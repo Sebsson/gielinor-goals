@@ -1,0 +1,219 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Ultor_ring (och Bellator_ring, Magus_ring, Venator_ring) - 90 Magic och 80 Crafting (kan",
+    "boostas), ring mould och ugn; en Fremennik ring-icon + vestige (+ 500 blood runes enligt vestige-sidorna; osäkert för magus och",
+    "venator) och 3 chromium ingots. Vestiges: ultor 1/1,088 Vardorvis, bellator 1/512 The Whisperer, magus 1/720 Duke Sucellus,",
+    "venator 1/768 The Leviathan. https://oldschool.runescape.wiki/w/Chromium_ingot - 3 per drop från samma bossar, eller smälts",
+    "(85 Smithing). Desert Treasure II - The Fallen Empire med kedja; ringarna kräver ett boss-kill för att bära.",
+    "Item-id (wiki): 28285/28279/28281/28283 vestiges, 28307/28316/28313/28310 ringar, 28276 CHROMIUM_INGOT.",
+    "Chromium: 12 för alla fyra ringarna; ägda ringar räknas som 3 var (countsAlso)."
+  ],
+  "id": "dt2-rings",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Desert Treasure II rings",
+  "description": "The four vestiges, chromium ingots and the ultor, bellator, magus and venator rings",
+  "category": "Ironman · Late",
+  "tags": [
+    "dt2",
+    "desert treasure ii",
+    "ultor",
+    "bellator",
+    "magus",
+    "venator",
+    "vestige",
+    "chromium",
+    "rings",
+    "ironman"
+  ],
+  "root": {
+    "title": "Desert Treasure II rings",
+    "aggregate": true,
+    "wikiPage": "Desert Treasure II - The Fallen Empire",
+    "icon": {
+      "item": 28307
+    },
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "QUEST"
+        },
+        "children": [
+          {
+            "quest": "DESERT_TREASURE_II__THE_FALLEN_EMPIRE"
+          },
+          {
+            "skill": "MAGIC",
+            "level": 90
+          },
+          {
+            "skill": "CRAFTING",
+            "level": 80
+          }
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "INVENTORY"
+        },
+        "children": [
+          {
+            "item": {
+              "id": 28276,
+              "name": "Chromium ingot",
+              "quantity": 12,
+              "countsAlso": [
+                {
+                  "item": 28307,
+                  "each": 3,
+                  "includeVariants": true
+                },
+                {
+                  "item": 28316,
+                  "each": 3,
+                  "includeVariants": true
+                },
+                {
+                  "item": 28313,
+                  "each": 3,
+                  "includeVariants": true
+                },
+                {
+                  "item": 28310,
+                  "each": 3,
+                  "includeVariants": true
+                }
+              ]
+            },
+            "note": "3 per ring. They drop 3 at a time from the four bosses, or are smelted with 85 Smithing."
+          },
+          {
+            "title": "Ultor ring",
+            "aggregate": true,
+            "icon": {
+              "sideIcon": "EQUIPMENT"
+            },
+            "children": [
+              {
+                "item": {
+                  "id": 28285,
+                  "name": "Ultor vestige"
+                },
+                "dropSource": {
+                  "hiscore": "VARDORVIS",
+                  "rate": 1088
+                },
+                "doneWhen": [
+                  "item:28307"
+                ],
+                "note": "1/1,088 from Vardorvis."
+              },
+              {
+                "item": {
+                  "id": 28307,
+                  "name": "Ultor ring",
+                  "includeVariants": true
+                }
+              }
+            ]
+          },
+          {
+            "title": "Bellator ring",
+            "aggregate": true,
+            "icon": {
+              "sideIcon": "EQUIPMENT"
+            },
+            "children": [
+              {
+                "item": {
+                  "id": 28279,
+                  "name": "Bellator vestige"
+                },
+                "dropSource": {
+                  "hiscore": "THE_WHISPERER",
+                  "rate": 512
+                },
+                "doneWhen": [
+                  "item:28316"
+                ],
+                "note": "1/512 from The Whisperer."
+              },
+              {
+                "item": {
+                  "id": 28316,
+                  "name": "Bellator ring",
+                  "includeVariants": true
+                }
+              }
+            ]
+          },
+          {
+            "title": "Magus ring",
+            "aggregate": true,
+            "icon": {
+              "sideIcon": "EQUIPMENT"
+            },
+            "children": [
+              {
+                "item": {
+                  "id": 28281,
+                  "name": "Magus vestige"
+                },
+                "dropSource": {
+                  "hiscore": "DUKE_SUCELLUS",
+                  "rate": 720
+                },
+                "doneWhen": [
+                  "item:28313"
+                ],
+                "note": "1/720 from Duke Sucellus."
+              },
+              {
+                "item": {
+                  "id": 28313,
+                  "name": "Magus ring",
+                  "includeVariants": true
+                }
+              }
+            ]
+          },
+          {
+            "title": "Venator ring",
+            "aggregate": true,
+            "icon": {
+              "sideIcon": "EQUIPMENT"
+            },
+            "children": [
+              {
+                "item": {
+                  "id": 28283,
+                  "name": "Venator vestige"
+                },
+                "dropSource": {
+                  "hiscore": "THE_LEVIATHAN",
+                  "rate": 768
+                },
+                "doneWhen": [
+                  "item:28310"
+                ],
+                "note": "1/768 from The Leviathan."
+              },
+              {
+                "item": {
+                  "id": 28310,
+                  "name": "Venator ring",
+                  "includeVariants": true
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

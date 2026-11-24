@@ -1,0 +1,90 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Dragonfire_shield (ändrad 5 okt 2026) - anti-dragon shield + draconic visage på ett städ,",
+    "90 Smithing (kan boostas); utan nivån gör Oziach det för 1 250 000 coins efter Dragon Slayer I. 75 Defence är wield-krav.",
+    "https://oldschool.runescape.wiki/w/Draconic_visage (ändrad 22 apr 2026) - 1/5,000 från Vorkath, King Black Dragon och svarta drakar",
+    "i Wilderness Slayer Cave; rune 1/8,000, adamant 1/9,000, övriga 1/10,000. Drop-källan räknar mot Vorkath-KC.",
+    "Item-id (wiki/gameval): 11286 DRAGONFIRE_VISAGE, 1540 ANTIDRAGONBREATHSHIELD, 11284 DRAGONFIRE_SHIELD_UNCHARGED (11283 laddad)."
+  ],
+  "id": "dragonfire-shield",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Dragonfire shield",
+  "description": "A draconic visage and 90 Smithing for the dragonfire shield",
+  "category": "Ironman · Mid",
+  "tags": [
+    "dfs",
+    "dragonfire shield",
+    "draconic visage",
+    "visage",
+    "vorkath",
+    "kbd",
+    "ironman"
+  ],
+  "root": {
+    "title": "Dragonfire shield",
+    "aggregate": true,
+    "wikiPage": "Dragonfire shield",
+    "icon": {
+      "item": 11284
+    },
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "QUEST"
+        },
+        "children": [
+          {
+            "skill": "SMITHING",
+            "level": 90,
+            "note": "Or pay Oziach in Edgeville 1,250,000 coins after Dragon Slayer I."
+          }
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "INVENTORY"
+        },
+        "children": [
+          {
+            "item": {
+              "id": 1540,
+              "name": "Anti-dragon shield",
+              "includeVariants": true
+            },
+            "doneWhen": [
+              "item:11284"
+            ]
+          },
+          {
+            "item": {
+              "id": 11286,
+              "name": "Draconic visage",
+              "includeVariants": true
+            },
+            "dropSource": {
+              "hiscore": "VORKATH",
+              "rate": 5000
+            },
+            "doneWhen": [
+              "item:11284"
+            ],
+            "note": "1/5,000 from Vorkath, the King Black Dragon and black dragons in the Wilderness Slayer Cave; 1/8,000 rune dragons, 1/9,000 adamant dragons, 1/10,000 other metal and brutal dragons."
+          },
+          {
+            "item": {
+              "id": 11284,
+              "name": "Dragonfire shield",
+              "includeVariants": true
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

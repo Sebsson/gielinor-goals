@@ -301,3 +301,94 @@ Packages contain only references to other templates and notes, so only the order
 ### All capes (`package-all-capes.json`)
 - [ ] Order verified
 - Order: Quest cape, Achievement diary cape, Max cape, Fire cape, Infernal cape, Dizana's quiver, Mythical cape, Champion's cape, Imbued god cape, Ardougne cloak 4 (from diary rewards, Ardougne).
+
+---
+
+## Wave 3 – equipment (milestone 15, part 1)
+
+### Toxic blowpipe + Serpentine helm (`blowpipe-serp.json`)
+- [ ] Verified
+- Wiki: [Zulrah](https://oldschool.runescape.wiki/w/Zulrah), [Toxic blowpipe](https://oldschool.runescape.wiki/w/Toxic_blowpipe), [Serpentine helm](https://oldschool.runescape.wiki/w/Serpentine_helm)
+- Zulrah needs Regicide.
+- Tanzanite fang and Serpentine visage drop as 2 × 1/1,024 each, about 1/512 per kill. The dry meter uses the Zulrah KC from the hiscores.
+- Fletching 78 to make the blowpipe. It was 53 before May 2024. Crafting 52 to make the serpentine helm.
+- Zulrah's scales: 11,000 as a target (charging). Each kill gives 100–299 scales. The quantity is a suggestion, not a requirement.
+- Item ids: fang 12922, blowpipe 12924, visage 12927, helm 12929, scales 12934.
+
+### Trident of the seas (`trident-seas.json`)
+- [ ] Verified
+- Wiki: [Kraken](https://oldschool.runescape.wiki/w/Kraken), [Trident of the seas](https://oldschool.runescape.wiki/w/Trident_of_the_seas)
+- Slayer 87 for the Kraken boss.
+- The uncharged trident drops at 1/512 from the boss and 1/200 from cave kraken. The goal uses the boss rate and the Kraken KC.
+- The goal counts the charged variants too. The uncharged trident is 11908.
+- **(uncertain)** The 87 Slayer is also required when the boss is fought outside a task. The wiki says so, but check it.
+
+### Trident of the swamp (`trident-swamp.json`)
+- [ ] Verified
+- Wiki: [Trident of the swamp](https://oldschool.runescape.wiki/w/Trident_of_the_swamp), [Magic fang](https://oldschool.runescape.wiki/w/Magic_fang)
+- References *Trident of the seas*, so the seas node is shared and not copied.
+- Regicide for Zulrah, Crafting 59 to combine.
+- Magic fang 12932 drops as 2 × 1/1,024 from Zulrah, about 1/512. Trident of the swamp is 12900.
+
+### Dragon hunter crossbow (`dhcb.json`)
+- [ ] Verified
+- Wiki: [Dragon hunter crossbow](https://oldschool.runescape.wiki/w/Dragon_hunter_crossbow), [Chambers of Xeric](https://oldschool.runescape.wiki/w/Chambers_of_Xeric)
+- Only from Chambers of Xeric. It is 4/60 of the unique rolls in normal mode and 4/56 in Challenge Mode.
+- Crossbow 21012. "Raid the Chambers of Xeric" is a manual goal that is done when you own the crossbow.
+- **(uncertain)** No drop rate yet. The raid unique chance depends on points, so it gets an approximate rate in part 2.
+
+### Barrows set (`BarrowsTemplate.java`, generated)
+- [ ] Verified
+- Wiki: [Barrows](https://oldschool.runescape.wiki/w/Barrows), [Chest (Barrows)](https://oldschool.runescape.wiki/w/Chest_(Barrows)), [Barrows equipment](https://oldschool.runescape.wiki/w/Barrows_equipment)
+- The brother is a choice: Ahrim, Dharok, Guthan, Karil, Torag or Verac. It is generated in Java because JSON templates have no choice parameters.
+- Unlock: Priest in Peril, Nature Spirit started (Mort Myre) and His Faithful Servants started (digging). The two started quests are manual goals that become done when the quest is completed.
+- With all six brothers killed, each piece is 7 × 1/2,448, about 1/350 per chest. Any piece per roll is 1/(450 − 58N). The dry meter uses Barrows chests from the hiscores.
+- The goals count degraded pieces too.
+- **(uncertain)** The item ids come from the gameval names `BARROWS_<BROTHER>_HEAD/BODY/LEGS/WEAPON`, because the wiki pages show no ids.
+
+### Moons of Peril (`moons-of-peril.json`)
+- [ ] Verified
+- Wiki: [Moons of Peril](https://oldschool.runescape.wiki/w/Moons_of_Peril), [Lunar Chest](https://oldschool.runescape.wiki/w/Lunar_Chest), [Perilous Moons](https://oldschool.runescape.wiki/w/Perilous_Moons)
+- Needs the quest Perilous Moons.
+- Three groups: Blood Moon, Blue Moon and Eclipse Moon, each with helm, chestplate, tassets and weapon.
+- Each piece is 1/224 per chest (1/56 per moon). The dry meter uses Lunar Chests from the hiscores.
+- **(uncertain)** Ids from gameval: Blood 29028/29022/29025 + Dual macuahuitl 28997, Blue 29019/29013/29016 + Blue moon spear 28988, Eclipse 29010/29004/29007 + Eclipse atlatl 29000.
+
+### Sunfire fanatic armour (`sunfire-fanatic.json`)
+- [ ] Verified
+- Wiki: [Sunfire fanatic armour](https://oldschool.runescape.wiki/w/Sunfire_fanatic_armour), [Fortis Colosseum](https://oldschool.runescape.wiki/w/Fortis_Colosseum)
+- Needs Children of the Sun.
+- The helm is about 1/24.47 per full run (wave rates from 70/43,400 up to 75/4,800). The dry meter uses Sol Heredit KC.
+- Helm 28933, cuirass 28936, chausses 28939.
+- **(uncertain)** The cuirass and chausses have no rate. Their per-wave rates and the wave they start at (3 or 4) were not confirmed.
+
+### Tormented bracelet + Amulet of torture (`torture-tormented.json`)
+- [ ] Verified
+- Wiki: [Amulet of torture](https://oldschool.runescape.wiki/w/Amulet_of_torture), [Tormented bracelet](https://oldschool.runescape.wiki/w/Tormented_bracelet), [Lvl-6 Enchant](https://oldschool.runescape.wiki/w/Lvl-6_Enchant)
+- References *Zenyte jewellery*. The shards, onyx and levels are shared and not copied.
+- Crafting 95 (bracelet) and 98 (amulet). Magic 93 for Lvl-6 Enchant, which costs 20 soul, 20 blood and 1 cosmic rune.
+- Tormented bracelet 19544, Amulet of torture 19553.
+
+### Dragonfire shield (`dragonfire-shield.json`)
+- [ ] Verified
+- Wiki: [Dragonfire shield](https://oldschool.runescape.wiki/w/Dragonfire_shield), [Draconic visage](https://oldschool.runescape.wiki/w/Draconic_visage)
+- Smithing 90 to make it at an anvil. Oziach makes it for 1.25m after Dragon Slayer I (note).
+- Draconic visage 11286: 1/5,000 from Vorkath, King Black Dragon and the black dragons in the Wilderness Slayer Cave. Rune dragons drop it at 1/8,000, adamant at 1/9,000 and other dragons at 1/10,000. The dry meter uses Vorkath KC.
+- Anti-dragon shield 1540, DFS 11284. The shield and the visage are done once you own the DFS.
+
+### Desert Treasure II rings (`dt2-rings.json`)
+- [ ] Verified
+- Wiki: [Desert Treasure II - The Fallen Empire](https://oldschool.runescape.wiki/w/Desert_Treasure_II_-_The_Fallen_Empire), [Chromium ingot](https://oldschool.runescape.wiki/w/Chromium_ingot), [Ultor ring](https://oldschool.runescape.wiki/w/Ultor_ring)
+- Needs the quest. Magic 90 and Crafting 80 to make the rings, with 3 chromium ingots each.
+- Chromium ingots 28276 × 12. Owned rings count as 3 ingots each.
+- Vestiges and boss rates:
+
+  | Ring | Vestige | Boss | Rate |
+  |---|---|---|---|
+  | Ultor 28307 | 28285 | Vardorvis | 1/1,088 |
+  | Bellator 28316 | 28279 | The Whisperer | 1/512 |
+  | Magus 28313 | 28281 | Duke Sucellus | 1/720 |
+  | Venator 28310 | 28283 | The Leviathan | 1/768 |
+
+- Each vestige is done once you own its ring.
+- **(uncertain)** The wiki pages disagreed on whether the magus and venator rings need blood runes or similar to make. It is not a goal.

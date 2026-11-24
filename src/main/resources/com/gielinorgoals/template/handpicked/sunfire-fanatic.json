@@ -1,0 +1,86 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Sunfire_fanatic_armour - helm, cuirass, chausses från Fortis Colosseums belöningar; en",
+    "av varje innan dubbletter. https://oldschool.runescape.wiki/w/Fortis_Colosseum (ändrad 16 nov 2026) - kräver Children of the Sun.",
+    "https://oldschool.runescape.wiki/w/Sunfire_fanatic_helm - chans per våg från våg 4 (70/43,400 ... 75/4,800 i våg 12); wikin:",
+    "ungefär 1/24.47 för hjälmen över alla tolv vågor. Drop-källan räknar mot Sol Heredit-KC (en hel körning) med 1/24.",
+    "Osäkert: chansen för cuirass och chausses står inte på sidorna, så de har ingen drop-källa; startvågen (3 eller 4) är oklar.",
+    "Item-id (gameval): 28933 SUNFIRE_HELM, 28936 SUNFIRE_BODY, 28939 SUNFIRE_LEGS. Osäkert: item-id markerade (gameval) är tagna från gameval-namnen, inte från wikins infoboxar.",
+    "60 Prayer och 40 Defence är wield-krav och inte med."
+  ],
+  "id": "sunfire-fanatic",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Sunfire fanatic armour",
+  "description": "The sunfire fanatic armour from the Fortis Colosseum",
+  "category": "Ironman · Late",
+  "tags": [
+    "sunfire",
+    "sunfire fanatic",
+    "fanatic armour",
+    "colosseum",
+    "fortis colosseum",
+    "prayer armour",
+    "ironman"
+  ],
+  "root": {
+    "title": "Sunfire fanatic armour",
+    "aggregate": true,
+    "wikiPage": "Sunfire fanatic armour",
+    "icon": {
+      "item": 28936
+    },
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "QUEST"
+        },
+        "children": [
+          {
+            "quest": "CHILDREN_OF_THE_SUN"
+          }
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "INVENTORY"
+        },
+        "children": [
+          {
+            "item": {
+              "id": 28933,
+              "name": "Sunfire fanatic helm",
+              "includeVariants": true
+            },
+            "dropSource": {
+              "hiscore": "SOL_HEREDIT",
+              "rate": 24
+            },
+            "note": "About 1/24.47 over a full twelve-wave run, from wave 4 on."
+          },
+          {
+            "item": {
+              "id": 28936,
+              "name": "Sunfire fanatic cuirass",
+              "includeVariants": true
+            },
+            "note": "From Colosseum rewards; the wiki gives no rate for this piece."
+          },
+          {
+            "item": {
+              "id": 28939,
+              "name": "Sunfire fanatic chausses",
+              "includeVariants": true
+            },
+            "note": "From Colosseum rewards; the wiki gives no rate for this piece."
+          }
+        ]
+      }
+    ]
+  }
+}

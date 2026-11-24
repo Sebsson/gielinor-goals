@@ -30,7 +30,7 @@ public class HandpickedTemplatesTest
 
 		assertEquals(List.of("Quest cape", "Achievement diary cape", "Max cape", "Base N", "Skill ladder",
 			"Total level N", "Combat level N", "Combat Achievements tier", "Quest series", "All diaries in a tier",
-			"Diary reward items", "Barrows gloves",
+			"Diary reward items", "Barrows set", "Barrows gloves",
 			"Bow of Faerdhinen + crystal armour", "Dragon warhammer", "Doom of Mokhaiotl", "The Hueycoatl",
 			"Fire cape", "Infernal cape", "Dragon defender", "Fighter torso", "Ava's assembler", "Graceful outfit",
 			"Rune pouch", "Imbued god cape", "Zenyte jewellery", "Ardougne cloak and fairy rings", "Prifddinas access",
@@ -39,7 +39,9 @@ public class HandpickedTemplatesTest
 			"Seed box", "Slayer helmet", "Void Knight equipment", "Elite void", "Angler's outfit", "Prospector kit",
 			"Lumberjack outfit", "Pyromancer outfit", "Rogue equipment", "Farmer's outfit", "Carpenter's outfit",
 			"Smiths' uniform", "Spirit angler's outfit", "Dizana's quiver", "Mythical cape", "Champion's cape", "Early ironman",
-			"Mid ironman", "Late ironman", "All capes"), names);
+			"Mid ironman", "Late ironman", "All capes", "Toxic blowpipe + Serpentine helm", "Trident of the seas",
+			"Trident of the swamp", "Dragon hunter crossbow", "Moons of Peril", "Sunfire fanatic armour",
+			"Tormented bracelet + Amulet of torture", "Dragonfire shield", "Desert Treasure II rings"), names);
 	}
 
 	@Test

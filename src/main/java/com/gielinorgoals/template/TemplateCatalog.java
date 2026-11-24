@@ -83,6 +83,7 @@ public class TemplateCatalog
 		all.add(new QuestSeriesTemplate(questRequirements));
 		all.add(new DiaryTierTemplate());
 		all.add(new DiaryRewardsTemplate(DiaryRewards.load(gson)));
+		all.add(new BarrowsTemplate());
 		// Handplockade templates från JSON-filer i resources.
 		all.addAll(JsonTemplates.load(gson));
 		templates = Collections.unmodifiableList(withReferences(all, loadErrors));

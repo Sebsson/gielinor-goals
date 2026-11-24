@@ -1,0 +1,87 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Trident_of_the_swamp (ändrad 13 okt 2026) - okladdad trident of the seas + magic fang,",
+    "chisel, 59 Crafting. Magic fang 2 × 1/1,024 från Zulrah (https://oldschool.runescape.wiki/w/Magic_fang). 78 Magic är wield-krav.",
+    "Item-id: 12932 MAGIC_FANG, 12900 TOXIC_TOTS_UNCHARGED. Trident of the seas är en referens till den templaten (delad nod)."
+  ],
+  "id": "trident-swamp",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Trident of the swamp",
+  "description": "The trident of the seas with a magic fang from Zulrah",
+  "category": "Ironman · Mid",
+  "tags": [
+    "trident",
+    "trident of the swamp",
+    "swamp trident",
+    "toxic trident",
+    "magic fang",
+    "zulrah",
+    "kraken",
+    "ironman"
+  ],
+  "root": {
+    "title": "Trident of the swamp",
+    "aggregate": true,
+    "wikiPage": "Trident of the swamp",
+    "icon": {
+      "item": 12900
+    },
+    "children": [
+      {
+        "template": "trident-seas",
+        "note": "The trident of the seas becomes the swamp trident."
+      },
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "QUEST"
+        },
+        "children": [
+          {
+            "quest": "REGICIDE",
+            "note": "For Zulrah and the magic fang."
+          },
+          {
+            "skill": "CRAFTING",
+            "level": 59,
+            "note": "Use a chisel on the magic fang with the uncharged trident."
+          }
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "INVENTORY"
+        },
+        "children": [
+          {
+            "item": {
+              "id": 12932,
+              "name": "Magic fang",
+              "includeVariants": true
+            },
+            "dropSource": {
+              "hiscore": "ZULRAH",
+              "rate": 512
+            },
+            "doneWhen": [
+              "item:12900"
+            ],
+            "note": "2 × 1/1,024 per Zulrah kill (about 1/512)."
+          },
+          {
+            "item": {
+              "id": 12900,
+              "name": "Trident of the swamp",
+              "includeVariants": true
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
