@@ -1,0 +1,40 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Ash_sanctifier (ändrad 20 okt 2026) - Item ID 25781 (gameval ASH_SANCTIFIER). Belöning",
+    "för hard Kourend & Kebos Diary; hämtas av Tyss vid Dark Altar. Ingen kostnad nämns. Laddas med death runes: 10",
+    "laddningar per rune. Ger halva Prayer-XP:n, eller hela med elite-diaryn."
+  ],
+  "id": "ash-sanctifier",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Ash sanctifier",
+  "description": "The hard Kourend & Kebos Diary for the Ash sanctifier",
+  "category": "Ironman · Mid",
+  "tags": ["ash sanctifier", "sanctifier", "ashes", "demonic ashes", "kourend hard", "diary", "prayer", "ironman"],
+  "root": {
+    "title": "Ash sanctifier",
+    "aggregate": true,
+    "wikiPage": "Ash sanctifier",
+    "icon": {"item": 25781},
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {"sideIcon": "QUEST"},
+        "children": [
+          {"diary": {"area": "KOUREND", "tier": "HARD"}}
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {"sideIcon": "INVENTORY"},
+        "children": [
+          {"item": {"id": 25781, "name": "Ash sanctifier", "includeVariants": true},
+            "note": "From Tyss at the Dark Altar. Charge it with death runes: 10 ashes per rune. Full Prayer XP needs the elite Kourend & Kebos Diary."}
+        ]
+      }
+    ]
+  }
+}

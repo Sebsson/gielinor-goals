@@ -1,0 +1,45 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Herb_sack (ändrad 3 nov 2026) - Item ID 13226 (gameval SLAYER_HERB_SACK; öppen 24478).",
+    "Köps för 750 slayer reward points av en Slayer master, eller 250 Tithe Farm-poäng av Farmer Gricoller.",
+    "Herblore 58: Herb sack-sidan säger att den krävs för att köpa, Slayer Rewards-sidan att den krävs för att använda.",
+    "Osäkert vilket, men nivån behövs i båda fallen, så den är med.",
+    "Poäng förbrukas när man köper. Ett POINTS-mål med samma aktivitet och antal i en annan template (t.ex. 750 slayer",
+    "points i Rune pouch) kopplas ihop via dubblettregeln; se anteckningen."
+  ],
+  "id": "herb-sack",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Herb sack",
+  "description": "750 slayer points and 58 Herblore for a herb sack",
+  "category": "Ironman · Early",
+  "tags": ["herb sack", "herbsack", "slayer points", "tithe farm", "herblore", "ironman"],
+  "root": {
+    "title": "Herb sack",
+    "aggregate": true,
+    "wikiPage": "Herb sack",
+    "icon": {"item": 13226},
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {"sideIcon": "QUEST"},
+        "children": [
+          {"skill": "HERBLORE", "level": 58},
+          {"points": {"activity": "SLAYER", "count": 750}, "doneWhen": ["item:13226"],
+            "note": "Points are spent when you buy. Saving for the rune pouch too means 1,500 in all. The herb sack is also sold for 250 Tithe Farm points."}
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {"sideIcon": "INVENTORY"},
+        "children": [
+          {"item": {"id": 13226, "name": "Herb sack", "includeVariants": true},
+            "note": "From any Slayer master's reward shop, or from Farmer Gricoller at the Tithe Farm."}
+        ]
+      }
+    ]
+  }
+}

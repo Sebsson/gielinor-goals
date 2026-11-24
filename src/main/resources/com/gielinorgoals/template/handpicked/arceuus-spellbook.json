@@ -1,0 +1,44 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Arceuus_spellbook (ändrad 1 nov 2026) - 'Players may speak with Tyss to switch to the",
+    "Arceuus spellbook without any additional requirements'. Kourend favour togs bort 10 jan 2024.",
+    "Att byta spellbook syns inte för pluginet, så det är ett manuellt mål.",
+    "A Kingdom Divided krävs för nästan alla stridsformler (utom Ghostly Grasp och Inferior Demonbane) och nyttoformler",
+    "(utom Resurrect Crops och reanimation); det är inget krav för spellbooken och ligger därför i en egen grupp."
+  ],
+  "id": "arceuus-spellbook",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Arceuus spellbook",
+  "description": "Speak to Tyss for the Arceuus spellbook; A Kingdom Divided for most of its spells",
+  "category": "Ironman · Early",
+  "tags": ["arceuus", "arceuus spellbook", "thralls", "resurrect", "kingdom divided", "akd", "spellbook", "ironman"],
+  "root": {
+    "title": "Arceuus spellbook",
+    "aggregate": true,
+    "wikiPage": "Arceuus spellbook",
+    "icon": {"sideIcon": "QUEST"},
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {"sideIcon": "QUEST"},
+        "children": [
+          {"title": "Speak to Tyss at the Dark Altar to switch to the Arceuus spellbook", "icon": {"sideIcon": "QUEST"},
+            "wikiPage": "Tyss",
+            "note": "No requirements since Kourend favour was removed in January 2024."}
+        ]
+      },
+      {
+        "title": "Most spells",
+        "aggregate": true,
+        "icon": {"sideIcon": "QUEST"},
+        "children": [
+          {"quest": "A_KINGDOM_DIVIDED",
+            "note": "Needed for almost every combat and utility spell, and for the Book of the Dead used by resurrection spells. Not needed to switch spellbook."}
+        ]
+      }
+    ]
+  }
+}

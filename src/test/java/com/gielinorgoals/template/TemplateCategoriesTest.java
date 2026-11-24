@@ -45,7 +45,7 @@ public class TemplateCategoriesTest
 	public void searchMatchesNamesAndTags()
 	{
 		assertEquals(List.of("Barrows gloves"), names(flat(TemplateCategories.group(templates, "rfd", false))));
-		assertEquals(List.of("Quest cape", "Barrows gloves", "Quest series"),
+		assertEquals(List.of("Quest cape", "Barrows gloves", "Prifddinas access", "Quest series"),
 			names(flat(TemplateCategories.group(templates, "QUEST", false))));
 		assertEquals(List.of("Max cape", "Base N"), names(flat(TemplateCategories.group(templates, "base", false))));
 		assertEquals(List.of("Combat Achievements tier"),

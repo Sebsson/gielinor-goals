@@ -1,0 +1,54 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Elite_Void_Knight_equipment (ändrad 4 okt 2026) - top och robe uppgraderas av Elite Void",
+    "Knight på Void Knights' Outpost för 200 commendation points var (400 för båda); kräver hard Western Provinces Diary och",
+    "den vanliga void-delen.",
+    "https://oldschool.runescape.wiki/w/Elite_void_top - Item ID 13072 (gameval ELITE_VOID_KNIGHT_TOP). Osäkert: elite void robe",
+    "13073 (ELITE_VOID_KNIGHT_ROBES) är taget från gameval-namnet.",
+    "Void knight top och robe är samma krav som i Void Knight equipment-templaten och kopplas ihop med dem via",
+    "dubblettregeln. Pest Control-poäng är en manuell räknare."
+  ],
+  "id": "elite-void",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Elite void",
+  "description": "The hard Western Provinces Diary and 400 Pest Control points to upgrade void",
+  "category": "Ironman · Late",
+  "tags": ["elite void", "void", "elite void knight", "pest control", "western hard", "diary", "ironman"],
+  "root": {
+    "title": "Elite void",
+    "aggregate": true,
+    "wikiPage": "Elite Void Knight equipment",
+    "icon": {"item": 13072},
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {"sideIcon": "QUEST"},
+        "children": [
+          {"diary": {"area": "WESTERN", "tier": "HARD"}},
+          {"killCount": {"manual": "Pest Control points", "count": 400},
+            "note": "200 points for each upgrade, on top of the points for the normal void pieces."}
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {"sideIcon": "INVENTORY"},
+        "children": [
+          {"item": {"id": 13072, "name": "Elite void top", "includeVariants": true},
+            "note": "Upgraded from a void knight top by the Elite Void Knight.",
+            "children": [
+              {"item": {"id": 8839, "name": "Void knight top", "includeVariants": true}, "doneWhen": ["item:13072"]}
+            ]},
+          {"item": {"id": 13073, "name": "Elite void robe", "includeVariants": true},
+            "note": "Upgraded from a void knight robe by the Elite Void Knight.",
+            "children": [
+              {"item": {"id": 8840, "name": "Void knight robe", "includeVariants": true}, "doneWhen": ["item:13073"]}
+            ]}
+        ]
+      }
+    ]
+  }
+}

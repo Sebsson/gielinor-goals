@@ -1,0 +1,72 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Fossil_Island (ändrad 10 okt 2026) - ön nås efter Bone Voyage.",
+    "https://oldschool.runescape.wiki/w/Bone_Voyage (ändrad 22 nov 2026) - 100 Kudos och The Dig Site. Kudos syns inte för",
+    "pluginet, så det är ett manuellt mål.",
+    "https://oldschool.runescape.wiki/w/Museum_Camp (ändrad 28 sep 2026) - fossil cleaning station Construction 5, bank chest 21",
+    "(2 oak planks, 1 iron bar, 5 nails), well 22, cooking pot 24, spinning wheel 28, loom 29; hammer från butiken på ön.",
+    "https://oldschool.runescape.wiki/w/Mycelium_Transportation_System (ändrad 4 okt 2026) - varje Magic Mushtree måste",
+    "hittas och användas en gång: House on the Hill, Verdant Valley, Sticky Swamp (yxa och kratta), Mushroom Meadow.",
+    "https://oldschool.runescape.wiki/w/Volcanic_Mine (ändrad 3 nov 2026) - Mining 50; 30 numulite per besök eller 3 000",
+    "numulite för permanent tillträde. Osäkert: 3 000 kommer från en sammanfattning av sidans senare del. Numulite = item",
+    "21555 (gameval FOSSIL_NUMULITE).",
+    "House on the Hill: en digsite pendant laddas vid Strange Machine för en teleport dit; kostnaden står inte på sidan.",
+    "Inte med (inte kontrollerat): fågelholkar, Fossil Island-wyverns slayerkrav, undervattensområdet."
+  ],
+  "id": "fossil-island",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Fossil Island",
+  "description": "Bone Voyage, the Museum Camp, the Magic Mushtrees and the Volcanic Mine",
+  "category": "Ironman · Mid",
+  "tags": ["fossil island", "fossil", "bone voyage", "museum camp", "mushtree", "mushtrees", "volcanic mine", "vm", "ironman"],
+  "root": {
+    "title": "Fossil Island",
+    "aggregate": true,
+    "wikiPage": "Fossil Island",
+    "icon": {"sideIcon": "QUEST"},
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {"sideIcon": "QUEST"},
+        "children": [
+          {"quest": "BONE_VOYAGE",
+            "children": [
+              {"title": "100 Kudos at the Varrock Museum", "icon": {"sideIcon": "QUEST"}, "wikiPage": "Kudos", "doneWhen": ["quest:11"],
+                "note": "Kudos come from the museum quiz, cleaning finds and some quests."}
+            ]},
+          {"title": "Museum Camp bank chest", "icon": {"sideIcon": "QUEST"}, "wikiPage": "Museum Camp",
+            "note": "Build it with 2 oak planks, 1 iron bar and 5 nails and a hammer from the island's shop.",
+            "children": [
+              {"skill": "CONSTRUCTION", "level": 21}
+            ]},
+          {"title": "Every Museum Camp building", "icon": {"sideIcon": "QUEST"}, "wikiPage": "Museum Camp",
+            "note": "Cleaning station (5), bank chest (21), well (22), cooking pot (24), spinning wheel (28) and loom (29). In all: 10 oak planks, 5 planks, 2 iron bars, 25 nails, 2 ropes, 2 logs, 3 soft clay, a bucket and a tinderbox.",
+            "children": [
+              {"skill": "CONSTRUCTION", "level": 29}
+            ]},
+          {"title": "Find all four Magic Mushtrees", "icon": {"sideIcon": "QUEST"}, "wikiPage": "Mycelium Transportation System",
+            "note": "House on the Hill, Verdant Valley, Sticky Swamp (needs an axe and a rake) and Mushroom Meadow. Each must be used once."},
+          {"title": "Digsite pendant teleport to the House on the Hill", "icon": {"sideIcon": "QUEST"}, "wikiPage": "House on the Hill",
+            "note": "Use a digsite pendant on the southernmost Strange Machine in the house."},
+          {"title": "Volcanic Mine", "icon": {"sideIcon": "QUEST"}, "wikiPage": "Volcanic Mine",
+            "note": "Entry costs 30 numulite per visit, or 3,000 numulite once for permanent access.",
+            "children": [
+              {"skill": "MINING", "level": 50}
+            ]}
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {"sideIcon": "INVENTORY"},
+        "children": [
+          {"item": {"id": 21555, "name": "Numulite", "quantity": 3000},
+            "note": "For permanent Volcanic Mine access. Numulite comes from fossil island activities such as the Volcanic Mine and cleaning."}
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Dragon_scimitar (ändrad 1 nov 2026) - Item ID 4587 (gameval DRAGON_SCIMITAR). Säljs av",
+    "Daga's Scimitar Smithy på Ape Atoll för 100 000 coins; kräver Monkey Madness I för att köpa. 60 Attack är ett",
+    "wield-krav och är därför inte med. Daga handlar bara med apor tills Monkey Madness II är klar.",
+    "https://oldschool.runescape.wiki/w/Monkey_Madness_I (ändrad 21 nov 2026) - The Grand Tree, Tree Gnome Village."
+  ],
+  "id": "dragon-scimitar",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Dragon scimitar",
+  "description": "Monkey Madness I and 100,000 coins for a dragon scimitar",
+  "category": "Ironman · Mid",
+  "tags": ["dscim", "d scim", "dragon scimitar", "scimitar", "monkey madness", "mm1", "ironman"],
+  "root": {
+    "title": "Dragon scimitar",
+    "aggregate": true,
+    "wikiPage": "Dragon scimitar",
+    "icon": {"item": 4587},
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {"sideIcon": "QUEST"},
+        "children": [
+          {"quest": "MONKEY_MADNESS_I"}
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {"sideIcon": "INVENTORY"},
+        "children": [
+          {"item": {"id": 995, "name": "Coins", "quantity": 100000}, "doneWhen": ["item:4587"]},
+          {"item": {"id": 4587, "name": "Dragon scimitar", "includeVariants": true},
+            "note": "Bought from Daga on Ape Atoll for 100,000 coins. Daga only trades with monkeys until Monkey Madness II is done."}
+        ]
+      }
+    ]
+  }
+}

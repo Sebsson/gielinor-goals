@@ -119,10 +119,13 @@ public class IronmanTemplatesTest
 	{
 		Map<String, List<GoalTemplate>> grouped = TemplateCategories.group(TEMPLATES, "", false);
 		assertEquals(List.of("Fire cape", "Dragon defender", "Fighter torso", "Graceful outfit", "Rune pouch",
-			"Ardougne cloak and fairy rings"), names(grouped.get(TemplateCategories.IRONMAN_EARLY)));
+			"Ardougne cloak and fairy rings", "Arceuus spellbook", "Ectophial", "Gnome gliders", "Herb sack", "Seed box"),
+			names(grouped.get(TemplateCategories.IRONMAN_EARLY)));
 		assertEquals(List.of("Barrows gloves", "Bow of Faerdhinen + crystal armour", "Dragon warhammer", "The Hueycoatl",
-			"Ava's assembler", "Imbued god cape"), names(grouped.get(TemplateCategories.IRONMAN_MID)));
-		assertEquals(List.of("Doom of Mokhaiotl", "Infernal cape", "Zenyte jewellery"),
+			"Ava's assembler", "Imbued god cape", "Lunar spellbook", "Ancient Magicks", "Fossil Island",
+			"Kingdom of Miscellania", "Dragon scimitar", "Spirit trees", "Bonecrusher", "Ash sanctifier", "Slayer helmet",
+			"Void Knight equipment"), names(grouped.get(TemplateCategories.IRONMAN_MID)));
+		assertEquals(List.of("Doom of Mokhaiotl", "Infernal cape", "Zenyte jewellery", "Prifddinas access", "Elite void"),
 			names(grouped.get(TemplateCategories.IRONMAN_LATE)));
 	}
 

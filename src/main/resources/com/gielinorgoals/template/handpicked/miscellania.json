@@ -1,0 +1,49 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Throne_of_Miscellania (ändrad 16 nov 2026) - Heroes' Quest och The Fremennik Trials;",
+    "support måste nå 75 % (från 25 %); ger Managing Miscellania och 10 000 coins i kistan.",
+    "https://oldschool.runescape.wiki/w/Royal_Trouble (ändrad 18 okt 2026) - Agility 40 och Slayer 40 (boostbara).",
+    "https://oldschool.runescape.wiki/w/Managing_Miscellania (ändrad 11 nov 2026) - kistan max 5 000 000 coins, 7 500 000",
+    "efter Royal Trouble; dagslön 10 % av kistan, max 50 000 (75 000 efter Royal Trouble); wikin rekommenderar minst",
+    "500 000 (750 000). 10 arbetare, 15 efter Royal Trouble. Kistan och godkännandet syns inte för pluginet, så de är",
+    "manuella mål."
+  ],
+  "id": "miscellania",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Kingdom of Miscellania",
+  "description": "Throne of Miscellania and Royal Trouble to run the kingdom with 15 workers",
+  "category": "Ironman · Mid",
+  "tags": ["misc", "miscellania", "kingdom", "managing miscellania", "throne of miscellania", "royal trouble", "herbs", "ironman"],
+  "root": {
+    "title": "Kingdom of Miscellania",
+    "aggregate": true,
+    "wikiPage": "Managing Miscellania",
+    "icon": {"sideIcon": "QUEST"},
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {"sideIcon": "QUEST"},
+        "children": [
+          {"quest": "THRONE_OF_MISCELLANIA",
+            "note": "Raise the people's support from 25% to 75% during the quest. Completing it opens Managing Miscellania with 10 workers."},
+          {"quest": "ROYAL_TROUBLE",
+            "note": "15 workers instead of 10, 50% more output, a coffer of up to 7.5m and a daily wage of up to 75k."}
+        ]
+      },
+      {
+        "title": "Run the kingdom",
+        "aggregate": true,
+        "icon": {"sideIcon": "INVENTORY"},
+        "children": [
+          {"title": "Fill the coffers", "icon": {"sideIcon": "INVENTORY"}, "wikiPage": "Managing Miscellania",
+            "note": "Each day 10% of the coffer is paid in wages, at most 75k after Royal Trouble. The wiki suggests keeping at least 750k in it."},
+          {"title": "Keep approval up", "icon": {"sideIcon": "STATS"}, "wikiPage": "Managing Miscellania",
+            "note": "Approval falls 1% a day after Royal Trouble (2.5% before). Raise it by working on the islands."}
+        ]
+      }
+    ]
+  }
+}

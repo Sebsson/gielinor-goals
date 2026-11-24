@@ -1,0 +1,40 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Seed_box (ändrad 5 okt 2026) - Item ID 13639 (gameval SEED_BOX; öppen 24482). Köps för",
+    "250 Tithe Farm-poäng av Farmer Gricoller i Hosidius. Inga krav nämns; en per konto."
+  ],
+  "id": "seed-box",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Seed box",
+  "description": "250 Tithe Farm points for a seed box",
+  "category": "Ironman · Early",
+  "tags": ["seed box", "seedbox", "tithe farm", "tithe", "farming", "ironman"],
+  "root": {
+    "title": "Seed box",
+    "aggregate": true,
+    "wikiPage": "Seed box",
+    "icon": {"item": 13639},
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {"sideIcon": "QUEST"},
+        "children": [
+          {"points": {"activity": "TITHE_FARM", "count": 250}, "doneWhen": ["item:13639"],
+            "note": "Points are spent when you buy."}
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {"sideIcon": "INVENTORY"},
+        "children": [
+          {"item": {"id": 13639, "name": "Seed box", "includeVariants": true},
+            "note": "From Farmer Gricoller at the Tithe Farm. Only one per account."}
+        ]
+      }
+    ]
+  }
+}

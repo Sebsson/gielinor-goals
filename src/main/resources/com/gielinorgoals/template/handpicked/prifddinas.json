@@ -1,0 +1,35 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Prifddinas (ändrad 17 nov 2026) - 'All methods of entering the city require completion",
+    "of Song of the Elves'. Även Sailing-bryggan (70 Sailing) kräver questen.",
+    "https://oldschool.runescape.wiki/w/Song_of_the_Elves - 70 Agility, Construction, Farming, Herblore, Hunter, Mining,",
+    "Smithing och Woodcutting (ej boostbara); Mourning's End Part II, Making History, Druidic Ritual. Kedjan och",
+    "skill-kraven kommer från quest-requirements.json när kedjor är påslagna, så att Song of the Elves delas med t.ex.",
+    "Bow of Faerdhinen-templaten via dubblettregeln."
+  ],
+  "id": "prifddinas",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Prifddinas access",
+  "description": "Song of the Elves and its full quest chain, for access to the elf city",
+  "category": "Ironman · Late",
+  "tags": ["prif", "prifddinas", "sote", "song of the elves", "elf city", "elves", "quest", "ironman"],
+  "root": {
+    "title": "Prifddinas access",
+    "aggregate": true,
+    "wikiPage": "Prifddinas",
+    "icon": {"sideIcon": "QUEST"},
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {"sideIcon": "QUEST"},
+        "children": [
+          {"quest": "SONG_OF_THE_ELVES",
+            "note": "Every way into the city needs Song of the Elves. The quest needs 70 Agility, Construction, Farming, Herblore, Hunter, Mining, Smithing and Woodcutting, none boostable."}
+        ]
+      }
+    ]
+  }
+}

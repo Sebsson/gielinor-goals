@@ -1,0 +1,42 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Ectophial (ändrad 24 apr 2026) - Item ID 4251 (gameval ECTOPHIAL; tom variant 4252",
+    "ECTOPHIAL_EMPTY, räknas via varianter). Belöning för Ghosts Ahoy; en ny fås av Velorina (med ghostspeak amulet)",
+    "eller köps av Perdu för 4 600 coins.",
+    "https://oldschool.runescape.wiki/w/Ghosts_Ahoy (ändrad 2 okt 2026) - Priest in Peril, The Restless Ghost; Agility 25,",
+    "Cooking 20 (boostbara)."
+  ],
+  "id": "ectophial",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Ectophial",
+  "description": "Ghosts Ahoy for the Ectophial, an unlimited teleport to the Ectofuntus",
+  "category": "Ironman · Early",
+  "tags": ["ectophial", "ecto", "ghosts ahoy", "teleport", "morytania", "ironman"],
+  "root": {
+    "title": "Ectophial",
+    "aggregate": true,
+    "wikiPage": "Ectophial",
+    "icon": {"item": 4251},
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {"sideIcon": "QUEST"},
+        "children": [
+          {"quest": "GHOSTS_AHOY"}
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {"sideIcon": "INVENTORY"},
+        "children": [
+          {"item": {"id": 4251, "name": "Ectophial", "includeVariants": true},
+            "note": "The quest reward. A lost one is free from Velorina while wearing a ghostspeak amulet, or 4,600 coins from Perdu."}
+        ]
+      }
+    ]
+  }
+}

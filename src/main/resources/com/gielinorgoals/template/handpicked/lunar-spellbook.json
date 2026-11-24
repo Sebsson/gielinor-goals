@@ -1,0 +1,36 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Lunar_spellbook (ändrad 3 okt 2026) - nås 'upon completion of the quest Lunar",
+    "Diplomacy'. '65 Magic and 40 Defence without boosts are required to cast any Lunar spell' - ett krav för att kasta,",
+    "inte för att låsa upp, så det står som anteckning.",
+    "https://oldschool.runescape.wiki/w/Lunar_Diplomacy (ändrad 12 nov 2026) - The Fremennik Trials, Lost City, Rune",
+    "Mysteries, Shilo Village; Herblore 5, Crafting 61, Defence 40, Firemaking 49, Magic 65, Mining 60, Woodcutting 55.",
+    "https://oldschool.runescape.wiki/w/Seal_of_Passage - Item ID 9083 (gameval LUNAR_SEAL_OF_PASSAGE); behövs på Lunar",
+    "Isle, fås av Brundt under questen. Inte ett eget mål."
+  ],
+  "id": "lunar-spellbook",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Lunar spellbook",
+  "description": "Lunar Diplomacy and its quest chain for the Lunar spellbook",
+  "category": "Ironman · Mid",
+  "tags": ["lunars", "lunar", "lunar spellbook", "lunar diplomacy", "spellbook", "vengeance", "npc contact", "ironman"],
+  "root": {
+    "title": "Lunar spellbook",
+    "aggregate": true,
+    "wikiPage": "Lunar spellbook",
+    "icon": {"item": 9083},
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {"sideIcon": "QUEST"},
+        "children": [
+          {"quest": "LUNAR_DIPLOMACY",
+            "note": "The spellbook opens when the quest is done. Casting any Lunar spell needs 65 Magic and 40 Defence without boosts. Keep the Seal of Passage while on Lunar Isle."}
+        ]
+      }
+    ]
+  }
+}

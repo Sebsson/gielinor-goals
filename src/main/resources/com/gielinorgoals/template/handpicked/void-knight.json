@@ -1,0 +1,64 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Void_Knight_equipment (ändrad 3 okt 2026) - 'To buy or equip any of the items (besides",
+    "the seal)': 42 Attack, Strength, Defence, Hitpoints, Ranged och Magic samt 22 Prayer, alltså krav även för att köpa.",
+    "Kostnad i Pest Control commendation points: hjälm (mage, melee, ranger) 200 var, top 250, robe 250, gloves 150.",
+    "Hela setet med alla tre hjälmarna: 1 250 poäng.",
+    "https://oldschool.runescape.wiki/w/Void_knight_top - Item ID 8839 (gameval PEST_VOID_KNIGHT_TOP).",
+    "Osäkert: id för robe (8840, PEST_VOID_KNIGHT_ROBES), gloves (8842, PEST_VOID_KNIGHT_GLOVES) och hjälmarna (11663",
+    "GAME_PEST_MAGE_HELM, 11664 GAME_PEST_ARCHER_HELM, 11665 GAME_PEST_MELEE_HELM) är tagna från gameval-namnen, inte från",
+    "wikin. Pest Control-poäng syns inte för pluginet (ingen varbit med det namnet), så de är en manuell räknare."
+  ],
+  "id": "void-knight",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Void Knight equipment",
+  "description": "Pest Control points and combat levels for the full void set with all three helms",
+  "category": "Ironman · Mid",
+  "tags": ["void", "void knight", "void knight equipment", "pest control", "pc", "commendation points", "ironman"],
+  "root": {
+    "title": "Void Knight equipment",
+    "aggregate": true,
+    "wikiPage": "Void Knight equipment",
+    "icon": {"item": 8839},
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {"sideIcon": "QUEST"},
+        "children": [
+          {
+            "title": "Combat levels to buy void",
+            "aggregate": true,
+            "icon": {"sideIcon": "STATS"},
+            "children": [
+              {"skill": "ATTACK", "level": 42},
+              {"skill": "STRENGTH", "level": 42},
+              {"skill": "DEFENCE", "level": 42},
+              {"skill": "HITPOINTS", "level": 42},
+              {"skill": "RANGED", "level": 42},
+              {"skill": "MAGIC", "level": 42},
+              {"skill": "PRAYER", "level": 22}
+            ]
+          },
+          {"killCount": {"manual": "Pest Control points", "count": 1250},
+            "note": "Top 250, robe 250, gloves 150 and 200 for each helm. One helm is enough for a single style: 850 points."}
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {"sideIcon": "INVENTORY"},
+        "children": [
+          {"item": {"id": 8839, "name": "Void knight top", "includeVariants": true}},
+          {"item": {"id": 8840, "name": "Void knight robe", "includeVariants": true}},
+          {"item": {"id": 8842, "name": "Void knight gloves", "includeVariants": true}},
+          {"item": {"id": 11663, "name": "Void mage helm", "includeVariants": true}},
+          {"item": {"id": 11664, "name": "Void ranger helm", "includeVariants": true}},
+          {"item": {"id": 11665, "name": "Void melee helm", "includeVariants": true}}
+        ]
+      }
+    ]
+  }
+}

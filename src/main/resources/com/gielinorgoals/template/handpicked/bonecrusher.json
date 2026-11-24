@@ -1,0 +1,41 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Bonecrusher (ändrad 3 okt 2026) - Item ID 13116 (gameval BONECRUSHER). Belöning för hard",
+    "Morytania Diary; hämtas av en ghost disciple i Ectofuntus med ghostspeak amulet eller Morytania legs. Ingen kostnad",
+    "nämns. Laddas med ecto-tokens: 25 laddningar per token, 1 per ben.",
+    "Hard Morytania-diaryns egna krav kommer från diary-målet (inte uppdelat här)."
+  ],
+  "id": "bonecrusher",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Bonecrusher",
+  "description": "The hard Morytania Diary for the Bonecrusher",
+  "category": "Ironman · Mid",
+  "tags": ["bonecrusher", "bone crusher", "morytania hard", "mory hard", "diary", "prayer", "ironman"],
+  "root": {
+    "title": "Bonecrusher",
+    "aggregate": true,
+    "wikiPage": "Bonecrusher",
+    "icon": {"item": 13116},
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {"sideIcon": "QUEST"},
+        "children": [
+          {"diary": {"area": "MORYTANIA", "tier": "HARD"}}
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {"sideIcon": "INVENTORY"},
+        "children": [
+          {"item": {"id": 13116, "name": "Bonecrusher", "includeVariants": true},
+            "note": "From a ghost disciple in the Ectofuntus while wearing a ghostspeak amulet or Morytania legs. Charge it with ecto-tokens: 25 bones per token."}
+        ]
+      }
+    ]
+  }
+}

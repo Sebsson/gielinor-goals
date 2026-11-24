@@ -1,0 +1,38 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Gnome_glider (ändrad 15 nov 2026) - glidarna kräver The Grand Tree. Ta Quir Priw,",
+    "Sindarpos, Kar-Hewo, Gandius och Lemanto Andra (bara enkel resa) har inga fler krav. Lemantolly Undri (Feldip Hills)",
+    "kräver delvis One Small Favour; Ookookolly Undri (Ape Atoll) kräver Monkey Madness II.",
+    "Delvis klara quests syns inte för pluginet, så One Small Favour är ett manuellt mål som blir klart med hela questen."
+  ],
+  "id": "gnome-gliders",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Gnome gliders",
+  "description": "The Grand Tree for the gliders, plus Feldip Hills and Ape Atoll",
+  "category": "Ironman · Early",
+  "tags": ["gliders", "gnome glider", "gnome gliders", "glider", "the grand tree", "teleport", "ironman"],
+  "root": {
+    "title": "Gnome gliders",
+    "aggregate": true,
+    "wikiPage": "Gnome glider",
+    "icon": {"sideIcon": "QUEST"},
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {"sideIcon": "QUEST"},
+        "children": [
+          {"quest": "THE_GRAND_TREE",
+            "note": "Ta Quir Priw, Sindarpos, Kar-Hewo, Gandius and the one-way flight to Lemanto Andra."},
+          {"title": "Feldip Hills glider: partly complete One Small Favour", "wikiPage": "One Small Favour",
+            "icon": {"sideIcon": "QUEST"}, "doneWhen": ["quest:107"],
+            "note": "Lemantolly Undri opens part-way through One Small Favour."},
+          {"quest": "MONKEY_MADNESS_II",
+            "note": "The Ookookolly Undri glider on Ape Atoll."}
+        ]
+      }
+    ]
+  }
+}

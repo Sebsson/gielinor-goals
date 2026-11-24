@@ -1,0 +1,79 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Spirit_tree (ändrad 13 nov 2026) - nätverket kräver Tree Gnome Village; The Grand Tree",
+    "krävs bara för att resa FRÅN Gnome Stronghold. Tree Gnome Village, Gnome Stronghold, Battlefield of Khazard, Grand",
+    "Exchange och Feldip Hills kräver bara Tree Gnome Village. Poison Waste: delvis The Path of Glouphrie. Prifddinas: Song",
+    "of the Elves. Laguna Aurorae: Pandemonium, 58 Sailing och att ha lagt till vid ön en gång.",
+    "Egna träd planteras i Etceteria, Port Sarim, Brimhaven, Hosidius och Farming Guild (avancerad nivå). Sidan nämner 83",
+    "Farming för Port Sarim; spirit seed kräver 83 Farming. Farming Guild: sidan säger att man måste boosta till 85 för att",
+    "teleportera dit, alltså 85 Farming - osäkert om det är ett formellt krav för planteringen, därför en anteckning.",
+    "Antal egna träd utanför POH: 1 vid 83, 2 vid 88, 3 vid 93, 4 vid 96, obegränsat vid 99 (ändrat 4 feb 2026).",
+    "POH: superior garden-träd kräver 75 Construction och 83 Farming; Spiritual Fairy Tree 95 Construction.",
+    "Partiella quests och att lägga till vid en ö syns inte för pluginet, så de är manuella mål."
+  ],
+  "id": "spirit-trees",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Spirit trees",
+  "description": "Every spirit tree that needs a quest, Sailing or Farming, and one in your house",
+  "category": "Ironman · Mid",
+  "tags": ["spirit tree", "spirit trees", "sts", "tree gnome village", "teleport", "farming", "ironman"],
+  "root": {
+    "title": "Spirit trees",
+    "aggregate": true,
+    "wikiPage": "Spirit tree",
+    "icon": {"sideIcon": "QUEST"},
+    "children": [
+      {
+        "title": "Network",
+        "aggregate": true,
+        "icon": {"sideIcon": "QUEST"},
+        "children": [
+          {"quest": "TREE_GNOME_VILLAGE",
+            "note": "Opens the network and the trees at Tree Gnome Village, Gnome Stronghold, the Battlefield of Khazard, the Grand Exchange and Feldip Hills."},
+          {"quest": "THE_GRAND_TREE",
+            "note": "Only needed to travel from the Gnome Stronghold tree."}
+        ]
+      },
+      {
+        "title": "More trees",
+        "aggregate": true,
+        "icon": {"sideIcon": "QUEST"},
+        "children": [
+          {"title": "Poison Waste: partly complete The Path of Glouphrie", "wikiPage": "The Path of Glouphrie",
+            "icon": {"sideIcon": "QUEST"}, "doneWhen": ["quest:3425"],
+            "note": "The tree at Incomitatus, east of the Poison Waste, opens part-way through the quest."},
+          {"quest": "SONG_OF_THE_ELVES",
+            "note": "The Prifddinas tree. Shared with the Prifddinas access template if you already have it."},
+          {"title": "Laguna Aurorae spirit tree", "icon": {"sideIcon": "QUEST"}, "wikiPage": "Spirit tree",
+            "note": "Moor at the island at least once.",
+            "children": [
+              {"quest": "PANDEMONIUM"},
+              {"skill": "SAILING", "level": 58}
+            ]}
+        ]
+      },
+      {
+        "title": "Grow your own",
+        "aggregate": true,
+        "icon": {"sideIcon": "STATS"},
+        "children": [
+          {"skill": "FARMING", "level": 83,
+            "note": "Spirit trees grow in the patches at Etceteria, Port Sarim, Brimhaven and Hosidius. Outside your house you can have 1 tree at 83 Farming, 2 at 88, 3 at 93, 4 at 96 and any number at 99."},
+          {"title": "Farming Guild spirit tree", "icon": {"sideIcon": "QUEST"}, "wikiPage": "Farming Guild",
+            "note": "The patch is in the advanced tier. The wiki says you must be boosted to 85 Farming each time you teleport there.",
+            "children": [
+              {"skill": "FARMING", "level": 85}
+            ]},
+          {"title": "Spirit tree in your house", "icon": {"sideIcon": "QUEST"}, "wikiPage": "Spirit tree (Construction)",
+            "note": "Built in a superior garden. At 95 Construction a spiritual fairy tree gives a spirit tree and a fairy ring together.",
+            "children": [
+              {"skill": "CONSTRUCTION", "level": 75},
+              {"skill": "FARMING", "level": 83}
+            ]}
+        ]
+      }
+    ]
+  }
+}

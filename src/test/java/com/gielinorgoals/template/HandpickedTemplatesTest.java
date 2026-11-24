@@ -33,7 +33,10 @@ public class HandpickedTemplatesTest
 			"Diary reward items", "Barrows gloves",
 			"Bow of Faerdhinen + crystal armour", "Dragon warhammer", "Doom of Mokhaiotl", "The Hueycoatl",
 			"Fire cape", "Infernal cape", "Dragon defender", "Fighter torso", "Ava's assembler", "Graceful outfit",
-			"Rune pouch", "Imbued god cape", "Zenyte jewellery", "Ardougne cloak and fairy rings"), names);
+			"Rune pouch", "Imbued god cape", "Zenyte jewellery", "Ardougne cloak and fairy rings", "Prifddinas access",
+			"Lunar spellbook", "Ancient Magicks", "Arceuus spellbook", "Fossil Island", "Kingdom of Miscellania",
+			"Ectophial", "Dragon scimitar", "Spirit trees", "Gnome gliders", "Bonecrusher", "Ash sanctifier", "Herb sack",
+			"Seed box", "Slayer helmet", "Void Knight equipment", "Elite void"), names);
 	}
 
 	@Test

@@ -174,9 +174,11 @@ public class IronmanTemplatesPart3Test
 	}
 
 	// doneWhen-nycklar som pekar utanför sin egen template: målet kan finnas från en annan
-	// template (infernal cape och Jad-KC, Fairytale II under Quest cape, elite Lumbridge-diaryn).
+	// template (infernal cape och Jad-KC, Fairytale II under Quest cape, elite Lumbridge-diaryn, och de
+	// delvis klara questerna The Path of Glouphrie och One Small Favour för spirit trees och gliders).
 	private static final java.util.Set<String> EXTERNAL_KEYS = java.util.Set.of(
-		"item:21295", "kc:hiscore:TZKAL_ZUK:1", "kc:hiscore:TZTOK_JAD:1", "quest:47", "diary:LUMBRIDGE:ELITE");
+		"item:21295", "kc:hiscore:TZKAL_ZUK:1", "kc:hiscore:TZTOK_JAD:1", "quest:47", "diary:LUMBRIDGE:ELITE",
+		"quest:3425", "quest:107");
 
 	@Test
 	public void everyDoneWhenKeyPointsAtARealGoal()

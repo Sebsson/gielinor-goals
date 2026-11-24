@@ -1,0 +1,67 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Slayer_helmet - Item ID 11864 (gameval SLAYER_HELM). Upplåsningen Malevolent Masquerade",
+    "kostar 400 slayer reward points (https://oldschool.runescape.wiki/w/Slayer_Rewards); 55 Crafting (boostbar) för att sätta",
+    "ihop. 10 Defence krävs för att bära (wield-krav, inte med).",
+    "Delar, en av varje: black mask (8921, HARMLESS_BLACK_MASK; drop från cave horror 1/512, kräver 58 Slayer och Cabin Fever för",
+    "Mos Le'Harmless), earmuffs (4166, SLAYER_EARMUFFS), facemask, nose peg, spiny helmet och enchanted gem. Earmuffs och",
+    "övriga köps för coins i Slayer Equipment-butiken. Osäkert: id för facemask (4164, SLAYER_FACEMASK), nose peg (4168,",
+    "SLAYER_NOSEPEG), spiny helmet (4551, WALLBEAST_SPIKE_HELMET) och enchanted gem (4155, SLAYER_GEM) är tagna från",
+    "gameval-namnen och inte lästa från wikins infoboxar.",
+    "Reinforced goggles behövs bara efter A Porcine of Interest och är inte med.",
+    "400 slayer points förbrukas; ett POINTS-mål med 400 kopplas inte ihop med Rune pouch (750)."
+  ],
+  "id": "slayer-helm",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Slayer helmet",
+  "description": "Malevolent masquerade, 55 Crafting and every part of the slayer helmet",
+  "category": "Ironman · Mid",
+  "tags": ["slayer helm", "slayer helmet", "slay helm", "black mask", "malevolent masquerade", "slayer", "crafting", "ironman"],
+  "root": {
+    "title": "Slayer helmet",
+    "aggregate": true,
+    "wikiPage": "Slayer helmet",
+    "icon": {"item": 11864},
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {"sideIcon": "QUEST"},
+        "children": [
+          {"title": "Malevolent masquerade (400 slayer points)", "points": {"activity": "SLAYER", "count": 400},
+            "wikiPage": "Slayer Rewards", "doneWhen": ["item:11864"],
+            "note": "Buy the unlock from a Slayer master's reward shop. The points are spent."},
+          {"skill": "CRAFTING", "level": 55}
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {"sideIcon": "INVENTORY"},
+        "children": [
+          {"item": {"id": 8921, "name": "Black mask", "includeVariants": true},
+            "dropSource": {"npc": "Cave horror", "rate": 512}, "doneWhen": ["item:11864"],
+            "note": "Dropped by cave horrors on Mos Le'Harmless (1/512).",
+            "children": [
+              {"skill": "SLAYER", "level": 58},
+              {"quest": "CABIN_FEVER"}
+            ]},
+          {"item": {"id": 4166, "name": "Earmuffs", "includeVariants": true}, "doneWhen": ["item:11864"],
+            "note": "200 coins in the Slayer Equipment shop."},
+          {"item": {"id": 4164, "name": "Facemask", "includeVariants": true}, "doneWhen": ["item:11864"],
+            "note": "Slayer Equipment shop."},
+          {"item": {"id": 4168, "name": "Nose peg", "includeVariants": true}, "doneWhen": ["item:11864"],
+            "note": "Slayer Equipment shop."},
+          {"item": {"id": 4551, "name": "Spiny helmet", "includeVariants": true}, "doneWhen": ["item:11864"],
+            "note": "Slayer Equipment shop."},
+          {"item": {"id": 4155, "name": "Enchanted gem", "includeVariants": true}, "doneWhen": ["item:11864"],
+            "note": "Slayer Equipment shop, or from any Slayer master."},
+          {"item": {"id": 11864, "name": "Slayer helmet", "includeVariants": true},
+            "note": "Use the black mask on the other parts with 55 Crafting after the unlock."}
+        ]
+      }
+    ]
+  }
+}
