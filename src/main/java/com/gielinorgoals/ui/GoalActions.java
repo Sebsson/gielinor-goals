@@ -137,6 +137,8 @@ final class GoalActions
 			menu.add(item("Show on map", true, () -> services.showOnMap(id)));
 		}
 		menu.add(item("Link to another goal...", true, this::linkToAnotherGoal));
+		menu.add(item("Save as template...", true,
+			() -> SaveTemplateDialog.show(owner, goal, goalManager, services.getCustomTemplates())));
 		if (parents.size() > 1)
 		{
 			// I panelen: föräldern raden ligger under. På kartan: varje förälder.

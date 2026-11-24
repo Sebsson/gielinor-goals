@@ -69,12 +69,23 @@ import net.runelite.client.hiscore.HiscoreSkill;
  * {@code "doneWhen": ["item:12954"]} gör noden klar när ett mål med någon av nycklarna
  * (se {@link TemplateKeys}) är klart, t.ex. en lägre defender när dragon defendern finns.
  * Filen valideras när den läses; en trasig fil ger ingen template alls, aldrig en halv.
+ * <p>
+ * Egna templates (sparade från ett mål) använder samma format, med två tillägg: en nod med
+ * {@code "id": "n1"} kan återanvändas under en till förälder med en nod som bara har
+ * {@code "ref": "n1"}, så att delade delmål förblir delade, och skill-krav kan ha
+ * {@code "xp"} i stället för {@code "level"}. Combat achievements skrivs
+ * {@code {"combatAchievement": {"id": 12, "name": "Noxious Foe", "tier": "Easy"}}}.
+ * {@code "formatVersion"} är formatets egen version, skild från profilens schemaversion.
  */
 public class JsonTemplate implements GoalTemplate
 {
 	// Fälten fylls av Gson.
 	static final class FileSpec
 	{
+		// Formatets version; saknas i de handplockade filerna och betyder då 1.
+		Integer formatVersion;
+		// Om "Show full quest chains" är ibockad från början; saknas = ja.
+		Boolean expandQuestChains;
 		// Stabilt id; om det saknas används filnamnet utan .json.
 		String id;
 		// Vem som har kontrollerat siffrorna mot wikin och när (t.ex. "2026-11-24"); tomt = inte än.
@@ -90,6 +101,10 @@ public class JsonTemplate implements GoalTemplate
 
 	static final class NodeSpec
 	{
+		// Lokalt id så att noden kan delas med "ref" från en annan förälder.
+		String id;
+		// Bara "ref": samma nod som den med det id:t, som delmål även här.
+		String ref;
 		String title;
 		Boolean aggregate;
 		// Egen sida på OSRS Wiki för "Open on wiki"; går före den som härleds ur kravet.
@@ -107,12 +122,21 @@ public class JsonTemplate implements GoalTemplate
 		String quest;
 		String skill;
 		Integer level;
+		Long xp;
+		CombatAchievementSpec combatAchievement;
 		Integer questPoints;
 		Integer totalLevel;
 		Integer combatLevel;
 		DiarySpec diary;
 		ItemSpec item;
 		List<NodeSpec> children;
+	}
+
+	static final class CombatAchievementSpec
+	{
+		Integer id;
+		String name;
+		String tier;
 	}
 
 	static final class DiarySpec
@@ -159,6 +183,13 @@ public class JsonTemplate implements GoalTemplate
 	private List<String> tags = java.util.Collections.emptyList();
 	private final NodeSpec root;
 	private boolean verified;
+	private boolean expandQuestChains = true;
+
+	/**
+	 * Formatets nuvarande version. En fil med högre version kommer från en nyare version av
+	 * pluginet och läses inte, hellre än att tolkas fel.
+	 */
+	public static final int FORMAT_VERSION = 1;
 
 	private JsonTemplate(String id, String name, String description, NodeSpec root)
 	{
@@ -185,6 +216,11 @@ public class JsonTemplate implements GoalTemplate
 		{
 			throw new IllegalArgumentException("Template needs a name and a root");
 		}
+		if (spec.formatVersion != null && (spec.formatVersion < 1 || spec.formatVersion > FORMAT_VERSION))
+		{
+			throw new IllegalArgumentException("Template format " + spec.formatVersion
+				+ " is from a newer version of Gielinor Goals");
+		}
 		String id = spec.id != null ? spec.id
 			: fallbackId != null ? fallbackId
 			: spec.name.trim().toLowerCase(java.util.Locale.ROOT).replaceAll("[^a-z0-9]+", "-");
@@ -199,6 +235,7 @@ public class JsonTemplate implements GoalTemplate
 			template.tags = java.util.List.copyOf(spec.tags);
 		}
 		template.verified = notBlank(spec.verifiedBy) && notBlank(spec.verifiedAt);
+		template.expandQuestChains = !Boolean.FALSE.equals(spec.expandQuestChains);
 		// Bygg en gång direkt, så att fel i filen märks när den läses och inte i dialogen.
 		template.build(Map.of());
 		return template;
@@ -261,20 +298,78 @@ public class JsonTemplate implements GoalTemplate
 		return root.icon == null ? null : toIcon(root.icon);
 	}
 
-	// Handplockade templates visar hela quest-kedjorna som standard.
+	// Handplockade templates visar hela quest-kedjorna som standard; egna sparar sina kedjor.
 	@Override
 	public boolean defaultExpandQuestChains()
 	{
-		return true;
+		return expandQuestChains;
 	}
 
 	@Override
 	public TemplateNode build(Map<String, Integer> parameters)
 	{
-		return toNode(root);
+		return toNode(root, new java.util.HashMap<>(), new java.util.HashSet<>());
 	}
 
-	private static TemplateNode toNode(NodeSpec spec)
+	/**
+	 * @param defined noder med id som redan är byggda
+	 * @param open    id:n för noderna på vägen hit; en ref till någon av dem vore en cykel
+	 */
+	private static TemplateNode toNode(NodeSpec spec, Map<String, TemplateNode> defined, java.util.Set<String> open)
+	{
+		if (spec == null)
+		{
+			throw new IllegalArgumentException("A node is empty");
+		}
+		if (spec.ref != null)
+		{
+			return toRef(spec, defined, open);
+		}
+		if (spec.id != null)
+		{
+			if (spec.id.trim().isEmpty() || defined.containsKey(spec.id) || !open.add(spec.id))
+			{
+				throw new IllegalArgumentException("Node id \"" + spec.id + "\" is empty or used twice");
+			}
+		}
+		TemplateNode node = toPlainNode(spec, defined, open);
+		if (spec.id != null)
+		{
+			node.setLocalId(spec.id);
+			open.remove(spec.id);
+			defined.put(spec.id, node);
+		}
+		return node;
+	}
+
+	// En nod som bara pekar på en tidigare nod: samma titel och krav, inga egna barn.
+	private static TemplateNode toRef(NodeSpec spec, Map<String, TemplateNode> defined, java.util.Set<String> open)
+	{
+		if (spec.id != null || spec.title != null || spec.aggregate != null || spec.children != null
+			|| spec.note != null || spec.wikiPage != null || spec.icon != null || spec.doneWhen != null
+			|| spec.dropSource != null || spec.expandChain != null || toRequirement(spec) != null)
+		{
+			throw new IllegalArgumentException("A node with \"ref\" can't have anything else");
+		}
+		if (open.contains(spec.ref))
+		{
+			throw new IllegalArgumentException("Node \"" + spec.ref + "\" is its own sub-goal (a cycle)");
+		}
+		TemplateNode target = defined.get(spec.ref);
+		if (target == null)
+		{
+			throw new IllegalArgumentException("ref \"" + spec.ref + "\" doesn't point to an earlier node");
+		}
+		TemplateNode node = new TemplateNode(target.getTitle(), target.getRequirement(), target.isAggregate());
+		node.setRef(spec.ref);
+		node.setIcon(target.getIcon());
+		node.setWikiPage(target.getWikiPage());
+		// Kedjan fälls ut (om alls) där noden definieras, inte en gång till här.
+		node.setExpandChain(false);
+		return node;
+	}
+
+	private static TemplateNode toPlainNode(NodeSpec spec, Map<String, TemplateNode> defined, java.util.Set<String> open)
 	{
 		Requirement requirement = toRequirement(spec);
 		String title = spec.title == null ? "" : spec.title;
@@ -320,7 +415,7 @@ public class JsonTemplate implements GoalTemplate
 		{
 			for (NodeSpec child : spec.children)
 			{
-				node.add(toNode(child));
+				node.add(toNode(child, defined, open));
 			}
 		}
 		return node;
@@ -336,11 +431,21 @@ public class JsonTemplate implements GoalTemplate
 		}
 		if (spec.skill != null)
 		{
-			if (spec.level == null)
+			if ((spec.level == null) == (spec.xp == null))
 			{
-				throw new IllegalArgumentException("Skill " + spec.skill + " needs a level");
+				throw new IllegalArgumentException("Skill " + spec.skill + " needs a level or an xp target");
 			}
-			return SkillRequirement.level(Skill.valueOf(spec.skill), spec.level);
+			Skill skill = Skill.valueOf(spec.skill);
+			return spec.level != null ? SkillRequirement.level(skill, spec.level) : SkillRequirement.xp(skill, spec.xp);
+		}
+		if (spec.combatAchievement != null)
+		{
+			CombatAchievementSpec ca = spec.combatAchievement;
+			if (ca.id == null || ca.id < 0)
+			{
+				throw new IllegalArgumentException("combatAchievement needs a task id");
+			}
+			return new com.gielinorgoals.model.CombatAchievementRequirement(ca.id, ca.name, ca.tier);
 		}
 		if (spec.questPoints != null)
 		{

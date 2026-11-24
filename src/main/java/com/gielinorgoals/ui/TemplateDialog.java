@@ -33,6 +33,7 @@ import com.gielinorgoals.template.QuestRequirementsDb;
 import com.gielinorgoals.template.TemplateCategories;
 import com.gielinorgoals.template.TemplateNode;
 import com.gielinorgoals.template.TemplateUpdates;
+import com.gielinorgoals.template.CustomTemplates;
 import com.gielinorgoals.template.TemplateBuilder;
 import com.gielinorgoals.template.TemplateParameter;
 import com.gielinorgoals.template.TemplatePlanner;
@@ -82,7 +83,13 @@ final class TemplateDialog
 	private static final Icon NO_ICON = new ImageIcon(new java.awt.image.BufferedImage(1, 1,
 		java.awt.image.BufferedImage.TYPE_INT_ARGB));
 
-	private final List<GoalTemplate> templates;
+	// Egna templates kan ändras medan dialogen är öppen, så listan hämtas på nytt.
+	private final java.util.function.Supplier<List<GoalTemplate>> templates;
+	@Nullable
+	private final CustomTemplates custom;
+	private final GoalIcons icons;
+	private final java.util.Set<GoalTemplate> iconsRequested = java.util.Collections.newSetFromMap(
+		new IdentityHashMap<>());
 	private final GoalTree tree;
 	private final GameData data;
 
@@ -111,17 +118,24 @@ final class TemplateDialog
 	// Varje nods rad i förhandsvisningen och dess förälder i förslaget.
 	private final Map<TemplateNode, PreviewRow> rows = new IdentityHashMap<>();
 
-	private TemplateDialog(List<GoalTemplate> templates, GoalTree tree, GameData data, GoalIcons icons,
-		QuestRequirementsDb questRequirements, boolean ironman, TemplateBuilder builder)
+	private TemplateDialog(java.util.function.Supplier<List<GoalTemplate>> templates, @Nullable CustomTemplates custom,
+		GoalTree tree, GameData data, GoalIcons icons, QuestRequirementsDb questRequirements, boolean ironman,
+		TemplateBuilder builder)
 	{
 		this.questRequirements = questRequirements;
 		this.builder = builder;
 		this.templates = templates;
+		this.custom = custom;
+		this.icons = icons;
 		this.tree = tree;
 		this.data = data;
 		this.ironman = ironman;
+	}
 
-		for (GoalTemplate template : templates)
+	// Ikonen laddas första gången templaten visas i listan.
+	private Icon iconFor(GoalTemplate template)
+	{
+		if (iconsRequested.add(template))
 		{
 			Requirement iconRequirement = template.getIconRequirement();
 			Consumer<java.awt.image.BufferedImage> show = image -> SwingUtilities.invokeLater(() ->
@@ -138,20 +152,23 @@ final class TemplateDialog
 				icons.loadImage(template.getIcon(), show);
 			}
 		}
+		return templateIcons.getOrDefault(template, NO_ICON);
 	}
 
 	/**
 	 * @return förslaget med användarens urbockningar, eller null om användaren avbröt
 	 */
 	@Nullable
-	static TemplateNode show(Component parent, List<GoalTemplate> templates, GoalTree tree, GameData data,
-		GoalIcons icons, QuestRequirementsDb questRequirements, boolean ironman, TemplateBuilder builder)
+	static TemplateNode show(Component parent, java.util.function.Supplier<List<GoalTemplate>> templates,
+		@Nullable CustomTemplates custom, GoalTree tree, GameData data, GoalIcons icons,
+		QuestRequirementsDb questRequirements, boolean ironman, TemplateBuilder builder)
 	{
-		if (templates.isEmpty())
+		if (templates.get().isEmpty())
 		{
 			return null;
 		}
-		TemplateDialog dialog = new TemplateDialog(templates, tree, data, icons, questRequirements, ironman, builder);
+		TemplateDialog dialog = new TemplateDialog(templates, custom, tree, data, icons, questRequirements, ironman,
+			builder);
 		JPanel content = dialog.buildContent();
 		int choice = JOptionPane.showOptionDialog(parent, content, "Add from template",
 			JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, new Object[]{"Add", "Cancel"}, "Add");
@@ -184,7 +201,7 @@ final class TemplateDialog
 				String text = "<html><body style='width:" + LIST_TEXT_WIDTH + "px'><b>" + UiText.escapeHtml(template.getName())
 					+ "</b><br><font color='#a0a0a0'>" + UiText.escapeHtml(template.getDescription()) + "</font></body></html>";
 				JLabel label = (JLabel) super.getListCellRendererComponent(list, text, index, isSelected, cellHasFocus);
-				label.setIcon(templateIcons.getOrDefault(template, NO_ICON));
+				label.setIcon(iconFor(template));
 				label.setIconTextGap(8);
 				label.setBorder(new EmptyBorder(4, 4, 4, 4));
 				return label;
@@ -210,6 +227,20 @@ final class TemplateDialog
 			if (value != selected)
 			{
 				selectTemplate((GoalTemplate) value);
+			}
+		});
+		templateList.addMouseListener(new java.awt.event.MouseAdapter()
+		{
+			@Override
+			public void mousePressed(java.awt.event.MouseEvent e)
+			{
+				showCustomMenu(e);
+			}
+
+			@Override
+			public void mouseReleased(java.awt.event.MouseEvent e)
+			{
+				showCustomMenu(e);
 			}
 		});
 		searchField.putClientProperty("JTextField.placeholderText", "Search templates and tags");
@@ -268,17 +299,31 @@ final class TemplateDialog
 	// Fyller listan per kategori efter söktexten och behåller valet om det fortfarande syns.
 	private void fillList()
 	{
-		GoalTemplate keep = selected;
+		String keepId = selected == null ? null : selected.getId();
 		listModel.clear();
-		Map<String, List<GoalTemplate>> grouped = TemplateCategories.group(templates, searchField.getText(), ironman);
+		Map<String, List<GoalTemplate>> grouped = TemplateCategories.group(templates.get(), searchField.getText(),
+			ironman);
+		GoalTemplate keep = null;
 		for (Map.Entry<String, List<GoalTemplate>> entry : grouped.entrySet())
 		{
 			listModel.addElement(entry.getKey());
-			entry.getValue().forEach(listModel::addElement);
+			for (GoalTemplate template : entry.getValue())
+			{
+				listModel.addElement(template);
+				// Efter t.ex. ett namnbyte är det ett nytt objekt med samma id.
+				if (template.getId().equals(keepId))
+				{
+					keep = template;
+				}
+			}
 		}
-		if (keep != null && listModel.contains(keep))
+		if (keep != null)
 		{
 			templateList.setSelectedValue(keep, true);
+			if (keep != selected)
+			{
+				selectTemplate(keep);
+			}
 		}
 		else if (listModel.size() > 1)
 		{
@@ -289,6 +334,84 @@ final class TemplateDialog
 			templateList.clearSelection();
 			selectTemplate(null);
 		}
+	}
+
+	// Högerklick på en egen template: ändra uppgifter, duplicera eller ta bort.
+	private void showCustomMenu(java.awt.event.MouseEvent e)
+	{
+		if (!e.isPopupTrigger() || custom == null)
+		{
+			return;
+		}
+		int index = templateList.locationToIndex(e.getPoint());
+		if (index < 0 || !templateList.getCellBounds(index, index).contains(e.getPoint()))
+		{
+			return;
+		}
+		Object value = listModel.get(index);
+		if (!(value instanceof GoalTemplate) || !CustomTemplates.isCustomId(((GoalTemplate) value).getId()))
+		{
+			return;
+		}
+		GoalTemplate template = (GoalTemplate) value;
+		templateList.setSelectedIndex(index);
+		javax.swing.JPopupMenu menu = new javax.swing.JPopupMenu();
+		javax.swing.JMenuItem edit = new javax.swing.JMenuItem("Edit name, description and tags...");
+		edit.addActionListener(event -> editDetails(template));
+		javax.swing.JMenuItem duplicate = new javax.swing.JMenuItem("Duplicate");
+		duplicate.addActionListener(event -> changeCustom(() -> custom.duplicate(template.getId())));
+		javax.swing.JMenuItem delete = new javax.swing.JMenuItem("Delete...");
+		delete.addActionListener(event -> deleteCustom(template));
+		menu.add(edit);
+		menu.add(duplicate);
+		menu.addSeparator();
+		menu.add(delete);
+		menu.show(templateList, e.getX(), e.getY());
+	}
+
+	private void editDetails(GoalTemplate template)
+	{
+		JTextField name = new JTextField(template.getName(), 28);
+		JTextField description = new JTextField(template.getDescription(), 28);
+		JTextField tags = new JTextField(String.join(", ", template.getTags()), 28);
+		JPanel fields = new JPanel(new DynamicGridLayout(0, 2, 6, 4));
+		fields.add(new JLabel("Name"));
+		fields.add(name);
+		fields.add(new JLabel("Description"));
+		fields.add(description);
+		fields.add(new JLabel("Tags (comma separated)"));
+		fields.add(tags);
+		int choice = JOptionPane.showConfirmDialog(templateList, fields, "Edit template", JOptionPane.OK_CANCEL_OPTION,
+			JOptionPane.PLAIN_MESSAGE);
+		if (choice == JOptionPane.OK_OPTION)
+		{
+			changeCustom(() -> custom.rename(template.getId(), name.getText().trim(), description.getText().trim(),
+				SaveTemplateDialog.parseTags(tags.getText())));
+		}
+	}
+
+	private void deleteCustom(GoalTemplate template)
+	{
+		int choice = JOptionPane.showConfirmDialog(templateList, "Delete the template '" + template.getName() + "'?\n"
+				+ "Goals you already added from it stay; they just can't be updated from it any more.",
+			"Delete template", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+		if (choice == JOptionPane.OK_OPTION)
+		{
+			changeCustom(() -> custom.delete(template.getId()));
+		}
+	}
+
+	private void changeCustom(Runnable change)
+	{
+		try
+		{
+			change.run();
+		}
+		catch (CustomTemplates.TemplateException e)
+		{
+			JOptionPane.showMessageDialog(templateList, e.getMessage(), "Gielinor Goals", JOptionPane.WARNING_MESSAGE);
+		}
+		fillList();
 	}
 
 	private void selectTemplate(@Nullable GoalTemplate template)

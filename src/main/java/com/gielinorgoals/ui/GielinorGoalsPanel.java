@@ -294,7 +294,8 @@ public class GielinorGoalsPanel extends PluginPanel
 	private void openTemplateDialog()
 	{
 		ProfileGuard guard = ProfileGuard.of(goalManager);
-		TemplateNode template = TemplateDialog.show(this, templateCatalog.getTemplates(), goalManager.getTree(),
+		TemplateNode template = TemplateDialog.show(this, templateCatalog::getTemplates, services.getCustomTemplates(),
+			goalManager.getTree(),
 			services.currentGameData(), services.getIcons(), services.getQuestRequirements(),
 			services.getAccountStatus().isIronman(), services.getTemplateBuilder());
 		// Templaten planerades mot målen i den profil som var laddad när dialogen öppnades.

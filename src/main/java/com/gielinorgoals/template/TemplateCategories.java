@@ -36,6 +36,8 @@ import java.util.Map;
  */
 public final class TemplateCategories
 {
+	// Användarens egna templates; alltid överst.
+	public static final String MINE = "My templates";
 	public static final String CAPES = "Capes";
 	public static final String IRONMAN_EARLY = "Ironman · Early";
 	public static final String IRONMAN_MID = "Ironman · Mid";
@@ -65,6 +67,7 @@ public final class TemplateCategories
 	public static Map<String, List<GoalTemplate>> group(List<GoalTemplate> templates, String query, boolean ironman)
 	{
 		List<String> order = new ArrayList<>();
+		order.add(MINE);
 		if (ironman)
 		{
 			order.addAll(IRONMAN);

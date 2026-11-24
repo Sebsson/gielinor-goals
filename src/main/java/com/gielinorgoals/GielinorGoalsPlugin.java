@@ -27,6 +27,7 @@ package com.gielinorgoals;
 import com.gielinorgoals.model.DiaryJournal;
 import com.gielinorgoals.model.Goal;
 import com.gielinorgoals.model.NextGoals;
+import com.gielinorgoals.template.CustomTemplates;
 import com.gielinorgoals.tracking.AccountStatus;
 import com.gielinorgoals.tracking.AchievementTracker;
 import com.gielinorgoals.tracking.DiaryJournalParser;
@@ -148,6 +149,12 @@ public class GielinorGoalsPlugin extends Plugin
 	@Inject
 	private AccountStatus accountStatus;
 
+	@Inject
+	private CustomTemplates customTemplates;
+
+	// Egna templates är globala; när de ändras räknas uppdateringsmärkena om.
+	private final Runnable onTemplatesChanged = () -> goalManager.templatesChanged();
+
 	// Hiscores hämtas på första tick efter inloggning när spelarens namn finns. Klienttråden.
 	private boolean hiscoreFetchPending;
 	// Hiscore-aktiviteter som har KC-mål; ett nytt mål ger en hämtning av startvärdet. EDT.
@@ -172,6 +179,7 @@ public class GielinorGoalsPlugin extends Plugin
 		injector.getInstance(DialogServices.class).setMapOpener(this::showOnMap);
 		goalManager.setListener(this::onGoalsChanged);
 		goalManager.setCompletionListener(this::announceCompleted);
+		customTemplates.addListener(onTemplatesChanged);
 
 		// Läs alla stats vid nästa tick om pluginet slås på medan man är inloggad.
 		clientThread.invokeLater(() ->
@@ -230,6 +238,7 @@ public class GielinorGoalsPlugin extends Plugin
 		goalManager.setCompletionListener(goals ->
 		{
 		});
+		customTemplates.removeListener(onTemplatesChanged);
 		goalManager.unload();
 		achievementTracker.setWatched(WatchedAchievements.NONE);
 		navigationButton = null;

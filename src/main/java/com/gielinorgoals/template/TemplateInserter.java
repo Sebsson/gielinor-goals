@@ -50,6 +50,8 @@ public final class TemplateInserter
 		private final Goal root;
 		private final List<Goal> created = new ArrayList<>();
 		private final List<Goal> linked = new ArrayList<>();
+		// Målet för varje nod med localId, så att en ref-nod kopplar in samma mål.
+		private final java.util.Map<String, Goal> byLocalId = new java.util.HashMap<>();
 
 		private Result(Goal root)
 		{
@@ -221,9 +223,25 @@ public final class TemplateInserter
 				continue;
 			}
 
+			if (child.getRef() != null)
+			{
+				// Ett delat delmål: samma mål under en till förälder. Var målet bortvalt finns
+				// det inget att koppla in.
+				Goal shared = result.byLocalId.get(child.getRef());
+				if (shared != null)
+				{
+					tree.link(parent.getId(), shared.getId());
+				}
+				continue;
+			}
+
 			Goal existing = findExisting(withRequirement, child.getRequirement());
 			if (existing != null)
 			{
+				if (child.getLocalId() != null)
+				{
+					result.byLocalId.put(child.getLocalId(), existing);
+				}
 				// Kopplingen kan redan finnas om templaten har samma krav två gånger.
 				// Ett mål som skapades tidigare i samma insättning kopplas in men räknas inte
 				// som ett befintligt mål.
@@ -237,6 +255,10 @@ public final class TemplateInserter
 			Goal goal = create(child);
 			tree.add(parent.getId(), goal);
 			result.created.add(goal);
+			if (child.getLocalId() != null)
+			{
+				result.byLocalId.put(child.getLocalId(), goal);
+			}
 			if (goal.getRequirement() != null)
 			{
 				withRequirement.add(goal);

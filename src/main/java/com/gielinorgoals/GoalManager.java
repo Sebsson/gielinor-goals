@@ -643,6 +643,47 @@ public class GoalManager
 		});
 	}
 
+	/**
+	 * Kopplar ett mål till en egen template som just sparats från det, så att "Update from
+	 * template" fungerar. Mål i delgrafen utan nod-nyckel får nyckeln för sin nod i templaten;
+	 * befintliga nycklar (t.ex. från en annan template) behålls.
+	 *
+	 * @param keys mål-id → nod-nyckel, från {@link com.gielinorgoals.template.TemplateExport}
+	 */
+	public void adoptTemplate(String rootId, String templateId, Map<String, String> keys)
+	{
+		apply(tree ->
+		{
+			Goal root = tree.find(rootId);
+			if (root == null)
+			{
+				return false;
+			}
+			root.setTemplateId(templateId);
+			root.setTemplateParams(new java.util.LinkedHashMap<>(Map.of(TemplateUpdates.QUEST_CHAINS_PARAM, 0)));
+			root.setTemplateChoices(null);
+			root.setTemplateIgnoredKeys(null);
+			for (Map.Entry<String, String> entry : keys.entrySet())
+			{
+				Goal goal = tree.find(entry.getKey());
+				if (goal != null && goal != root && goal.getTemplateNodeKey() == null)
+				{
+					goal.setTemplateNodeKey(entry.getValue());
+				}
+			}
+			return true;
+		});
+	}
+
+	/**
+	 * En egen template har ändrats eller tagits bort: uppdateringsmärkena räknas om.
+	 */
+	public void templatesChanged()
+	{
+		revision++;
+		listener.run();
+	}
+
 	private static void applyAggregate(Goal goal, boolean aggregate)
 	{
 		if (aggregate && !goal.isAggregate())

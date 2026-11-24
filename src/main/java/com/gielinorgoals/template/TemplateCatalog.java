@@ -40,10 +40,15 @@ public class TemplateCatalog
 {
 	private final List<GoalTemplate> templates;
 
+	// Användarens egna templates; null i tester med en egen lista.
+	@javax.annotation.Nullable
+	private final CustomTemplates custom;
+
 	@Inject
-	TemplateCatalog(Gson gson, QuestRequirementsDb questRequirements, CombatAchievementCatalog combatAchievements)
+	TemplateCatalog(Gson gson, QuestRequirementsDb questRequirements, CombatAchievementCatalog combatAchievements,
+		CustomTemplates custom)
 	{
-		this(gson, questRequirements, (CombatAchievementSource) combatAchievements);
+		this(gson, questRequirements, (CombatAchievementSource) combatAchievements, custom);
 	}
 
 	/**
@@ -56,6 +61,13 @@ public class TemplateCatalog
 
 	public TemplateCatalog(Gson gson, QuestRequirementsDb questRequirements, CombatAchievementSource combatAchievements)
 	{
+		this(gson, questRequirements, combatAchievements, CustomTemplates.inMemory(gson));
+	}
+
+	public TemplateCatalog(Gson gson, QuestRequirementsDb questRequirements, CombatAchievementSource combatAchievements,
+		CustomTemplates custom)
+	{
+		this.custom = custom;
 		List<GoalTemplate> all = new ArrayList<>();
 		all.add(new QuestCapeTemplate(QuestCapeExclusions.load(gson)));
 		all.add(new DiaryCapeTemplate());
@@ -76,12 +88,23 @@ public class TemplateCatalog
 	// För tester: en egen lista.
 	TemplateCatalog(List<GoalTemplate> templates)
 	{
+		this.custom = null;
 		this.templates = Collections.unmodifiableList(templates);
 	}
 
+	/**
+	 * Egna templates först, sedan de inbyggda. En ny lista vid varje anrop, eftersom de egna
+	 * kan ändras.
+	 */
 	public List<GoalTemplate> getTemplates()
 	{
-		return templates;
+		if (custom == null)
+		{
+			return templates;
+		}
+		List<GoalTemplate> all = new ArrayList<>(custom.getTemplates());
+		all.addAll(templates);
+		return Collections.unmodifiableList(all);
 	}
 
 	/**
@@ -90,6 +113,11 @@ public class TemplateCatalog
 	@javax.annotation.Nullable
 	public GoalTemplate find(@javax.annotation.Nullable String id)
 	{
+		if (CustomTemplates.isCustomId(id))
+		{
+			// En borttagen egen template ger null: inget uppdateringsmärke och inget fel.
+			return custom == null ? null : custom.find(id);
+		}
 		for (GoalTemplate template : templates)
 		{
 			if (template.getId().equals(id))

@@ -29,6 +29,7 @@ import com.gielinorgoals.model.ActivityCounters;
 import com.gielinorgoals.model.GameData;
 import com.gielinorgoals.model.Requirement;
 import com.gielinorgoals.template.QuestRequirementsDb;
+import com.gielinorgoals.template.CustomTemplates;
 import com.gielinorgoals.template.TemplateBuilder;
 import com.gielinorgoals.tracking.AccountStatus;
 import com.gielinorgoals.template.TemplateUpdates;
@@ -63,6 +64,9 @@ public class DialogServices
 	// Bygger templates, på klienttråden för de som behöver spelets data.
 	@Getter
 	private final TemplateBuilder templateBuilder;
+	// Användarens egna templates, globala för alla konton.
+	@Getter
+	private final CustomTemplates customTemplates;
 	private final GoalManager goalManager;
 	// Sätts av pluginet, som äger kartfönstret.
 	private Consumer<String> mapOpener = id ->
@@ -73,9 +77,10 @@ public class DialogServices
 	DialogServices(ItemSearch itemSearch, CombatAchievementCatalog combatAchievements,
 		CompletionLookup completionLookup, GoalIcons icons, GoalManager goalManager,
 		QuestRequirementsDb questRequirements, TemplateUpdates templateUpdates, AccountStatus accountStatus,
-		TemplateBuilder templateBuilder)
+		TemplateBuilder templateBuilder, CustomTemplates customTemplates)
 	{
 		this.templateBuilder = templateBuilder;
+		this.customTemplates = customTemplates;
 		this.itemSearch = itemSearch;
 		this.combatAchievements = combatAchievements;
 		this.completionLookup = completionLookup;

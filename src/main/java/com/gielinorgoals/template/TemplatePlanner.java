@@ -139,6 +139,14 @@ public final class TemplatePlanner
 				continue;
 			}
 
+			if (child.getRef() != null)
+			{
+				// Delat delmål: samma mål som en nod tidigare i förslaget.
+				plan.statuses.put(child, Status.DUPLICATE);
+				plan.done.put(child, met(child.getRequirement(), data));
+				continue;
+			}
+
 			Goal existing = TemplateInserter.findExisting(existingGoals, child.getRequirement());
 			if (existing != null)
 			{

@@ -200,6 +200,45 @@ public class GoalManagerTemplateTest
 	}
 
 	@Test
+	public void savedGoalIsLinkedToItsCustomTemplate()
+	{
+		Gson gson = new Gson();
+		com.gielinorgoals.template.CustomTemplates custom = com.gielinorgoals.template.CustomTemplates.inMemory(gson);
+		TemplateCatalog catalog = new TemplateCatalog(gson, QuestRequirementsDb.load(gson),
+			com.gielinorgoals.template.CombatAchievementSource.NONE, custom);
+		TemplateUpdates updates = new TemplateUpdates(catalog, QuestRequirementsDb.load(gson));
+		manager.addGoal(null, "Plan", null, null);
+		Goal root = manager.getTree().getRoots().get(0);
+		manager.addGoal(root.getId(), "Buy rope", null, null);
+
+		com.gielinorgoals.template.TemplateExport.Result export = com.gielinorgoals.template.TemplateExport.export(
+			manager.getTree(), root, "Plan", "", List.of());
+		String id = custom.add(export);
+		manager.adoptTemplate(root.getId(), id, export.getKeys());
+
+		assertEquals(id, root.getTemplateId());
+		Goal rope = manager.getTree().getChildren(root).get(0);
+		assertEquals("group:buy rope", rope.getTemplateNodeKey());
+		// Direkt efter sparningen finns inget att uppdatera.
+		assertFalse(updates.hasUpdate(manager.getTree(), root, manager.getRevision()));
+
+		// Spara över: samma id; ett nytt delmål i templaten syns som en uppdatering.
+		manager.addGoal(root.getId(), "Buy coins", null, null);
+		com.gielinorgoals.template.TemplateExport.Result again = com.gielinorgoals.template.TemplateExport.export(
+			manager.getTree(), root, "Plan", "", List.of());
+		custom.replace(id, again);
+		manager.adoptTemplate(root.getId(), id, again.getKeys());
+		assertEquals(id, root.getTemplateId());
+		assertEquals(1, custom.getTemplates().size());
+		assertFalse(updates.hasUpdate(manager.getTree(), root, manager.getRevision()));
+
+		// Sparad på nytt efter att delmålet togs bort: uppdateringen föreslår det igen.
+		Goal coins = manager.getTree().getChildren(root).get(1);
+		manager.removeGoal(coins.getId());
+		assertTrue(updates.hasUpdate(manager.getTree(), root, manager.getRevision()));
+	}
+
+	@Test
 	public void insertedTemplateSurvivesReload()
 	{
 		manager.insertTemplate(new QuestCapeTemplate(QuestCapeExclusions.load(new Gson())).build(Map.of()));

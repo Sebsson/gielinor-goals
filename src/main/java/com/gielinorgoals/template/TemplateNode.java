@@ -92,6 +92,15 @@ public class TemplateNode
 	@Setter
 	private boolean expandChain = true;
 
+	// Delade noder i en egen template: noden med localId sätts in en gång, och en nod med
+	// ref (samma titel och krav, inga egna barn) kopplar in samma mål under en till förälder.
+	@Setter
+	@Nullable
+	private String localId;
+	@Setter
+	@Nullable
+	private String ref;
+
 	public TemplateNode(String title, @Nullable Requirement requirement, boolean aggregate)
 	{
 		this.title = title;
