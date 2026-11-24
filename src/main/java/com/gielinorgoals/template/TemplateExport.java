@@ -122,16 +122,49 @@ public final class TemplateExport
 	{
 		TemplateExport export = new TemplateExport(tree);
 		export.collect(root);
-		for (String id : export.inside)
+		export.countParents();
+		JsonTemplate.NodeSpec rootSpec = export.write(root);
+		export.filterDoneWhen();
+		return export.result(rootSpec, name, description, tags);
+	}
+
+	/**
+	 * Alla profilens mål, som säkerhetskopia: en grupp "All goals" med varje rotmål som delmål.
+	 * Vid import blir gruppens delmål egna rotmål igen, ihopslagna med de befintliga.
+	 */
+	public static Result exportAll(GoalTree tree)
+	{
+		TemplateExport export = new TemplateExport(tree);
+		List<Goal> roots = tree.getRoots();
+		roots.forEach(export::collect);
+		export.countParents();
+		JsonTemplate.NodeSpec container = new JsonTemplate.NodeSpec();
+		container.title = ALL_GOALS;
+		container.aggregate = Boolean.TRUE;
+		container.children = new ArrayList<>();
+		for (Goal root : roots)
+		{
+			container.children.add(export.write(root));
+		}
+		export.filterDoneWhen();
+		return export.result(container, ALL_GOALS, "Every goal from a profile", List.of());
+	}
+
+	public static final String ALL_GOALS = "All goals";
+
+	private void countParents()
+	{
+		for (String id : inside)
 		{
 			for (Goal child : tree.getChildren(tree.find(id)))
 			{
-				export.parentsInside.merge(child.getId(), 1, Integer::sum);
+				parentsInside.merge(child.getId(), 1, Integer::sum);
 			}
 		}
-		JsonTemplate.NodeSpec rootSpec = export.write(root);
-		export.filterDoneWhen();
+	}
 
+	private Result result(JsonTemplate.NodeSpec rootSpec, String name, String description, List<String> tags)
+	{
 		JsonTemplate.FileSpec spec = new JsonTemplate.FileSpec();
 		spec.formatVersion = JsonTemplate.FORMAT_VERSION;
 		spec.name = name;
@@ -140,7 +173,7 @@ public final class TemplateExport
 		// Kedjorna som fanns under målen sparas som de är; de fälls inte ut en gång till.
 		spec.expandQuestChains = false;
 		spec.root = rootSpec;
-		return new Result(spec, export.keys, export.nodeCount, export.convertedXpGains);
+		return new Result(spec, keys, nodeCount, convertedXpGains);
 	}
 
 	private void collect(Goal goal)

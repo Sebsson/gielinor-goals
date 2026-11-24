@@ -191,6 +191,14 @@ public class CustomTemplates
 	}
 
 	/**
+	 * Sparar en importerad template som en egen, med ett nytt id.
+	 */
+	public String add(ShareCodec.Payload payload)
+	{
+		return add(payload.getSpec());
+	}
+
+	/**
 	 * Skriver över en befintlig template med en ny export av målen.
 	 */
 	public void replace(String id, TemplateExport.Result export)

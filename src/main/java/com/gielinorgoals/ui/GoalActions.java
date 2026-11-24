@@ -35,6 +35,8 @@ import java.awt.Component;
 import java.util.List;
 import javax.annotation.Nullable;
 import javax.swing.JCheckBoxMenuItem;
+import com.gielinorgoals.template.ShareCodec;
+import com.gielinorgoals.template.TemplateExport;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
@@ -139,6 +141,7 @@ final class GoalActions
 		menu.add(item("Link to another goal...", true, this::linkToAnotherGoal));
 		menu.add(item("Save as template...", true,
 			() -> SaveTemplateDialog.show(owner, goal, goalManager, services.getCustomTemplates())));
+		menu.add(item("Export...", true, this::export));
 		if (parents.size() > 1)
 		{
 			// I panelen: föräldern raden ligger under. På kartan: varje förälder.
@@ -269,6 +272,14 @@ final class GoalActions
 			goalManager.applyTemplateUpdate(goal.getId(), selection.getAdditions(), selection.getRemoveGoalIds(),
 				selection.getDeclinedKeys());
 		}
+	}
+
+	// Målet med delgraf som delningssträng, utan att först spara det som template.
+	private void export()
+	{
+		String share = services.getShareCodec().encode(TemplateExport.export(tree, goal, goal.getDisplayTitle(), "",
+			List.of()), ShareCodec.Kind.TEMPLATE);
+		ShareDialog.show(owner, "Export goal", "the goal and its sub-goals", share, goal.getDisplayTitle());
 	}
 
 	private void linkToAnotherGoal()

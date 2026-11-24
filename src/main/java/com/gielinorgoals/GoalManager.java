@@ -845,6 +845,27 @@ public class GoalManager
 	}
 
 	/**
+	 * Slår ihop importerade mål med profilens ({@link TemplateInserter#merge}): delmålen till
+	 * {@code container} blir rotmål, befintliga mål återanvänds och inget ersätts. Som vid en
+	 * insättning bockas redan uppfyllda mål av tyst, utan popups.
+	 *
+	 * @return vad som skapades och kopplades in, eller null om målen inte går att ändra
+	 */
+	@Nullable
+	public TemplateInserter.Result importGoals(TemplateNode container)
+	{
+		if (!isEditable())
+		{
+			return null;
+		}
+		TemplateInserter.Result result = TemplateInserter.merge(tree, container);
+		markApprox(evaluate());
+		save();
+		listener.run();
+		return result;
+	}
+
+	/**
 	 * Uppdaterar en insatt template med det användaren valde: tillägg sätts in under sina
 	 * föräldrar (med samma dubblettregel som vid insättning), valda borttagna noder tas bort
 	 * från templaten, och tillägg som användaren bockade ur sparas som bortvalda så att de

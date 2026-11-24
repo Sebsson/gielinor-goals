@@ -93,6 +93,8 @@ import net.runelite.client.util.Text;
 @Slf4j
 @PluginDescriptor(
 	name = "Gielinor Goals",
+	// Krävs av Filepath (export och import till fil).
+	internalName = "gielinor-goals",
 	description = "Goals that tick themselves off, ironman templates, kill count goals and a goal map",
 	tags = {"goals", "todo", "checklist", "ironman", "progress", "templates", "kill count", "map"}
 )

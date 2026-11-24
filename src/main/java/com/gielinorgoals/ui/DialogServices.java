@@ -30,6 +30,7 @@ import com.gielinorgoals.model.GameData;
 import com.gielinorgoals.model.Requirement;
 import com.gielinorgoals.template.QuestRequirementsDb;
 import com.gielinorgoals.template.CustomTemplates;
+import com.gielinorgoals.template.ShareCodec;
 import com.gielinorgoals.template.TemplateBuilder;
 import com.gielinorgoals.tracking.AccountStatus;
 import com.gielinorgoals.template.TemplateUpdates;
@@ -67,6 +68,9 @@ public class DialogServices
 	// Användarens egna templates, globala för alla konton.
 	@Getter
 	private final CustomTemplates customTemplates;
+	// Delningssträngar för export och import; bara urklipp och fil, inget nätverk.
+	@Getter
+	private final ShareCodec shareCodec;
 	private final GoalManager goalManager;
 	// Sätts av pluginet, som äger kartfönstret.
 	private Consumer<String> mapOpener = id ->
@@ -77,8 +81,9 @@ public class DialogServices
 	DialogServices(ItemSearch itemSearch, CombatAchievementCatalog combatAchievements,
 		CompletionLookup completionLookup, GoalIcons icons, GoalManager goalManager,
 		QuestRequirementsDb questRequirements, TemplateUpdates templateUpdates, AccountStatus accountStatus,
-		TemplateBuilder templateBuilder, CustomTemplates customTemplates)
+		TemplateBuilder templateBuilder, CustomTemplates customTemplates, ShareCodec shareCodec)
 	{
+		this.shareCodec = shareCodec;
 		this.templateBuilder = templateBuilder;
 		this.customTemplates = customTemplates;
 		this.itemSearch = itemSearch;

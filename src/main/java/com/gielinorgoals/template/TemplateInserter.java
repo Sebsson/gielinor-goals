@@ -47,13 +47,15 @@ public final class TemplateInserter
 	@Getter
 	public static final class Result
 	{
-		private final Goal root;
+		// Null bara efter en ihopslagning där allt redan fanns.
+		@Nullable
+		private Goal root;
 		private final List<Goal> created = new ArrayList<>();
 		private final List<Goal> linked = new ArrayList<>();
 		// Målet för varje nod med localId, så att en ref-nod kopplar in samma mål.
 		private final java.util.Map<String, Goal> byLocalId = new java.util.HashMap<>();
 
-		private Result(Goal root)
+		private Result(@Nullable Goal root)
 		{
 			this.root = root;
 		}
@@ -183,6 +185,118 @@ public final class TemplateInserter
 		insertChildren(tree, container, parent, withRequirement, before, result);
 		collapseCounters(result);
 		return result;
+	}
+
+	/**
+	 * Slår ihop importerade mål med profilens: delmålen till {@code container} blir rotmål.
+	 * Ett mål som redan finns på samma plats (samma nyckel bland rotmålen eller förälderns
+	 * delmål) återanvänds och får de delmål som saknas, och ett mål med samma krav någon
+	 * annanstans kopplas in. Inget befintligt mål ersätts eller tas bort, så samma import
+	 * två gånger ger inga dubbletter.
+	 */
+	public static Result merge(GoalTree tree, TemplateNode container)
+	{
+		List<Goal> withRequirement = new ArrayList<>();
+		java.util.Set<String> before = new java.util.HashSet<>();
+		for (Goal goal : tree.flatten())
+		{
+			before.add(goal.getId());
+			if (goal.getRequirement() != null)
+			{
+				withRequirement.add(goal);
+			}
+		}
+		Result result = new Result(null);
+		mergeChildren(tree, container, null, true, withRequirement, before, result);
+		collapseCounters(result);
+		return result;
+	}
+
+	private static void mergeChildren(GoalTree tree, TemplateNode node, @Nullable Goal parent, boolean atRoot,
+		List<Goal> withRequirement, java.util.Set<String> before, Result result)
+	{
+		for (TemplateNode child : node.getChildren())
+		{
+			if (!child.isIncluded())
+			{
+				continue;
+			}
+			if (child.getRef() != null)
+			{
+				Goal shared = result.byLocalId.get(child.getRef());
+				if (shared != null && parent != null)
+				{
+					tree.link(parent.getId(), shared.getId());
+				}
+				continue;
+			}
+
+			Goal match = mergeMatch(tree, parent, atRoot, child, withRequirement);
+			if (match != null)
+			{
+				if (child.getLocalId() != null)
+				{
+					result.byLocalId.put(child.getLocalId(), match);
+				}
+				if (parent != null)
+				{
+					tree.link(parent.getId(), match.getId());
+				}
+				if (before.contains(match.getId()) && !result.linked.contains(match))
+				{
+					result.linked.add(match);
+				}
+				mergeChildren(tree, child, match, false, withRequirement, before, result);
+				continue;
+			}
+
+			Goal goal = create(child);
+			tree.add(parent == null ? null : parent.getId(), goal);
+			result.created.add(goal);
+			if (result.root == null)
+			{
+				result.root = goal;
+			}
+			if (goal.getRequirement() != null)
+			{
+				withRequirement.add(goal);
+			}
+			if (child.getLocalId() != null)
+			{
+				result.byLocalId.put(child.getLocalId(), goal);
+			}
+			mergeChildren(tree, child, goal, false, withRequirement, before, result);
+		}
+	}
+
+	/**
+	 * Målet som en importerad nod slås ihop med: ett med samma nyckel på samma plats, annars
+	 * ett med samma krav var som helst, annars null.
+	 *
+	 * @param atRoot true om noden blir ett rotmål; annars jämförs med parents delmål
+	 */
+	@Nullable
+	static Goal mergeMatch(GoalTree tree, @Nullable Goal parent, boolean atRoot, TemplateNode node,
+		List<Goal> withRequirement)
+	{
+		String key = node.getKey();
+		List<Goal> siblings = atRoot ? tree.getRoots() : parent != null ? tree.getChildren(parent)
+			: Collections.emptyList();
+		for (Goal candidate : siblings)
+		{
+			if (key.equals(mergeKey(candidate)))
+			{
+				return candidate;
+			}
+		}
+		return findExisting(withRequirement, node.getRequirement());
+	}
+
+	// Målets nyckel, och för egna mål utan nyckel samma group-nyckel som en nod med samma titel.
+	private static String mergeKey(Goal goal)
+	{
+		String key = TemplateKeys.of(goal);
+		return key != null ? key : "group:" + goal.getTitle().trim().toLowerCase(java.util.Locale.ROOT);
 	}
 
 	// tree.add fäller ut föräldern; räknarmål ska vara ihopfällda som standard.

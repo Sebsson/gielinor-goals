@@ -129,6 +129,74 @@ public final class TemplatePlanner
 		return plan;
 	}
 
+	/**
+	 * Som {@link #plan}, men för en import som slås ihop med profilen
+	 * ({@link TemplateInserter#merge}): delmålen till {@code container} blir rotmål, och mål på
+	 * samma plats med samma nyckel räknas som befintliga.
+	 */
+	public static Plan planMerge(GoalTree tree, TemplateNode container, GameData data)
+	{
+		List<Goal> existingGoals = new ArrayList<>();
+		for (Goal goal : tree.flatten())
+		{
+			if (goal.getRequirement() != null)
+			{
+				existingGoals.add(goal);
+			}
+		}
+		Plan plan = new Plan();
+		plan.statuses.put(container, Status.NEW);
+		planMergeChildren(tree, container, null, true, existingGoals, new ArrayList<>(), data, plan);
+		plan.done.put(container, false);
+		return plan;
+	}
+
+	private static void planMergeChildren(GoalTree tree, TemplateNode node, @Nullable Goal parent, boolean atRoot,
+		List<Goal> existingGoals, List<TemplateNode> planned, GameData data, Plan plan)
+	{
+		for (TemplateNode child : node.getChildren())
+		{
+			if (!child.isIncluded())
+			{
+				continue;
+			}
+			if (child.getRef() != null)
+			{
+				plan.statuses.put(child, Status.DUPLICATE);
+				plan.done.put(child, met(child.getRequirement(), data));
+				continue;
+			}
+			Goal match = TemplateInserter.mergeMatch(tree, parent, atRoot, child, existingGoals);
+			if (match != null)
+			{
+				plan.statuses.put(child, Status.LINKED);
+				plan.existing.put(child, match);
+				boolean done = match.isCompleted() || met(child.getRequirement(), data);
+				plan.done.put(child, done);
+				plan.linkedGoals++;
+				plan.alreadyDone += done ? 1 : 0;
+				planMergeChildren(tree, child, match, false, existingGoals, planned, data, plan);
+				continue;
+			}
+			if (findPlanned(planned, child.getRequirement()) != null)
+			{
+				plan.statuses.put(child, Status.DUPLICATE);
+				plan.done.put(child, met(child.getRequirement(), data));
+				continue;
+			}
+			plan.statuses.put(child, Status.NEW);
+			plan.newGoals++;
+			if (child.getRequirement() != null)
+			{
+				planned.add(child);
+			}
+			planMergeChildren(tree, child, null, false, existingGoals, planned, data, plan);
+			boolean done = isDone(child, child.getRequirement(), data, plan);
+			plan.done.put(child, done);
+			plan.alreadyDone += done ? 1 : 0;
+		}
+	}
+
 	private static void planChildren(TemplateNode node, List<Goal> existingGoals, List<TemplateNode> planned,
 		GameData data, Plan plan)
 	{

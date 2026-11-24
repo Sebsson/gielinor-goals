@@ -34,6 +34,7 @@ import com.gielinorgoals.template.TemplateCategories;
 import com.gielinorgoals.template.TemplateNode;
 import com.gielinorgoals.template.TemplateUpdates;
 import com.gielinorgoals.template.CustomTemplates;
+import com.gielinorgoals.template.ShareCodec;
 import com.gielinorgoals.template.TemplateBuilder;
 import com.gielinorgoals.template.TemplateParameter;
 import com.gielinorgoals.template.TemplatePlanner;
@@ -87,6 +88,11 @@ final class TemplateDialog
 	private final java.util.function.Supplier<List<GoalTemplate>> templates;
 	@Nullable
 	private final CustomTemplates custom;
+	@Nullable
+	private final ShareCodec shareCodec;
+	// Import: bara förhandsvisningen visas, och en hel profil planeras som en ihopslagning.
+	private boolean importMode;
+	private boolean merge;
 	private final GoalIcons icons;
 	private final java.util.Set<GoalTemplate> iconsRequested = java.util.Collections.newSetFromMap(
 		new IdentityHashMap<>());
@@ -119,13 +125,14 @@ final class TemplateDialog
 	private final Map<TemplateNode, PreviewRow> rows = new IdentityHashMap<>();
 
 	private TemplateDialog(java.util.function.Supplier<List<GoalTemplate>> templates, @Nullable CustomTemplates custom,
-		GoalTree tree, GameData data, GoalIcons icons, QuestRequirementsDb questRequirements, boolean ironman,
-		TemplateBuilder builder)
+		@Nullable ShareCodec shareCodec, GoalTree tree, GameData data, GoalIcons icons,
+		QuestRequirementsDb questRequirements, boolean ironman, TemplateBuilder builder)
 	{
 		this.questRequirements = questRequirements;
 		this.builder = builder;
 		this.templates = templates;
 		this.custom = custom;
+		this.shareCodec = shareCodec;
 		this.icons = icons;
 		this.tree = tree;
 		this.data = data;
@@ -160,19 +167,62 @@ final class TemplateDialog
 	 */
 	@Nullable
 	static TemplateNode show(Component parent, java.util.function.Supplier<List<GoalTemplate>> templates,
-		@Nullable CustomTemplates custom, GoalTree tree, GameData data, GoalIcons icons,
-		QuestRequirementsDb questRequirements, boolean ironman, TemplateBuilder builder)
+		@Nullable CustomTemplates custom, @Nullable ShareCodec shareCodec, GoalTree tree, GameData data,
+		GoalIcons icons, QuestRequirementsDb questRequirements, boolean ironman, TemplateBuilder builder)
 	{
 		if (templates.get().isEmpty())
 		{
 			return null;
 		}
-		TemplateDialog dialog = new TemplateDialog(templates, custom, tree, data, icons, questRequirements, ironman,
-			builder);
+		TemplateDialog dialog = new TemplateDialog(templates, custom, shareCodec, tree, data, icons, questRequirements,
+			ironman, builder);
 		JPanel content = dialog.buildContent();
 		int choice = JOptionPane.showOptionDialog(parent, content, "Add from template",
 			JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, new Object[]{"Add", "Cancel"}, "Add");
 		return choice == 0 ? dialog.current : null;
+	}
+
+	/**
+	 * Vad användaren valde för en import: förslaget med urbockningar, och om det ska läggas
+	 * till som mål, sparas som egen template eller båda.
+	 */
+	@lombok.Value
+	static class ImportChoice
+	{
+		TemplateNode node;
+		boolean add;
+		boolean save;
+	}
+
+	/**
+	 * Förhandsvisningen för en import, med samma urbockning och markeringar som för templates.
+	 *
+	 * @return valet, eller null om användaren avbröt
+	 */
+	@Nullable
+	static ImportChoice showImport(Component parent, ShareCodec.Payload payload, GoalTree tree, GameData data,
+		GoalIcons icons, QuestRequirementsDb questRequirements, TemplateBuilder builder)
+	{
+		TemplateDialog dialog = new TemplateDialog(() -> List.of(payload.getTemplate()), null, null, tree, data, icons,
+			questRequirements, false, builder);
+		dialog.importMode = true;
+		dialog.merge = payload.getKind() == ShareCodec.Kind.GOALS;
+		JPanel content = new JPanel(new BorderLayout(0, 8));
+		content.add(dialog.buildContent(), BorderLayout.CENTER);
+		if (dialog.merge)
+		{
+			content.add(new JLabel("<html><body style='width:" + LIST_TEXT_WIDTH + "px'>These goals are merged with"
+				+ " yours: goals you already have are reused, and nothing is replaced.</body></html>"),
+				BorderLayout.NORTH);
+		}
+		Object[] options = {"Add as goals", "Save as my template", "Both", "Cancel"};
+		int choice = JOptionPane.showOptionDialog(parent, content, "Import: " + payload.getName(),
+			JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+		if (choice < 0 || choice > 2 || dialog.current == null)
+		{
+			return null;
+		}
+		return new ImportChoice(dialog.current, choice != 1, choice != 0);
 	}
 
 	private JPanel buildContent()
@@ -287,8 +337,14 @@ final class TemplateDialog
 		options.add(questChainBox, BorderLayout.SOUTH);
 		top.add(options, BorderLayout.SOUTH);
 
+		if (importMode)
+		{
+			// Bara en sak att visa; ingen lista eller sökning.
+			searchField.setVisible(false);
+			listScroll.setVisible(false);
+		}
 		JPanel content = new JPanel(new BorderLayout(0, 8));
-		content.add(top, BorderLayout.NORTH);
+		content.add(importMode ? options : top, BorderLayout.NORTH);
 		content.add(previewScroll, BorderLayout.CENTER);
 		content.add(summaryLabel, BorderLayout.SOUTH);
 
@@ -358,15 +414,28 @@ final class TemplateDialog
 		javax.swing.JPopupMenu menu = new javax.swing.JPopupMenu();
 		javax.swing.JMenuItem edit = new javax.swing.JMenuItem("Edit name, description and tags...");
 		edit.addActionListener(event -> editDetails(template));
+		javax.swing.JMenuItem share = new javax.swing.JMenuItem("Copy share string");
+		share.addActionListener(event -> copyShareString(template));
+		share.setEnabled(shareCodec != null);
 		javax.swing.JMenuItem duplicate = new javax.swing.JMenuItem("Duplicate");
 		duplicate.addActionListener(event -> changeCustom(() -> custom.duplicate(template.getId())));
 		javax.swing.JMenuItem delete = new javax.swing.JMenuItem("Delete...");
 		delete.addActionListener(event -> deleteCustom(template));
 		menu.add(edit);
+		menu.add(share);
 		menu.add(duplicate);
 		menu.addSeparator();
 		menu.add(delete);
 		menu.show(templateList, e.getX(), e.getY());
+	}
+
+	private void copyShareString(GoalTemplate template)
+	{
+		String share = shareCodec.encode(custom, template.getId());
+		if (share != null)
+		{
+			ShareDialog.show(templateList, "Share template", "the template", share, template.getName());
+		}
 	}
 
 	private void editDetails(GoalTemplate template)
@@ -561,7 +630,8 @@ final class TemplateDialog
 			summaryLabel.setText(" ");
 			return;
 		}
-		TemplatePlanner.Plan plan = TemplatePlanner.plan(tree, current, data);
+		TemplatePlanner.Plan plan = merge ? TemplatePlanner.planMerge(tree, current, data)
+			: TemplatePlanner.plan(tree, current, data);
 		for (PreviewRow row : rows.values())
 		{
 			row.update(plan);
@@ -604,7 +674,9 @@ final class TemplateDialog
 		private void update(TemplatePlanner.Plan plan)
 		{
 			// Delmål under en urbockad eller inkopplad nod läggs inte till och kan inte väljas.
-			boolean parentAdds = parent == null || plan.statusOf(parent) == TemplatePlanner.Status.NEW;
+			// Vid en ihopslagning får även befintliga mål de delmål som saknas.
+			boolean parentAdds = parent == null || plan.statusOf(parent) == TemplatePlanner.Status.NEW
+				|| merge && plan.statusOf(parent) == TemplatePlanner.Status.LINKED;
 			checkBox.setEnabled(parent != null && parentAdds);
 			checkBox.setToolTipText(!parentAdds && parent != null && plan.statusOf(parent) == TemplatePlanner.Status.LINKED
 				? "The existing goal keeps its own sub-goals"

@@ -312,6 +312,60 @@ public class JsonTemplate implements GoalTemplate
 	}
 
 	/**
+	 * Ett fel i en nod, med var i templaten noden finns; bara den innersta noden anges.
+	 */
+	static final class NodeException extends IllegalArgumentException
+	{
+		NodeException(String message)
+		{
+			super(message);
+		}
+	}
+
+	// Kort beskrivning av en nod för felmeddelanden: titeln, kravet eller "a goal".
+	private static String describe(NodeSpec spec)
+	{
+		if (spec.title != null && !spec.title.trim().isEmpty())
+		{
+			return "\"" + abbreviate(spec.title.trim()) + "\"";
+		}
+		if (spec.quest != null)
+		{
+			return "quest " + abbreviate(spec.quest);
+		}
+		if (spec.item != null && spec.item.name != null)
+		{
+			return "\"" + abbreviate(spec.item.name) + "\"";
+		}
+		if (spec.skill != null)
+		{
+			return "skill " + abbreviate(spec.skill);
+		}
+		return spec.ref != null ? "a shared goal" : "a goal";
+	}
+
+	private static String abbreviate(String text)
+	{
+		return text.length() <= 40 ? text : text.substring(0, 40) + "...";
+	}
+
+	// Enum-värde ur filen, med ett begripligt fel i stället för "No enum constant".
+	private static <E extends Enum<E>> E enumOf(Class<E> type, @Nullable String name, String what)
+	{
+		if (name != null)
+		{
+			for (E value : type.getEnumConstants())
+			{
+				if (value.name().equals(name))
+				{
+					return value;
+				}
+			}
+		}
+		throw new IllegalArgumentException("Unknown " + what + " \"" + (name == null ? "" : abbreviate(name)) + "\"");
+	}
+
+	/**
 	 * @param defined noder med id som redan är byggda
 	 * @param open    id:n för noderna på vägen hit; en ref till någon av dem vore en cykel
 	 */
@@ -319,8 +373,25 @@ public class JsonTemplate implements GoalTemplate
 	{
 		if (spec == null)
 		{
-			throw new IllegalArgumentException("A node is empty");
+			throw new IllegalArgumentException("A goal in the template is empty");
 		}
+		try
+		{
+			return toCheckedNode(spec, defined, open);
+		}
+		catch (NodeException e)
+		{
+			throw e;
+		}
+		catch (IllegalArgumentException e)
+		{
+			throw new NodeException("In " + describe(spec) + ": " + e.getMessage());
+		}
+	}
+
+	private static TemplateNode toCheckedNode(NodeSpec spec, Map<String, TemplateNode> defined,
+		java.util.Set<String> open)
+	{
 		if (spec.ref != null)
 		{
 			return toRef(spec, defined, open);
@@ -421,12 +492,29 @@ public class JsonTemplate implements GoalTemplate
 		return node;
 	}
 
+	// Högsta item-id som godtas; spelets id:n ligger långt under.
+	static final int MAX_ITEM_ID = 100_000;
+
 	@Nullable
 	private static Requirement toRequirement(NodeSpec spec)
 	{
+		int kinds = count(spec.quest, spec.skill, spec.combatAchievement, spec.questPoints, spec.totalLevel,
+			spec.combatLevel, spec.diary, spec.item, spec.killCount);
+		if (kinds > 1)
+		{
+			throw new IllegalArgumentException("A goal can only have one requirement");
+		}
+		if (spec.skill == null && (spec.level != null || spec.xp != null))
+		{
+			throw new IllegalArgumentException("level and xp need a skill");
+		}
+		if (spec.item != null && spec.item.id != null && (spec.item.id < 0 || spec.item.id > MAX_ITEM_ID))
+		{
+			throw new IllegalArgumentException("Item id " + spec.item.id + " is not a valid item");
+		}
 		if (spec.quest != null)
 		{
-			Quest quest = Quest.valueOf(spec.quest);
+			Quest quest = enumOf(Quest.class, spec.quest, "quest");
 			return new QuestRequirement(quest.getId(), quest.getName());
 		}
 		if (spec.skill != null)
@@ -435,7 +523,11 @@ public class JsonTemplate implements GoalTemplate
 			{
 				throw new IllegalArgumentException("Skill " + spec.skill + " needs a level or an xp target");
 			}
-			Skill skill = Skill.valueOf(spec.skill);
+			Skill skill = enumOf(Skill.class, spec.skill, "skill");
+			if ("OVERALL".equals(skill.name()))
+			{
+				throw new IllegalArgumentException("Unknown skill \"OVERALL\"");
+			}
 			return spec.level != null ? SkillRequirement.level(skill, spec.level) : SkillRequirement.xp(skill, spec.xp);
 		}
 		if (spec.combatAchievement != null)
@@ -461,7 +553,8 @@ public class JsonTemplate implements GoalTemplate
 		}
 		if (spec.diary != null)
 		{
-			return new DiaryRequirement(DiaryArea.valueOf(spec.diary.area), DiaryTier.valueOf(spec.diary.tier));
+			return new DiaryRequirement(enumOf(DiaryArea.class, spec.diary.area, "diary area"),
+				enumOf(DiaryTier.class, spec.diary.tier, "diary tier"));
 		}
 		if (spec.item != null)
 		{
@@ -480,6 +573,16 @@ public class JsonTemplate implements GoalTemplate
 		return null;
 	}
 
+	private static int count(Object... values)
+	{
+		int count = 0;
+		for (Object value : values)
+		{
+			count += value != null ? 1 : 0;
+		}
+		return count;
+	}
+
 	private static KillCountRequirement toKillCount(ActivitySpec spec)
 	{
 		if (spec.count == null)
@@ -489,7 +592,7 @@ public class JsonTemplate implements GoalTemplate
 		switch (activityKind(spec))
 		{
 			case HISCORE:
-				return KillCountRequirement.hiscore(HiscoreSkill.valueOf(spec.hiscore), spec.count);
+				return KillCountRequirement.hiscore(enumOf(HiscoreSkill.class, spec.hiscore, "hiscore activity"), spec.count);
 			case NPC:
 				return KillCountRequirement.npc(spec.npc, spec.count);
 			default:
@@ -507,7 +610,7 @@ public class JsonTemplate implements GoalTemplate
 		switch (activityKind(spec))
 		{
 			case HISCORE:
-				source = DropSource.hiscore(HiscoreSkill.valueOf(spec.hiscore), spec.rate);
+				source = DropSource.hiscore(enumOf(HiscoreSkill.class, spec.hiscore, "hiscore activity"), spec.rate);
 				break;
 			case NPC:
 				source = DropSource.npc(spec.npc, spec.rate);
@@ -531,9 +634,9 @@ public class JsonTemplate implements GoalTemplate
 		}
 		if (spec.activity != null)
 		{
-			return GoalIcon.activity(HiscoreSkill.valueOf(spec.activity));
+			return GoalIcon.activity(enumOf(HiscoreSkill.class, spec.activity, "hiscore activity"));
 		}
-		return GoalIcon.side(GoalIcon.SideIcon.valueOf(spec.sideIcon));
+		return GoalIcon.side(enumOf(GoalIcon.SideIcon.class, spec.sideIcon, "icon"));
 	}
 
 	private static KillCountRequirement.ActivityType activityKind(ActivitySpec spec)

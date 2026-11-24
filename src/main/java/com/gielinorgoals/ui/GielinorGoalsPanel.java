@@ -84,6 +84,7 @@ public class GielinorGoalsPanel extends PluginPanel
 	private final ProgressBar summaryBar = new ProgressBar();
 	private final JCheckBox hideCompletedBox = new JCheckBox("Hide completed");
 	private final JButton collapseAllButton = new JButton("Collapse all");
+	private final JButton moreButton = new JButton("...");
 	private final JButton mapButton = new JButton("Map");
 	// Sätts av pluginet, som äger kartfönstret.
 	private Runnable openMap = () ->
@@ -183,10 +184,18 @@ public class GielinorGoalsPanel extends PluginPanel
 		mapButton.setToolTipText("Open a map of how your goals connect");
 		mapButton.addActionListener(e -> openMap.run());
 
+		moreButton.setFocusPainted(false);
+		moreButton.setToolTipText("Import and export goals");
+		moreButton.addActionListener(e -> showMoreMenu());
+		JPanel titleButtons = new JPanel(new BorderLayout(4, 0));
+		titleButtons.setOpaque(false);
+		titleButtons.add(moreButton, BorderLayout.WEST);
+		titleButtons.add(mapButton, BorderLayout.EAST);
+
 		JPanel titleRow = new JPanel(new BorderLayout());
 		titleRow.setOpaque(false);
 		titleRow.add(title, BorderLayout.WEST);
-		titleRow.add(mapButton, BorderLayout.EAST);
+		titleRow.add(titleButtons, BorderLayout.EAST);
 
 		// Summeringen har en egen rad; titelraden är för smal för både den och kartknappen.
 		JPanel summaryRow = new JPanel(new BorderLayout());
@@ -199,6 +208,24 @@ public class GielinorGoalsPanel extends PluginPanel
 		header.add(summaryRow);
 		header.add(summaryBar);
 		return header;
+	}
+
+	// Panelmenyn: import och export av mål.
+	private void showMoreMenu()
+	{
+		boolean editable = goalManager.isEditable();
+		javax.swing.JPopupMenu menu = new javax.swing.JPopupMenu();
+		javax.swing.JMenuItem importItem = new javax.swing.JMenuItem("Import...");
+		importItem.setEnabled(editable);
+		importItem.addActionListener(e -> ImportDialog.show(this, goalManager, services));
+		javax.swing.JMenuItem exportItem = new javax.swing.JMenuItem("Export all goals...");
+		exportItem.setEnabled(editable && !goalManager.getTree().getRoots().isEmpty());
+		exportItem.addActionListener(e -> ShareDialog.show(this, "Export all goals", "all your goals",
+			services.getShareCodec().encode(com.gielinorgoals.template.TemplateExport.exportAll(goalManager.getTree()),
+				com.gielinorgoals.template.ShareCodec.Kind.GOALS), "all goals"));
+		menu.add(importItem);
+		menu.add(exportItem);
+		menu.show(moreButton, 0, moreButton.getHeight());
 	}
 
 	private JPanel buildActiveControls()
@@ -295,7 +322,7 @@ public class GielinorGoalsPanel extends PluginPanel
 	{
 		ProfileGuard guard = ProfileGuard.of(goalManager);
 		TemplateNode template = TemplateDialog.show(this, templateCatalog::getTemplates, services.getCustomTemplates(),
-			goalManager.getTree(),
+			services.getShareCodec(), goalManager.getTree(),
 			services.currentGameData(), services.getIcons(), services.getQuestRequirements(),
 			services.getAccountStatus().isIronman(), services.getTemplateBuilder());
 		// Templaten planerades mot målen i den profil som var laddad när dialogen öppnades.
