@@ -1,0 +1,86 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Prospector_kit (ändrad 18 nov 2026) - Prospector Percy, golden nuggets: helmet 40, jacket 60,",
+    "legs 50, boots 30 (180 för setet). Alternativt Petrified Pete (Volcanic Mine) för 120 000 poäng för setet; priset per del står",
+    "inte på sidan. Golden nugget 12012 (MOTHERLODE_NUGGET).",
+    "Delar: MOTHERLODE_REWARD_HAT 12013, _TOP 12014, _LEGS 12015, _BOOTS 12016. Osäkert: delarnas item-id är tagna från gameval-namnen (se nedan), inte lästa från wikins infoboxar.",
+    "Osäkert: sidan anger ingen nivå för Motherlode Mine eller butiken, så det finns inget skill-mål."
+  ],
+  "id": "prospector",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Prospector kit",
+  "description": "180 golden nuggets from the Motherlode Mine for the prospector kit",
+  "category": "Skilling outfits",
+  "tags": [
+    "prospector",
+    "prospector kit",
+    "mining outfit",
+    "motherlode",
+    "mlm",
+    "golden nuggets",
+    "nuggets",
+    "mining",
+    "skilling outfit"
+  ],
+  "root": {
+    "title": "Prospector kit",
+    "aggregate": true,
+    "wikiPage": "Prospector kit",
+    "icon": {
+      "item": 12014
+    },
+    "children": [
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "INVENTORY"
+        },
+        "children": [
+          {
+            "item": {
+              "id": 12012,
+              "name": "Golden nugget",
+              "quantity": 180
+            },
+            "note": "From cleaning pay-dirt in the Motherlode Mine (about 3% per pay-dirt)."
+          },
+          {
+            "item": {
+              "id": 12013,
+              "name": "Prospector helmet",
+              "includeVariants": true
+            },
+            "note": "40 golden nuggets from Prospector Percy."
+          },
+          {
+            "item": {
+              "id": 12014,
+              "name": "Prospector jacket",
+              "includeVariants": true
+            },
+            "note": "60 golden nuggets."
+          },
+          {
+            "item": {
+              "id": 12015,
+              "name": "Prospector legs",
+              "includeVariants": true
+            },
+            "note": "50 golden nuggets."
+          },
+          {
+            "item": {
+              "id": 12016,
+              "name": "Prospector boots",
+              "includeVariants": true
+            },
+            "note": "30 golden nuggets."
+          }
+        ]
+      }
+    ]
+  }
+}

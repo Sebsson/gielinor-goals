@@ -1,0 +1,72 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Pyromancer_outfit (ändrad 3 okt 2026) - hood, garb, robe, boots från Wintertodts reward cart.",
+    "Osäkert: dropchansen per del står inte på sidan (reward cart-sidan är inte läst), så delarna har ingen drop-källa. Inte heller",
+    "Wintertodts krav är kontrollerade. Warm gloves räknas inte till setet.",
+    "Delar: PYROMANCER_HOOD 20708, PYROMANCER_TOP 20704 (garb), PYROMANCER_BOTTOM 20706 (robe), PYROMANCER_BOOTS 20710. Osäkert: delarnas item-id är tagna från gameval-namnen (se nedan), inte lästa från wikins infoboxar."
+  ],
+  "id": "pyromancer",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Pyromancer outfit",
+  "description": "Every piece of the pyromancer outfit from Wintertodt",
+  "category": "Skilling outfits",
+  "tags": [
+    "pyromancer",
+    "pyromancer outfit",
+    "firemaking outfit",
+    "wintertodt",
+    "wt",
+    "firemaking",
+    "skilling outfit"
+  ],
+  "root": {
+    "title": "Pyromancer outfit",
+    "aggregate": true,
+    "wikiPage": "Pyromancer outfit",
+    "icon": {
+      "item": 20704
+    },
+    "children": [
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "INVENTORY"
+        },
+        "children": [
+          {
+            "item": {
+              "id": 20708,
+              "name": "Pyromancer hood",
+              "includeVariants": true
+            },
+            "note": "From the Wintertodt reward cart."
+          },
+          {
+            "item": {
+              "id": 20704,
+              "name": "Pyromancer garb",
+              "includeVariants": true
+            }
+          },
+          {
+            "item": {
+              "id": 20706,
+              "name": "Pyromancer robe",
+              "includeVariants": true
+            }
+          },
+          {
+            "item": {
+              "id": 20710,
+              "name": "Pyromancer boots",
+              "includeVariants": true
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Spirit_angler%27s_outfit (ändrad 28 okt 2026) - Gita Prymes: 1 200 spirit flakes plus samma",
+    "del av angler's outfit per del (4 800 flakes för setet). Spirit flakes från Tempoross reward pool. Spirit flakes 25588 (SPIRIT_FLAKES).",
+    "Delar: SPIRIT_ANGLER_HAT 25592 (headband), _TOP 25594, _LEGS 25596 (waders), _BOOTS 25598. Osäkert: delarnas item-id är tagna från gameval-namnen (se nedan), inte lästa från wikins infoboxar.",
+    "Angler-delarna är samma krav som i Angler-templaten och kopplas ihop med dem via dubblettregeln."
+  ],
+  "id": "spirit-angler",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Spirit angler's outfit",
+  "description": "4,800 spirit flakes from Tempoross and the angler's outfit",
+  "category": "Skilling outfits",
+  "tags": [
+    "spirit angler",
+    "spirit angler's outfit",
+    "spirit angler outfit",
+    "tempoross",
+    "spirit flakes",
+    "fishing",
+    "skilling outfit"
+  ],
+  "root": {
+    "title": "Spirit angler's outfit",
+    "aggregate": true,
+    "wikiPage": "Spirit angler's outfit",
+    "icon": {
+      "item": 25594
+    },
+    "children": [
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "INVENTORY"
+        },
+        "children": [
+          {
+            "item": {
+              "id": 25588,
+              "name": "Spirit flakes",
+              "quantity": 4800
+            },
+            "note": "From the Tempoross reward pool. 1,200 per piece."
+          },
+          {
+            "item": {
+              "id": 25592,
+              "name": "Spirit angler headband",
+              "includeVariants": true
+            },
+            "note": "1,200 spirit flakes and an angler hat from Gita Prymes.",
+            "children": [
+              {
+                "item": {
+                  "id": 13258,
+                  "name": "Angler hat",
+                  "includeVariants": true
+                },
+                "doneWhen": [
+                  "item:25592"
+                ]
+              }
+            ]
+          },
+          {
+            "item": {
+              "id": 25594,
+              "name": "Spirit angler top",
+              "includeVariants": true
+            },
+            "children": [
+              {
+                "item": {
+                  "id": 13259,
+                  "name": "Angler top",
+                  "includeVariants": true
+                },
+                "doneWhen": [
+                  "item:25594"
+                ]
+              }
+            ]
+          },
+          {
+            "item": {
+              "id": 25596,
+              "name": "Spirit angler waders",
+              "includeVariants": true
+            },
+            "children": [
+              {
+                "item": {
+                  "id": 13260,
+                  "name": "Angler waders",
+                  "includeVariants": true
+                },
+                "doneWhen": [
+                  "item:25596"
+                ]
+              }
+            ]
+          },
+          {
+            "item": {
+              "id": 25598,
+              "name": "Spirit angler boots",
+              "includeVariants": true
+            },
+            "children": [
+              {
+                "item": {
+                  "id": 13261,
+                  "name": "Angler boots",
+                  "includeVariants": true
+                },
+                "doneWhen": [
+                  "item:25598"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

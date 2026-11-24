@@ -1,0 +1,73 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Mythical_cape - Jack i Myths' Guild säljer den för 10 000 coins. Item ID 22114 (MYTHICAL_CAPE).",
+    "Kräver Dragon Slayer II (för guildet och för att bära). Den monterade kappan (47 Construction) är inte med.",
+    "https://oldschool.runescape.wiki/w/Dragon_Slayer_II - kedjan och skill-kraven kommer från quest-requirements.json."
+  ],
+  "id": "mythical-cape",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Mythical cape",
+  "description": "Dragon Slayer II and 10,000 coins for the mythical cape",
+  "category": "Capes",
+  "tags": [
+    "mythical cape",
+    "myths guild",
+    "myths' guild",
+    "ds2",
+    "dragon slayer ii",
+    "dragon slayer 2",
+    "cape",
+    "ironman"
+  ],
+  "root": {
+    "title": "Mythical cape",
+    "aggregate": true,
+    "wikiPage": "Mythical cape",
+    "icon": {
+      "item": 22114
+    },
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "QUEST"
+        },
+        "children": [
+          {
+            "quest": "DRAGON_SLAYER_II"
+          }
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "INVENTORY"
+        },
+        "children": [
+          {
+            "item": {
+              "id": 995,
+              "name": "Coins",
+              "quantity": 10000
+            },
+            "doneWhen": [
+              "item:22114"
+            ]
+          },
+          {
+            "item": {
+              "id": 22114,
+              "name": "Mythical cape",
+              "includeVariants": true
+            },
+            "note": "Bought from Jack on the top floor of the Myths' Guild."
+          }
+        ]
+      }
+    ]
+  }
+}

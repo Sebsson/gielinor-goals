@@ -32,6 +32,18 @@
     "seed-box.json",
     "slayer-helm.json",
     "void-knight.json",
-    "elite-void.json"
+    "elite-void.json",
+    "angler.json",
+    "prospector.json",
+    "lumberjack.json",
+    "pyromancer.json",
+    "rogue.json",
+    "farmers-outfit.json",
+    "carpenters-outfit.json",
+    "smiths-uniform.json",
+    "spirit-angler.json",
+    "dizanas-quiver.json",
+    "mythical-cape.json",
+    "champions-cape.json"
   ]
 }

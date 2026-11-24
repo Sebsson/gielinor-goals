@@ -44,13 +44,14 @@ public final class TemplateCategories
 	public static final String IRONMAN_LATE = "Ironman · Late";
 	public static final String BOSSES = "Bosses";
 	public static final String SKILLS = "Skills";
+	public static final String SKILLING_OUTFITS = "Skilling outfits";
 	public static final String QUESTS = "Quests";
 	public static final String DIARIES = "Diaries";
 	// För templates med en kategori som inte finns i listan, t.ex. en stavfelad JSON-fil.
 	public static final String OTHER = "Other";
 
 	private static final List<String> ORDER = List.of(CAPES, IRONMAN_EARLY, IRONMAN_MID, IRONMAN_LATE, BOSSES, SKILLS,
-		QUESTS, DIARIES);
+		SKILLING_OUTFITS, QUESTS, DIARIES);
 	private static final List<String> IRONMAN = List.of(IRONMAN_EARLY, IRONMAN_MID, IRONMAN_LATE);
 
 	private TemplateCategories()

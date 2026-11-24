@@ -1,0 +1,116 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Lumberjack_outfit (ändrad 4 okt 2026) - Forestry Shop: hat 1 200 bark + 200 yew + 100 magic logs;",
+    "top 1 500 bark + 60 yew + 120 magic + 120 redwood; legs 1 300 bark + 160 yew + 140 magic; boots 1 000 bark + 100 maple + 200 yew.",
+    "Setet: 5 000 bark, 100 maple, 620 yew, 360 magic, 120 redwood logs (noterade). Anima-infused bark 28134 (FORESTRY_CURRENCY).",
+    "Kolumnen Cost i butikstabellen har ingen valuta; den är inte med. Temple Trekking: undead lumberjacks, 25 % per kill, en del per händelse.",
+    "Delar: RAMBLE_LUMBERJACK_HAT 10941, _TOP 10939, _LEGS 10940, _BOOTS 10933. Osäkert: gameval har även FORESTRY_LUMBERJACK_*",
+    "(28169-28175); det är oklart vilken av dem Forestry-butiken ger. Delarna räknas med varianter, men om RuneLites variationstabell inte kopplar ihop dem syns de nya inte.",
+    "Logs: MAPLE_LOGS 1517, YEW_LOGS 1515, MAGIC_LOGS 1513, REDWOOD_LOGS 19669."
+  ],
+  "id": "lumberjack",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Lumberjack outfit",
+  "description": "Anima-infused bark and logs from Forestry, or Temple Trekking, for the lumberjack outfit",
+  "category": "Skilling outfits",
+  "tags": [
+    "lumberjack",
+    "lumberjack outfit",
+    "woodcutting outfit",
+    "forestry",
+    "anima-infused bark",
+    "bark",
+    "temple trekking",
+    "woodcutting",
+    "skilling outfit"
+  ],
+  "root": {
+    "title": "Lumberjack outfit",
+    "aggregate": true,
+    "wikiPage": "Lumberjack outfit",
+    "icon": {
+      "item": 10939
+    },
+    "children": [
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "INVENTORY"
+        },
+        "children": [
+          {
+            "item": {
+              "id": 28134,
+              "name": "Anima-infused bark",
+              "quantity": 5000
+            },
+            "note": "From Forestry events while woodcutting."
+          },
+          {
+            "item": {
+              "id": 1517,
+              "name": "Maple logs",
+              "quantity": 100
+            }
+          },
+          {
+            "item": {
+              "id": 1515,
+              "name": "Yew logs",
+              "quantity": 620
+            }
+          },
+          {
+            "item": {
+              "id": 1513,
+              "name": "Magic logs",
+              "quantity": 360
+            }
+          },
+          {
+            "item": {
+              "id": 19669,
+              "name": "Redwood logs",
+              "quantity": 120
+            }
+          },
+          {
+            "item": {
+              "id": 10941,
+              "name": "Lumberjack hat",
+              "includeVariants": true
+            },
+            "note": "1,200 bark, 200 yew and 100 magic logs in the Forestry Shop. Or from undead lumberjacks in Temple Trekking."
+          },
+          {
+            "item": {
+              "id": 10939,
+              "name": "Lumberjack top",
+              "includeVariants": true
+            },
+            "note": "1,500 bark, 60 yew, 120 magic and 120 redwood logs."
+          },
+          {
+            "item": {
+              "id": 10940,
+              "name": "Lumberjack legs",
+              "includeVariants": true
+            },
+            "note": "1,300 bark, 160 yew and 140 magic logs."
+          },
+          {
+            "item": {
+              "id": 10933,
+              "name": "Lumberjack boots",
+              "includeVariants": true
+            },
+            "note": "1,000 bark, 100 maple and 200 yew logs."
+          }
+        ]
+      }
+    ]
+  }
+}

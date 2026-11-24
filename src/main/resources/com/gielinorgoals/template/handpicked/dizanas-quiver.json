@@ -1,0 +1,96 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Dizana%27s_quiver - belöning för att besegra Sol Heredit (våg 12) i Fortis Colosseum; eller av",
+    "Minimus för 4 000 sunfire splinters. Blessed: vid en Shrine of Ralos med 150 000 sunfire splinters (laddningar räknas med).",
+    "https://oldschool.runescape.wiki/w/Fortis_Colosseum - kräver Children of the Sun. 75 Ranged krävs för att bära (inte med).",
+    "Item-id: 28947 okladdad (DIZANAS_QUIVER_UNCHARGED), 28951 laddad. Osäkert: blessed-versionens id står inte på sidan; gameval",
+    "DIZANAS_QUIVER_INFINITE 28955 antas vara den. Sunfire splinters 28924 (SUNFIRESPLINTER), id från gameval-namnet."
+  ],
+  "id": "dizanas-quiver",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Dizana's quiver",
+  "description": "Beat the Fortis Colosseum for Dizana's quiver, and bless it",
+  "category": "Capes",
+  "tags": [
+    "quiver",
+    "dizana's quiver",
+    "dizanas quiver",
+    "colosseum",
+    "fortis colosseum",
+    "sol heredit",
+    "blessed quiver",
+    "cape",
+    "ironman"
+  ],
+  "root": {
+    "title": "Dizana's quiver",
+    "aggregate": true,
+    "wikiPage": "Dizana's quiver",
+    "icon": {
+      "item": 28951
+    },
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "QUEST"
+        },
+        "children": [
+          {
+            "quest": "CHILDREN_OF_THE_SUN"
+          }
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "INVENTORY"
+        },
+        "children": [
+          {
+            "item": {
+              "id": 28947,
+              "name": "Dizana's quiver",
+              "includeVariants": true
+            },
+            "doneWhen": [
+              "item:28955"
+            ],
+            "note": "Guaranteed for defeating Sol Heredit in wave 12 of the Fortis Colosseum."
+          }
+        ]
+      },
+      {
+        "title": "Blessed",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "INVENTORY"
+        },
+        "children": [
+          {
+            "item": {
+              "id": 28924,
+              "name": "Sunfire splinters",
+              "quantity": 150000
+            },
+            "doneWhen": [
+              "item:28955"
+            ],
+            "note": "Needed in the inventory at a Shrine of Ralos; charges already added count."
+          },
+          {
+            "item": {
+              "id": 28955,
+              "name": "Blessed dizana's quiver",
+              "includeVariants": true
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

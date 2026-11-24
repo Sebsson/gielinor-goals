@@ -1,0 +1,90 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Farmer%27s_outfit (ändrad 3 okt 2026) - Tithe Farm-poäng: strawhat 75, jacket/shirt 150,",
+    "boro trousers 125, boots 50 (400 för setet).",
+    "Delar (manlig variant; den kvinnliga räknas bara om variationstabellen kopplar ihop dem - osäkert): TITHE_REWARD_HAT_MALE 13646 (female 13647),",
+    "TITHE_REWARD_TORSO_MALE 13642 (13643), TITHE_REWARD_LEGS_MALE 13640 (13641), TITHE_REWARD_FEET_MALE 13644 (13645).",
+    "Osäkert: delarnas item-id är tagna från gameval-namnen (se nedan), inte lästa från wikins infoboxar. Sidan säger inte om varianterna har olika id; gameval har två."
+  ],
+  "id": "farmers-outfit",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Farmer's outfit",
+  "description": "400 Tithe Farm points for the farmer's outfit",
+  "category": "Skilling outfits",
+  "tags": [
+    "farmer",
+    "farmer's outfit",
+    "farmers outfit",
+    "farming outfit",
+    "tithe farm",
+    "tithe",
+    "farming",
+    "skilling outfit"
+  ],
+  "root": {
+    "title": "Farmer's outfit",
+    "aggregate": true,
+    "wikiPage": "Farmer's outfit",
+    "icon": {
+      "item": 13642
+    },
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "QUEST"
+        },
+        "children": [
+          {
+            "points": {
+              "activity": "TITHE_FARM",
+              "count": 400
+            },
+            "note": "Points are spent when you buy. Strawhat 75, jacket 150, trousers 125, boots 50."
+          }
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "INVENTORY"
+        },
+        "children": [
+          {
+            "item": {
+              "id": 13646,
+              "name": "Farmer's strawhat",
+              "includeVariants": true
+            }
+          },
+          {
+            "item": {
+              "id": 13642,
+              "name": "Farmer's jacket",
+              "includeVariants": true
+            },
+            "note": "Called farmer's shirt for the other body type."
+          },
+          {
+            "item": {
+              "id": 13640,
+              "name": "Farmer's boro trousers",
+              "includeVariants": true
+            }
+          },
+          {
+            "item": {
+              "id": 13644,
+              "name": "Farmer's boots",
+              "includeVariants": true
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

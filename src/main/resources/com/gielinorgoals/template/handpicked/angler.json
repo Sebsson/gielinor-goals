@@ -1,0 +1,112 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Angler%27s_outfit (ändrad 5 okt 2026) - hat, top, waders, boots. Fishing Trawler: en del",
+    "man saknar med 1/12 per spel (minst 50 i bidrag), eller 50 molch pearls per del av Alry the Angler (200 för setet).",
+    "Molch pearl 22820 (gameval AERIAL_FISHING_PEARL); aerial fishing kräver 43 Fishing enligt molch pearl-sidan.",
+    "Delar: TRAWLER_REWARD_HAT 13258, TRAWLER_REWARD_TOP 13259, TRAWLER_REWARD_LEGS 13260, TRAWLER_REWARD_BOOTS 13261.",
+    "Osäkert: delarnas item-id är tagna från gameval-namnen (se nedan), inte lästa från wikins infoboxar.",
+    "En del räknas som klar även när den har gjorts om till spirit angler (doneWhen), eftersom delen då förbrukas."
+  ],
+  "id": "angler",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Angler's outfit",
+  "description": "Every piece of the angler outfit, from Fishing Trawler or molch pearls",
+  "category": "Skilling outfits",
+  "tags": [
+    "angler",
+    "angler's outfit",
+    "angler outfit",
+    "fishing",
+    "fishing trawler",
+    "trawler",
+    "molch pearls",
+    "aerial fishing",
+    "skilling outfit"
+  ],
+  "root": {
+    "title": "Angler's outfit",
+    "aggregate": true,
+    "wikiPage": "Angler's outfit",
+    "icon": {
+      "item": 13259
+    },
+    "children": [
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "INVENTORY"
+        },
+        "children": [
+          {
+            "item": {
+              "id": 22820,
+              "name": "Molch pearl",
+              "quantity": 200
+            },
+            "note": "50 per piece from Alry the Angler on Molch Island. Aerial fishing needs 43 Fishing. Not needed if every piece comes from the Fishing Trawler."
+          },
+          {
+            "item": {
+              "id": 13258,
+              "name": "Angler hat",
+              "includeVariants": true
+            },
+            "dropSource": {
+              "manual": "Fishing Trawler games",
+              "rate": 12
+            },
+            "doneWhen": [
+              "item:25592"
+            ],
+            "note": "1/12 per Fishing Trawler game for a piece you do not have, with at least 50 contribution. Or 50 molch pearls."
+          },
+          {
+            "item": {
+              "id": 13259,
+              "name": "Angler top",
+              "includeVariants": true
+            },
+            "dropSource": {
+              "manual": "Fishing Trawler games",
+              "rate": 12
+            },
+            "doneWhen": [
+              "item:25594"
+            ]
+          },
+          {
+            "item": {
+              "id": 13260,
+              "name": "Angler waders",
+              "includeVariants": true
+            },
+            "dropSource": {
+              "manual": "Fishing Trawler games",
+              "rate": 12
+            },
+            "doneWhen": [
+              "item:25596"
+            ]
+          },
+          {
+            "item": {
+              "id": 13261,
+              "name": "Angler boots",
+              "includeVariants": true
+            },
+            "dropSource": {
+              "manual": "Fishing Trawler games",
+              "rate": 12
+            },
+            "doneWhen": [
+              "item:25598"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

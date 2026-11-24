@@ -1,0 +1,87 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Carpenter%27s_outfit (ändrad 8 aug 2026) - Mahogany Homes carpenter points: helmet 400, shirt",
+    "800, trousers 600, boots 200 (2 000 för setet). Carpenter points syns inte för pluginet (ingen variabel), så de är en manuell räknare.",
+    "Delar: CONSTRUCTION_HAT 24872, CONSTRUCTION_SHIRT 24874, CONSTRUCTION_TROUSERS 24876, CONSTRUCTION_BOOTS 24878. Osäkert: delarnas item-id är tagna från gameval-namnen (se nedan), inte lästa från wikins infoboxar."
+  ],
+  "id": "carpenters-outfit",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Carpenter's outfit",
+  "description": "2,000 Mahogany Homes points for the carpenter's outfit",
+  "category": "Skilling outfits",
+  "tags": [
+    "carpenter",
+    "carpenter's outfit",
+    "carpenters outfit",
+    "construction outfit",
+    "mahogany homes",
+    "mh",
+    "construction",
+    "skilling outfit"
+  ],
+  "root": {
+    "title": "Carpenter's outfit",
+    "aggregate": true,
+    "wikiPage": "Carpenter's outfit",
+    "icon": {
+      "item": 24874
+    },
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "QUEST"
+        },
+        "children": [
+          {
+            "killCount": {
+              "manual": "Carpenter points",
+              "count": 2000
+            },
+            "note": "Points are spent when you buy. Helmet 400, shirt 800, trousers 600, boots 200."
+          }
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "INVENTORY"
+        },
+        "children": [
+          {
+            "item": {
+              "id": 24872,
+              "name": "Carpenter's helmet",
+              "includeVariants": true
+            }
+          },
+          {
+            "item": {
+              "id": 24874,
+              "name": "Carpenter's shirt",
+              "includeVariants": true
+            }
+          },
+          {
+            "item": {
+              "id": 24876,
+              "name": "Carpenter's trousers",
+              "includeVariants": true
+            }
+          },
+          {
+            "item": {
+              "id": 24878,
+              "name": "Carpenter's boots",
+              "includeVariants": true
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -18,9 +18,11 @@ public class TemplateCategoriesTest
 		Map<String, List<GoalTemplate>> grouped = TemplateCategories.group(templates, "", false);
 
 		assertEquals(List.of(TemplateCategories.CAPES, TemplateCategories.IRONMAN_EARLY, TemplateCategories.IRONMAN_MID,
-			TemplateCategories.IRONMAN_LATE, TemplateCategories.BOSSES, TemplateCategories.SKILLS, TemplateCategories.QUESTS,
-			TemplateCategories.DIARIES), new ArrayList<>(grouped.keySet()));
-		assertEquals(List.of("Quest cape", "Achievement diary cape", "Max cape"),
+			TemplateCategories.IRONMAN_LATE, TemplateCategories.BOSSES, TemplateCategories.SKILLS,
+			TemplateCategories.SKILLING_OUTFITS, TemplateCategories.QUESTS, TemplateCategories.DIARIES),
+			new ArrayList<>(grouped.keySet()));
+		assertEquals(List.of("Quest cape", "Achievement diary cape", "Max cape", "Dizana's quiver", "Mythical cape",
+			"Champion's cape"),
 			names(grouped.get(TemplateCategories.CAPES)));
 		assertEquals(List.of("Combat Achievements tier"), names(grouped.get(TemplateCategories.BOSSES)));
 		assertEquals(List.of("Quest series"), names(grouped.get(TemplateCategories.QUESTS)));
@@ -37,7 +39,7 @@ public class TemplateCategoriesTest
 
 		assertEquals(List.of(TemplateCategories.IRONMAN_EARLY, TemplateCategories.IRONMAN_MID,
 			TemplateCategories.IRONMAN_LATE, TemplateCategories.CAPES, TemplateCategories.BOSSES, TemplateCategories.SKILLS,
-			TemplateCategories.QUESTS, TemplateCategories.DIARIES),
+			TemplateCategories.SKILLING_OUTFITS, TemplateCategories.QUESTS, TemplateCategories.DIARIES),
 			new ArrayList<>(grouped.keySet()));
 	}
 

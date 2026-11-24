@@ -1,0 +1,99 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Rogue_equipment (ändrad 3 okt 2026) - mask, top, gloves, trousers, boots från Rogue's",
+    "equipment crate i Rogues' Den; man väljer själv vilken del. Sidan: setet kräver i praktiken 50 Agility och Thieving.",
+    "Osäkert: hur många lådor per runda och Rogues' Dens egna krav står inte på sidan.",
+    "Delar: ROGUESDEN_HELM 5554 (mask), ROGUESDEN_BODY 5553 (top), ROGUESDEN_GLOVES 5556, ROGUESDEN_LEGS 5555 (trousers),",
+    "ROGUESDEN_BOOTS 5557. Osäkert: delarnas item-id är tagna från gameval-namnen (se nedan), inte lästa från wikins infoboxar."
+  ],
+  "id": "rogue",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Rogue equipment",
+  "description": "Every piece of rogue equipment from Rogues' Den crates",
+  "category": "Skilling outfits",
+  "tags": [
+    "rogue",
+    "rogue equipment",
+    "rogue outfit",
+    "rogues' den",
+    "rogues den",
+    "thieving outfit",
+    "thieving",
+    "skilling outfit"
+  ],
+  "root": {
+    "title": "Rogue equipment",
+    "aggregate": true,
+    "wikiPage": "Rogue equipment",
+    "icon": {
+      "item": 5554
+    },
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "QUEST"
+        },
+        "children": [
+          {
+            "skill": "AGILITY",
+            "level": 50,
+            "note": "The wiki says the set effectively needs 50 Agility and 50 Thieving."
+          },
+          {
+            "skill": "THIEVING",
+            "level": 50
+          }
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "INVENTORY"
+        },
+        "children": [
+          {
+            "item": {
+              "id": 5554,
+              "name": "Rogue mask",
+              "includeVariants": true
+            },
+            "note": "From a rogue's equipment crate at the end of Rogues' Den; you pick the piece."
+          },
+          {
+            "item": {
+              "id": 5553,
+              "name": "Rogue top",
+              "includeVariants": true
+            }
+          },
+          {
+            "item": {
+              "id": 5556,
+              "name": "Rogue gloves",
+              "includeVariants": true
+            }
+          },
+          {
+            "item": {
+              "id": 5555,
+              "name": "Rogue trousers",
+              "includeVariants": true
+            }
+          },
+          {
+            "item": {
+              "id": 5557,
+              "name": "Rogue boots",
+              "includeVariants": true
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

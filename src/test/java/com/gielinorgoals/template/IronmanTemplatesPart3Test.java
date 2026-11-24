@@ -178,7 +178,9 @@ public class IronmanTemplatesPart3Test
 	// delvis klara questerna The Path of Glouphrie och One Small Favour för spirit trees och gliders).
 	private static final java.util.Set<String> EXTERNAL_KEYS = java.util.Set.of(
 		"item:21295", "kc:hiscore:TZKAL_ZUK:1", "kc:hiscore:TZTOK_JAD:1", "quest:47", "diary:LUMBRIDGE:ELITE",
-		"quest:3425", "quest:107");
+		"quest:3425", "quest:107",
+		// Angler-delar som gjorts om till spirit angler (Spirit angler-templaten).
+		"item:25592", "item:25594", "item:25596", "item:25598");
 
 	@Test
 	public void everyDoneWhenKeyPointsAtARealGoal()

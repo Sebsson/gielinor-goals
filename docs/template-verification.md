@@ -172,3 +172,108 @@ Data was read from the wiki on 2026-11-24.
 - Needs the hard Western Provinces Diary. Each upgrade costs 200 points, 400 for both (a manual counter).
 - Elite void top: 13072 (`ELITE_VOID_KNIGHT_TOP`). Elite void robe: **(uncertain)** 13073 (`ELITE_VOID_KNIGHT_ROBES`).
 - The void knight top and robe are shared nodes with *Void Knight equipment*.
+
+---
+
+## Wave 2 – skilling outfits and capes (milestone 13, part 3)
+
+The piece item IDs in this section come from the gameval names, not from the wiki infoboxes, because the outfit pages don't list IDs. All of them are **(uncertain)** until checked.
+
+### Angler's outfit (`angler.json`)
+- [ ] Verified
+- Wiki: [Angler's outfit](https://oldschool.runescape.wiki/w/Angler%27s_outfit), [Molch pearl](https://oldschool.runescape.wiki/w/Molch_pearl)
+- Fishing Trawler: 1/12 per game for a piece you don't own, if you have at least 50 contribution. This is a drop source with a manual counter called "Fishing Trawler games".
+- Or 50 molch pearls per piece from Alry, 200 for the set. Molch pearl is item 22820 (`AERIAL_FISHING_PEARL`), confirmed on the wiki.
+- Aerial fishing needs 43 Fishing. This is a note.
+- Pieces: hat 13258, top 13259, waders 13260, boots 13261 (`TRAWLER_REWARD_*`).
+- A piece also counts as done when its spirit angler piece is done (doneWhen).
+
+### Prospector kit (`prospector.json`)
+- [ ] Verified
+- Wiki: [Prospector kit](https://oldschool.runescape.wiki/w/Prospector_kit), [Golden nugget](https://oldschool.runescape.wiki/w/Golden_nugget)
+- Golden nuggets: helmet 40, jacket 60, legs 50, boots 30, so 180 for the set. Golden nugget is item 12012 (`MOTHERLODE_NUGGET`).
+- The Volcanic Mine alternative costs 120,000 points for the set. It is a note; the price per piece is not on the wiki.
+- Pieces: 12013 to 12016 (`MOTHERLODE_REWARD_HAT/TOP/LEGS/BOOTS`).
+- No Mining level is included, because the wiki page doesn't give one.
+
+### Lumberjack outfit (`lumberjack.json`)
+- [ ] Verified
+- Wiki: [Lumberjack outfit](https://oldschool.runescape.wiki/w/Lumberjack_outfit)
+- Forestry Shop prices:
+
+  | Piece | Bark | Maple | Yew | Magic | Redwood |
+  |---|---|---|---|---|---|
+  | Hat | 1,200 | | 200 | 100 | |
+  | Top | 1,500 | | 60 | 120 | 120 |
+  | Legs | 1,300 | | 160 | 140 | |
+  | Boots | 1,000 | 100 | 200 | | |
+  | **Set** | **5,000** | **100** | **620** | **360** | **120** |
+
+- Bark is 28134 (`FORESTRY_CURRENCY`). Logs: maple 1517, yew 1515, magic 1513, redwood 19669.
+- Temple Trekking alternative: 25% per undead lumberjack kill.
+- Pieces: hat 10941, top 10939, legs 10940, boots 10933 (`RAMBLE_LUMBERJACK_*`).
+- **(uncertain)** Gameval also has `FORESTRY_LUMBERJACK_*` (28169 to 28175). It's unclear which one the Forestry Shop gives.
+
+### Pyromancer outfit (`pyromancer.json`)
+- [ ] Verified
+- Wiki: [Pyromancer outfit](https://oldschool.runescape.wiki/w/Pyromancer_outfit)
+- From the Wintertodt reward cart. **(uncertain)** The drop rate per piece is not on the outfit page, so there is no drop source.
+- Pieces: hood 20708, garb 20704, robe 20706, boots 20710.
+- Wintertodt's own requirements were not checked.
+
+### Rogue equipment (`rogue.json`)
+- [ ] Verified
+- Wiki: [Rogue equipment](https://oldschool.runescape.wiki/w/Rogue_equipment)
+- From rogue's equipment crates in Rogues' Den, and you choose the piece.
+- The wiki says the set "effectively requires" 50 Agility and 50 Thieving. Both are goals.
+- Pieces: mask 5554, top 5553, gloves 5556, trousers 5555, boots 5557 (`ROGUESDEN_*`).
+
+### Farmer's outfit (`farmers-outfit.json`)
+- [ ] Verified
+- Wiki: [Farmer's outfit](https://oldschool.runescape.wiki/w/Farmer%27s_outfit)
+- Tithe Farm points: strawhat 75, jacket 150, trousers 125, boots 50, so 400 for the set. This is a POINTS goal.
+- Pieces, male variant: 13646, 13642, 13640, 13644.
+- **(uncertain)** The female variants are 13647, 13643, 13641 and 13645. They only count if RuneLite's variation table links the two.
+
+### Carpenter's outfit (`carpenters-outfit.json`)
+- [ ] Verified
+- Wiki: [Carpenter's outfit](https://oldschool.runescape.wiki/w/Carpenter%27s_outfit)
+- Carpenter points: helmet 400, shirt 800, trousers 600, boots 200, so 2,000 for the set. This is a manual counter, because the points can't be read.
+- Pieces: 24872, 24874, 24876, 24878 (`CONSTRUCTION_HAT/SHIRT/TROUSERS/BOOTS`).
+
+### Smiths' uniform (`smiths-uniform.json`)
+- [ ] Verified
+- Wiki: [Smiths' Uniform](https://oldschool.runescape.wiki/w/Smiths%27_Uniform)
+- Foundry reputation: tunic 4,000, trousers 4,000, gloves 3,500, boots 3,500, so 15,000 for the set. This is a POINTS goal.
+- Pieces: tunic 27023, trousers 27025, gloves 27029, boots 27027.
+- **(uncertain)** The iced gloves (27031) only count through variants.
+
+### Spirit angler's outfit (`spirit-angler.json`)
+- [ ] Verified
+- Wiki: [Spirit angler's outfit](https://oldschool.runescape.wiki/w/Spirit_angler%27s_outfit)
+- Each piece costs 1,200 spirit flakes plus the matching angler piece, so 4,800 flakes for the set. Spirit flakes are 25588 (`SPIRIT_FLAKES`).
+- Pieces: headband 25592, top 25594, waders 25596, boots 25598.
+- The angler pieces are shared nodes with *Angler's outfit*.
+
+### Dizana's quiver (`dizanas-quiver.json`)
+- [ ] Verified
+- Wiki: [Dizana's quiver](https://oldschool.runescape.wiki/w/Dizana%27s_quiver), [Fortis Colosseum](https://oldschool.runescape.wiki/w/Fortis_Colosseum)
+- The Colosseum needs Children of the Sun. The quiver is guaranteed for beating Sol Heredit in wave 12, or Minimus sells it for 4,000 sunfire splinters.
+- Uncharged quiver is 28947 and charged is 28951, both confirmed on the wiki.
+- Blessed: 150,000 sunfire splinters at a Shrine of Ralos.
+- **(uncertain)** The blessed quiver is assumed to be 28955 (`DIZANAS_QUIVER_INFINITE`). Sunfire splinters are assumed to be 28924 (`SUNFIRESPLINTER`).
+- The 75 Ranged needed to wear it is not included.
+
+### Mythical cape (`mythical-cape.json`)
+- [ ] Verified
+- Wiki: [Mythical cape](https://oldschool.runescape.wiki/w/Mythical_cape), [Myths' Guild](https://oldschool.runescape.wiki/w/Myths%27_Guild), [Dragon Slayer II](https://oldschool.runescape.wiki/w/Dragon_Slayer_II)
+- Jack sells it for 10,000 coins. The cape is 22114, confirmed on the wiki.
+- Needs Dragon Slayer II. The quest chain comes from the quest database.
+
+### Champion's cape (`champions-cape.json`)
+- [ ] Verified
+- Wiki: [Champion's cape](https://oldschool.runescape.wiki/w/Champion%27s_cape), [Champions' Challenge](https://oldschool.runescape.wiki/w/Champions%27_Challenge), [Champion's scroll](https://oldschool.runescape.wiki/w/Champion%27s_scroll)
+- You need 32 quest points before scrolls can drop. Each scroll is 1/5,000.
+- There are 10 champions plus Leon d'Cour. The cape is 21439, confirmed on the wiki.
+- Drop sources used, one main monster per scroll: imp, goblin, skeleton, zombie, hill giant, hobgoblin, ghoul, earth warrior, jogre and lesser demon. Other monsters also drop each scroll.
+- **(uncertain)** The scroll IDs come from the gameval names: 6798 to 6807 (`CHAMPIONS_CHALLENGE_*`).

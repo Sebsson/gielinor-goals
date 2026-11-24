@@ -1,0 +1,357 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Champion%27s_cape (ändrad 22 apr 2026) - Item ID 21439 (CHAMPION_CAPE); fås av Larxus när alla",
+    "11 champions är besegrade (10 + Leon d'Cour).",
+    "https://oldschool.runescape.wiki/w/Champions%27_Challenge (ändrad 12 sep 2026) - minst 32 quest points och members-värld för att",
+    "få scrolls; scrollen droppar 1/5 000 och inte för champions man redan besegrat.",
+    "https://oldschool.runescape.wiki/w/Champion%27s_scroll (ändrad 12 sep 2026) - vilka monster som droppar varje scroll.",
+    "Osäkert: scrollernas id står inte på sidorna; gameval CHAMPIONS_CHALLENGE_* (6798-6807) antas vara dem. Drop-källan anger",
+    "huvudmonstret (t.ex. hill giant för giant-scrollen), fast fler monster droppar samma scroll.",
+    "Att besegra en champion syns inte för pluginet, så det är manuella mål som blir klara med kappan."
+  ],
+  "id": "champions-cape",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Champion's cape",
+  "description": "Every champion scroll and Leon d'Cour for the champion's cape",
+  "category": "Capes",
+  "tags": [
+    "champion's cape",
+    "champions cape",
+    "champions' challenge",
+    "champion scrolls",
+    "champions guild",
+    "cape",
+    "ironman"
+  ],
+  "root": {
+    "title": "Champion's cape",
+    "aggregate": true,
+    "wikiPage": "Champion's cape",
+    "icon": {
+      "item": 21439
+    },
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "QUEST"
+        },
+        "children": [
+          {
+            "questPoints": 32,
+            "note": "Needed for champion scrolls to drop."
+          }
+        ]
+      },
+      {
+        "title": "Champions",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "COMBAT"
+        },
+        "children": [
+          {
+            "title": "Defeat the Imp Champion",
+            "icon": {
+              "sideIcon": "QUEST"
+            },
+            "note": "Use the champion scroll at the Champions' Guild.",
+            "doneWhen": [
+              "item:21439"
+            ],
+            "wikiPage": "Champions' Challenge",
+            "children": [
+              {
+                "item": {
+                  "id": 6803,
+                  "name": "Imp champion scroll"
+                },
+                "doneWhen": [
+                  "item:21439"
+                ],
+                "dropSource": {
+                  "npc": "Imp",
+                  "rate": 5000
+                },
+                "note": "About 1/5,000 from imp and related monsters."
+              }
+            ]
+          },
+          {
+            "title": "Defeat the Goblin Champion",
+            "icon": {
+              "sideIcon": "QUEST"
+            },
+            "note": "Use the champion scroll at the Champions' Guild.",
+            "doneWhen": [
+              "item:21439"
+            ],
+            "wikiPage": "Champions' Challenge",
+            "children": [
+              {
+                "item": {
+                  "id": 6801,
+                  "name": "Goblin champion scroll"
+                },
+                "doneWhen": [
+                  "item:21439"
+                ],
+                "dropSource": {
+                  "npc": "Goblin",
+                  "rate": 5000
+                },
+                "note": "About 1/5,000 from goblin and related monsters."
+              }
+            ]
+          },
+          {
+            "title": "Defeat the Skeleton Champion",
+            "icon": {
+              "sideIcon": "QUEST"
+            },
+            "note": "Use the champion scroll at the Champions' Guild.",
+            "doneWhen": [
+              "item:21439"
+            ],
+            "wikiPage": "Champions' Challenge",
+            "children": [
+              {
+                "item": {
+                  "id": 6806,
+                  "name": "Skeleton champion scroll"
+                },
+                "doneWhen": [
+                  "item:21439"
+                ],
+                "dropSource": {
+                  "npc": "Skeleton",
+                  "rate": 5000
+                },
+                "note": "About 1/5,000 from skeleton and related monsters."
+              }
+            ]
+          },
+          {
+            "title": "Defeat the Zombie Champion",
+            "icon": {
+              "sideIcon": "QUEST"
+            },
+            "note": "Use the champion scroll at the Champions' Guild.",
+            "doneWhen": [
+              "item:21439"
+            ],
+            "wikiPage": "Champions' Challenge",
+            "children": [
+              {
+                "item": {
+                  "id": 6807,
+                  "name": "Zombie champion scroll"
+                },
+                "doneWhen": [
+                  "item:21439"
+                ],
+                "dropSource": {
+                  "npc": "Zombie",
+                  "rate": 5000
+                },
+                "note": "About 1/5,000 from zombie and related monsters."
+              }
+            ]
+          },
+          {
+            "title": "Defeat the Giant Champion",
+            "icon": {
+              "sideIcon": "QUEST"
+            },
+            "note": "Use the champion scroll at the Champions' Guild.",
+            "doneWhen": [
+              "item:21439"
+            ],
+            "wikiPage": "Champions' Challenge",
+            "children": [
+              {
+                "item": {
+                  "id": 6800,
+                  "name": "Giant champion scroll"
+                },
+                "doneWhen": [
+                  "item:21439"
+                ],
+                "dropSource": {
+                  "npc": "Hill giant",
+                  "rate": 5000
+                },
+                "note": "About 1/5,000 from hill giant and related monsters."
+              }
+            ]
+          },
+          {
+            "title": "Defeat the Hobgoblin Champion",
+            "icon": {
+              "sideIcon": "QUEST"
+            },
+            "note": "Use the champion scroll at the Champions' Guild.",
+            "doneWhen": [
+              "item:21439"
+            ],
+            "wikiPage": "Champions' Challenge",
+            "children": [
+              {
+                "item": {
+                  "id": 6802,
+                  "name": "Hobgoblin champion scroll"
+                },
+                "doneWhen": [
+                  "item:21439"
+                ],
+                "dropSource": {
+                  "npc": "Hobgoblin",
+                  "rate": 5000
+                },
+                "note": "About 1/5,000 from hobgoblin and related monsters."
+              }
+            ]
+          },
+          {
+            "title": "Defeat the Ghoul Champion",
+            "icon": {
+              "sideIcon": "QUEST"
+            },
+            "note": "Use the champion scroll at the Champions' Guild.",
+            "doneWhen": [
+              "item:21439"
+            ],
+            "wikiPage": "Champions' Challenge",
+            "children": [
+              {
+                "item": {
+                  "id": 6799,
+                  "name": "Ghoul champion scroll"
+                },
+                "doneWhen": [
+                  "item:21439"
+                ],
+                "dropSource": {
+                  "npc": "Ghoul",
+                  "rate": 5000
+                },
+                "note": "About 1/5,000 from ghoul and related monsters."
+              }
+            ]
+          },
+          {
+            "title": "Defeat the Earth warrior Champion",
+            "icon": {
+              "sideIcon": "QUEST"
+            },
+            "note": "Use the champion scroll at the Champions' Guild.",
+            "doneWhen": [
+              "item:21439"
+            ],
+            "wikiPage": "Champions' Challenge",
+            "children": [
+              {
+                "item": {
+                  "id": 6798,
+                  "name": "Earth warrior champion scroll"
+                },
+                "doneWhen": [
+                  "item:21439"
+                ],
+                "dropSource": {
+                  "npc": "Earth warrior",
+                  "rate": 5000
+                },
+                "note": "About 1/5,000 from earth warrior and related monsters."
+              }
+            ]
+          },
+          {
+            "title": "Defeat the Jogre Champion",
+            "icon": {
+              "sideIcon": "QUEST"
+            },
+            "note": "Use the champion scroll at the Champions' Guild.",
+            "doneWhen": [
+              "item:21439"
+            ],
+            "wikiPage": "Champions' Challenge",
+            "children": [
+              {
+                "item": {
+                  "id": 6804,
+                  "name": "Jogre champion scroll"
+                },
+                "doneWhen": [
+                  "item:21439"
+                ],
+                "dropSource": {
+                  "npc": "Jogre",
+                  "rate": 5000
+                },
+                "note": "About 1/5,000 from jogre and related monsters."
+              }
+            ]
+          },
+          {
+            "title": "Defeat the Lesser demon Champion",
+            "icon": {
+              "sideIcon": "QUEST"
+            },
+            "note": "Use the champion scroll at the Champions' Guild.",
+            "doneWhen": [
+              "item:21439"
+            ],
+            "wikiPage": "Champions' Challenge",
+            "children": [
+              {
+                "item": {
+                  "id": 6805,
+                  "name": "Lesser demon champion scroll"
+                },
+                "doneWhen": [
+                  "item:21439"
+                ],
+                "dropSource": {
+                  "npc": "Lesser demon",
+                  "rate": 5000
+                },
+                "note": "About 1/5,000 from lesser demon and related monsters."
+              }
+            ]
+          },
+          {
+            "title": "Defeat Leon d'Cour",
+            "icon": {
+              "sideIcon": "QUEST"
+            },
+            "note": "Offered once the ten other champions are beaten.",
+            "doneWhen": [
+              "item:21439"
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "INVENTORY"
+        },
+        "children": [
+          {
+            "item": {
+              "id": 21439,
+              "name": "Champion's cape",
+              "includeVariants": true
+            },
+            "note": "From Larxus once every champion is defeated."
+          }
+        ]
+      }
+    ]
+  }
+}
