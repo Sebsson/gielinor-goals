@@ -105,10 +105,30 @@ final class TemplateUpdateDialog
 	private JPanel buildContent()
 	{
 		JPanel rows = new JPanel(new DynamicGridLayout(0, 1, 0, 1));
-		if (!plan.getAdditions().isEmpty())
+		List<TemplateUpdates.Addition> replacements = new ArrayList<>();
+		List<TemplateUpdates.Addition> additions = new ArrayList<>();
+		for (TemplateUpdates.Addition addition : plan.getAdditions())
+		{
+			(addition.getReplaces() != null ? replacements : additions).add(addition);
+		}
+		if (!replacements.isEmpty())
+		{
+			// Ett byte visas som en rad: det nya målet, och vilket mål det ersätter.
+			rows.add(heading("Changed in the template"));
+			for (TemplateUpdates.Addition addition : replacements)
+			{
+				addRows(rows, addition.getNode(), null, 0);
+				JLabel replaced = new JLabel("replaces \"" + addition.getReplaces().getDisplayTitle()
+					+ "\", which is removed");
+				replaced.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+				replaced.setBorder(new EmptyBorder(0, INDENT_PX + 4, 2, 4));
+				rows.add(replaced);
+			}
+		}
+		if (!additions.isEmpty())
 		{
 			rows.add(heading("New in the template"));
-			for (TemplateUpdates.Addition addition : plan.getAdditions())
+			for (TemplateUpdates.Addition addition : additions)
 			{
 				addRows(rows, addition.getNode(), null, 0);
 			}
@@ -134,7 +154,11 @@ final class TemplateUpdateDialog
 		scroll.setBorder(BorderFactory.createEmptyBorder());
 
 		JPanel content = new JPanel(new BorderLayout(0, 8));
-		content.add(new JLabel("<html>Changes for \"" + plan.getRoot().getDisplayTitle() + "\" since it was added:</html>"),
+		String intro = plan.isNewVersion()
+			? "The template for \"" + plan.getRoot().getDisplayTitle() + "\" has been updated (version "
+				+ plan.getGoalVersion() + " to " + plan.getTemplateVersion() + "). Changes:"
+			: "Changes for \"" + plan.getRoot().getDisplayTitle() + "\" since it was added:";
+		content.add(new JLabel("<html><body style='width:360px'>" + UiText.escapeHtml(intro) + "</body></html>"),
 			BorderLayout.NORTH);
 		content.add(scroll, BorderLayout.CENTER);
 		content.add(summary, BorderLayout.SOUTH);
@@ -211,6 +235,10 @@ final class TemplateUpdateDialog
 		{
 			removes += box.isSelected() ? 1 : 0;
 		}
+		for (TemplateUpdates.Addition addition : plan.getAdditions())
+		{
+			removes += addition.getReplaces() != null && addition.getNode().isIncluded() ? 1 : 0;
+		}
 		summary.setText("Adds " + adds + (adds == 1 ? " goal" : " goals") + ", removes " + removes);
 	}
 
@@ -218,19 +246,24 @@ final class TemplateUpdateDialog
 	{
 		List<TemplateUpdates.Addition> chosen = new ArrayList<>();
 		List<String> declined = new ArrayList<>();
+		List<String> remove = new ArrayList<>();
 		for (TemplateUpdates.Addition addition : plan.getAdditions())
 		{
 			if (addition.getNode().isIncluded())
 			{
 				chosen.add(addition);
 				collectDeclined(addition.getNode(), declined);
+				// Ett valt byte tar bort målet det ersätter; ett bortvalt behåller det.
+				if (addition.getReplaces() != null)
+				{
+					remove.add(addition.getReplaces().getId());
+				}
 			}
 			else
 			{
 				declined.add(addition.getNode().getKey());
 			}
 		}
-		List<String> remove = new ArrayList<>();
 		for (int i = 0; i < removeBoxes.size(); i++)
 		{
 			if (removeBoxes.get(i).isSelected())

@@ -59,6 +59,8 @@ public class Goal
 	private java.util.Map<String, Integer> templateParams;
 	// Valen templaten byggdes med (t.ex. "skill" → "ATTACK"); bara på template-roten.
 	private java.util.Map<String, String> templateChoices;
+	// Templatens version när målet sattes in eller senast uppdaterades; null = 1.
+	private Integer templateVersion;
 	// Nycklar för noder användaren valt bort; de föreslås inte vid uppdatering. Bara på roten.
 	private List<String> templateIgnoredKeys;
 	// Stabil nyckel för noden i templaten målet skapades från, t.ex. "quest:117".

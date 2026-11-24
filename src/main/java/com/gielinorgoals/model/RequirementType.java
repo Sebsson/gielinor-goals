@@ -42,7 +42,8 @@ public enum RequirementType
 	TOTAL_LEVEL(TotalLevelRequirement.class),
 	COMBAT_LEVEL(CombatLevelRequirement.class),
 	QUEST_POINTS(QuestPointsRequirement.class),
-	KILL_COUNT(KillCountRequirement.class);
+	KILL_COUNT(KillCountRequirement.class),
+	POINTS(PointsRequirement.class);
 
 	private final Class<? extends Requirement> implementation;
 }

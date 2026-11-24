@@ -97,7 +97,7 @@ public class TemplateEngineTest
 		LoadResult again = serializer.deserialize(serializer.serialize(result.getTree()));
 		assertFalse(again.isMigrated());
 		assertEquals(Map.of("skill", "MINING"), again.getTree().find("a").getTemplateChoices());
-		assertEquals(12, SchemaMigrator.CURRENT_VERSION);
+		assertTrue(SchemaMigrator.CURRENT_VERSION >= 12);
 	}
 
 	@Test

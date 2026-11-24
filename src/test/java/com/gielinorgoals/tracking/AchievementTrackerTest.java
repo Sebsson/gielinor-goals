@@ -63,7 +63,8 @@ public class AchievementTrackerTest
 	public void snapshotReportsQuestPointsOrUnknown()
 	{
 		AchievementTracker.Achievements achievements = new AchievementTracker.Achievements(
-			java.util.Collections.emptyMap(), java.util.Collections.emptyMap(), java.util.Collections.emptyMap(), 142);
+			java.util.Collections.emptyMap(), java.util.Collections.emptyMap(), java.util.Collections.emptyMap(), 142,
+			java.util.Collections.emptyMap());
 
 		assertEquals(142, new GameSnapshot(java.util.Collections.emptyMap(), GameSnapshot.Items.UNKNOWN, achievements)
 			.getQuestPoints());

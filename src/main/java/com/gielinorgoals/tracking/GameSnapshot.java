@@ -77,6 +77,12 @@ public class GameSnapshot implements GameData
 	}
 
 	@Override
+	public int getVarp(int varpId)
+	{
+		return achievements.getVarps().getOrDefault(varpId, -1);
+	}
+
+	@Override
 	public int getQuestPoints()
 	{
 		return achievements.getQuestPoints();

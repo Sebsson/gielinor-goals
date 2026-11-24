@@ -605,6 +605,7 @@ final class TemplateDialog
 		current.setTemplateId(template.getId());
 		current.setTemplateParams(params);
 		current.setTemplateChoices(choices.isEmpty() ? null : new HashMap<>(choices));
+		current.setTemplateVersion(template.getVersion() > 1 ? template.getVersion() : null);
 		addRows(current, null, 0);
 		refreshStatuses();
 		previewPanel.revalidate();

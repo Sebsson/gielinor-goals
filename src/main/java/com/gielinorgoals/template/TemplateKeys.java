@@ -117,6 +117,11 @@ public final class TemplateKeys
 		{
 			return "combat:" + ((CombatLevelRequirement) requirement).getTarget();
 		}
+		if (requirement instanceof com.gielinorgoals.model.PointsRequirement)
+		{
+			com.gielinorgoals.model.PointsRequirement points = (com.gielinorgoals.model.PointsRequirement) requirement;
+			return "points:" + points.getActivity().name() + ":" + points.getTarget();
+		}
 		if (requirement instanceof KillCountRequirement)
 		{
 			KillCountRequirement kc = (KillCountRequirement) requirement;

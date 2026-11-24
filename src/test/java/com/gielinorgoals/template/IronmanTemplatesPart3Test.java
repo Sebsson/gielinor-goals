@@ -115,7 +115,12 @@ public class IronmanTemplatesPart3Test
 	@Test
 	public void runePouch()
 	{
-		assertTrue(KillCountRequirement.manual("Slayer points", 750).isSameGoal(unlock("rune-pouch").get(0).getRequirement()));
+		// Version 2: slayer points läses från spelet och ersätter den manuella räknaren.
+		TemplateNode points = unlock("rune-pouch").get(0);
+		assertEquals(new com.gielinorgoals.model.PointsRequirement(com.gielinorgoals.model.PointsActivity.SLAYER, 750),
+			points.getRequirement());
+		// Nyckeln måste vara exakt den som den gamla manuella räknaren fick.
+		assertEquals(List.of(TemplateKeys.of(KillCountRequirement.manual("Slayer points", 750))), points.getReplaces());
 		assertItem(obtain("rune-pouch").get(0), ItemID.BH_RUNE_POUCH, 1);
 	}
 

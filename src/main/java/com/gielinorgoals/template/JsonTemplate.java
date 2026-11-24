@@ -32,6 +32,7 @@ import com.gielinorgoals.model.DropSource;
 import com.gielinorgoals.model.GoalIcon;
 import com.gielinorgoals.model.ItemRequirement;
 import com.gielinorgoals.model.KillCountRequirement;
+import com.gielinorgoals.model.PointsActivity;
 import com.gielinorgoals.model.QuestPointsRequirement;
 import com.gielinorgoals.model.QuestRequirement;
 import com.gielinorgoals.model.Requirement;
@@ -76,6 +77,13 @@ import net.runelite.client.hiscore.HiscoreSkill;
  * {@code "xp"} i stället för {@code "level"}. Combat achievements skrivs
  * {@code {"combatAchievement": {"id": 12, "name": "Noxious Foe", "tier": "Easy"}}}.
  * {@code "formatVersion"} är formatets egen version, skild från profilens schemaversion.
+ * <p>
+ * Poäng som spelet håller i en varbit eller varp skrivs
+ * {@code {"points": {"activity": "SLAYER", "count": 750}}} (se {@link PointsActivity}).
+ * {@code "version"} är templatens eget innehåll: den höjs när en handplockad template ändras
+ * så att uppdateringsdialogen kan säga det. {@code "replaces": ["kc:manual:slayer points:750"]}
+ * på en nod betyder att den ersätter ett mål med den nyckeln från en äldre version; dialogen
+ * visar då bytet som en ändring i stället för ett nytt och ett borttaget mål.
  */
 public class JsonTemplate implements GoalTemplate
 {
@@ -86,6 +94,8 @@ public class JsonTemplate implements GoalTemplate
 		Integer formatVersion;
 		// Om "Show full quest chains" är ibockad från början; saknas = ja.
 		Boolean expandQuestChains;
+		// Templatens innehållsversion; saknas = 1. Höjs när en handplockad template ändras.
+		Integer version;
 		// Stabilt id; om det saknas används filnamnet utan .json.
 		String id;
 		// Vem som har kontrollerat siffrorna mot wikin och när (t.ex. "2026-11-24"); tomt = inte än.
@@ -119,6 +129,9 @@ public class JsonTemplate implements GoalTemplate
 		IconSpec icon;
 		// Nycklar till andra mål, t.ex. "item:12954"; noden är klar när något av dem är klart.
 		List<String> doneWhen;
+		// Nycklar för mål i en äldre version som den här noden ersätter.
+		List<String> replaces;
+		PointsSpec points;
 		String quest;
 		String skill;
 		Integer level;
@@ -130,6 +143,12 @@ public class JsonTemplate implements GoalTemplate
 		DiarySpec diary;
 		ItemSpec item;
 		List<NodeSpec> children;
+	}
+
+	static final class PointsSpec
+	{
+		String activity;
+		Integer count;
 	}
 
 	static final class CombatAchievementSpec
@@ -184,6 +203,7 @@ public class JsonTemplate implements GoalTemplate
 	private final NodeSpec root;
 	private boolean verified;
 	private boolean expandQuestChains = true;
+	private int version = 1;
 
 	/**
 	 * Formatets nuvarande version. En fil med högre version kommer från en nyare version av
@@ -236,6 +256,14 @@ public class JsonTemplate implements GoalTemplate
 		}
 		template.verified = notBlank(spec.verifiedBy) && notBlank(spec.verifiedAt);
 		template.expandQuestChains = !Boolean.FALSE.equals(spec.expandQuestChains);
+		if (spec.version != null)
+		{
+			if (spec.version < 1)
+			{
+				throw new IllegalArgumentException("Template version must be 1 or higher");
+			}
+			template.version = spec.version;
+		}
 		// Bygg en gång direkt, så att fel i filen märks när den läses och inte i dialogen.
 		template.build(Map.of());
 		return template;
@@ -296,6 +324,12 @@ public class JsonTemplate implements GoalTemplate
 	public GoalIcon getIcon()
 	{
 		return root.icon == null ? null : toIcon(root.icon);
+	}
+
+	@Override
+	public int getVersion()
+	{
+		return version;
 	}
 
 	// Handplockade templates visar hela quest-kedjorna som standard; egna sparar sina kedjor.
@@ -418,7 +452,8 @@ public class JsonTemplate implements GoalTemplate
 	{
 		if (spec.id != null || spec.title != null || spec.aggregate != null || spec.children != null
 			|| spec.note != null || spec.wikiPage != null || spec.icon != null || spec.doneWhen != null
-			|| spec.dropSource != null || spec.expandChain != null || toRequirement(spec) != null)
+			|| spec.dropSource != null || spec.expandChain != null || spec.replaces != null
+			|| toRequirement(spec) != null)
 		{
 			throw new IllegalArgumentException("A node with \"ref\" can't have anything else");
 		}
@@ -474,6 +509,10 @@ public class JsonTemplate implements GoalTemplate
 			}
 			node.setDoneWhen(List.copyOf(spec.doneWhen));
 		}
+		if (spec.replaces != null)
+		{
+			node.setReplaces(List.copyOf(keys(spec.replaces, "replaces")));
+		}
 		if (spec.dropSource != null)
 		{
 			if (!(requirement instanceof ItemRequirement))
@@ -499,7 +538,7 @@ public class JsonTemplate implements GoalTemplate
 	private static Requirement toRequirement(NodeSpec spec)
 	{
 		int kinds = count(spec.quest, spec.skill, spec.combatAchievement, spec.questPoints, spec.totalLevel,
-			spec.combatLevel, spec.diary, spec.item, spec.killCount);
+			spec.combatLevel, spec.diary, spec.item, spec.killCount, spec.points);
 		if (kinds > 1)
 		{
 			throw new IllegalArgumentException("A goal can only have one requirement");
@@ -529,6 +568,15 @@ public class JsonTemplate implements GoalTemplate
 				throw new IllegalArgumentException("Unknown skill \"OVERALL\"");
 			}
 			return spec.level != null ? SkillRequirement.level(skill, spec.level) : SkillRequirement.xp(skill, spec.xp);
+		}
+		if (spec.points != null)
+		{
+			if (spec.points.count == null)
+			{
+				throw new IllegalArgumentException("points needs a count");
+			}
+			return new com.gielinorgoals.model.PointsRequirement(
+				enumOf(PointsActivity.class, spec.points.activity, "points activity"), spec.points.count);
 		}
 		if (spec.combatAchievement != null)
 		{
@@ -571,6 +619,19 @@ public class JsonTemplate implements GoalTemplate
 			return toKillCount(spec.killCount);
 		}
 		return null;
+	}
+
+	// Nycklar som "item:12954", kontrollerade på samma sätt som doneWhen.
+	private static List<String> keys(List<String> keys, String field)
+	{
+		for (String key : keys)
+		{
+			if (key == null || key.trim().isEmpty() || !key.equals(key.trim()) || !key.contains(":"))
+			{
+				throw new IllegalArgumentException(field + " needs keys like \"item:12954\"");
+			}
+		}
+		return keys;
 	}
 
 	private static int count(Object... values)

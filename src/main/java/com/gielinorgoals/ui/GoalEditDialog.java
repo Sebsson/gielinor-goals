@@ -36,6 +36,8 @@ import com.gielinorgoals.model.GameData;
 import com.gielinorgoals.model.GoalProgress;
 import com.gielinorgoals.model.ItemRequirement;
 import com.gielinorgoals.model.KillCountRequirement;
+import com.gielinorgoals.model.PointsActivity;
+import com.gielinorgoals.model.PointsRequirement;
 import com.gielinorgoals.model.QuestPointsRequirement;
 import com.gielinorgoals.model.QuestRequirement;
 import com.gielinorgoals.template.QuestChains;
@@ -109,11 +111,13 @@ final class GoalEditDialog
 		TOTAL_LEVEL("Total level"),
 		COMBAT_LEVEL("Combat level"),
 		QUEST_POINTS("Quest points"),
+		POINTS("Activity points"),
 		KILL_COUNT("Kill count");
 
+		// Ett tal mot ett mål, i samma kort; POINTS har dessutom ett val av aktivitet.
 		boolean isAccountLevel()
 		{
-			return this == TOTAL_LEVEL || this == COMBAT_LEVEL || this == QUEST_POINTS;
+			return this == TOTAL_LEVEL || this == COMBAT_LEVEL || this == QUEST_POINTS || this == POINTS;
 		}
 
 		private final String label;
@@ -267,6 +271,8 @@ final class GoalEditDialog
 	private static final String ACCOUNT_CARD = "ACCOUNT";
 	private final JLabel accountTargetLabel = new JLabel();
 	private final JTextField accountTargetField = new JTextField(20);
+	// Aktiviteten för POINTS, t.ex. slayer points; syns bara för den typen.
+	private final JComboBox<PointsActivity> pointsBox = new JComboBox<>(PointsActivity.values());
 	private final JLabel accountCurrentLabel = hintLabel();
 
 	// KC-kortet: sökbar aktivitet, namn för NPC/egen räknare, målantal och nuvarande värde.
@@ -495,6 +501,13 @@ final class GoalEditDialog
 			kindBox.setSelectedItem(GoalKind.QUEST_POINTS);
 			accountTargetField.setText(String.valueOf(((QuestPointsRequirement) requirement).getTarget()));
 		}
+		else if (requirement instanceof PointsRequirement)
+		{
+			PointsRequirement points = (PointsRequirement) requirement;
+			pointsBox.setSelectedItem(points.getActivity());
+			kindBox.setSelectedItem(GoalKind.POINTS);
+			accountTargetField.setText(String.valueOf(points.getTarget()));
+		}
 		else if (requirement instanceof CombatAchievementRequirement)
 		{
 			CombatAchievementRequirement task = (CombatAchievementRequirement) requirement;
@@ -682,6 +695,8 @@ final class GoalEditDialog
 	private JPanel buildAccountCard()
 	{
 		JPanel card = new JPanel(new DynamicGridLayout(0, 1, 0, 4));
+		pointsBox.addActionListener(e -> accountCurrentLabel.setText(accountCurrentText(GoalKind.POINTS)));
+		card.add(pointsBox);
 		card.add(accountCurrentLabel);
 		card.add(accountTargetLabel);
 		card.add(accountTargetField);
@@ -841,6 +856,7 @@ final class GoalEditDialog
 
 		if (kind.isAccountLevel())
 		{
+			pointsBox.setVisible(kind == GoalKind.POINTS);
 			int[] range = accountRange(kind);
 			accountTargetLabel.setText("Target " + kind.toString().toLowerCase(Locale.ROOT)
 				+ " (" + range[0] + "-" + range[1] + ")");
@@ -862,12 +878,14 @@ final class GoalEditDialog
 				return new int[]{TotalLevelRequirement.MIN, TotalLevelRequirement.MAX};
 			case COMBAT_LEVEL:
 				return new int[]{CombatLevelRequirement.MIN, CombatLevelRequirement.MAX};
+			case POINTS:
+				return new int[]{PointsRequirement.MIN, PointsRequirement.MAX};
 			default:
 				return new int[]{QuestPointsRequirement.MIN, QuestPointsRequirement.MAX};
 		}
 	}
 
-	private static Requirement accountRequirement(GoalKind kind, int target)
+	private Requirement accountRequirement(GoalKind kind, int target)
 	{
 		switch (kind)
 		{
@@ -875,6 +893,8 @@ final class GoalEditDialog
 				return new TotalLevelRequirement(target);
 			case COMBAT_LEVEL:
 				return new CombatLevelRequirement(target);
+			case POINTS:
+				return new PointsRequirement((PointsActivity) pointsBox.getSelectedItem(), target);
 			default:
 				return new QuestPointsRequirement(target);
 		}
@@ -886,6 +906,11 @@ final class GoalEditDialog
 		GoalProgress progress = accountRequirement(kind, accountRange(kind)[0]).progress(services.currentGameData());
 		if (progress == null)
 		{
+			if (kind == GoalKind.POINTS)
+			{
+				// Poängen läses först när ett mål bevakar dem, så de är okända innan målet finns.
+				return "Your current points are read from the game once the goal is added.";
+			}
 			return "Log in to see your current " + kind.toString().toLowerCase(Locale.ROOT) + ".";
 		}
 		return "You have " + QuantityFormatter.formatNumber(progress.getCurrent()) + " now.";
@@ -1004,6 +1029,7 @@ final class GoalEditDialog
 			case TOTAL_LEVEL:
 			case COMBAT_LEVEL:
 			case QUEST_POINTS:
+			case POINTS:
 			{
 				// Ett redan uppnått mål är tillåtet; det bockas av med ungefärligt datum.
 				int[] range = accountRange(kind);

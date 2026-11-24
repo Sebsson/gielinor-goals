@@ -27,6 +27,8 @@ package com.gielinorgoals.tracking;
 import com.gielinorgoals.model.CombatAchievementRequirement;
 import com.gielinorgoals.model.DiaryRequirement;
 import com.gielinorgoals.model.GoalTree;
+import com.gielinorgoals.model.PointsActivity;
+import com.gielinorgoals.model.PointsRequirement;
 import com.gielinorgoals.model.QuestRequirement;
 import com.gielinorgoals.model.Requirement;
 import java.util.Collections;
@@ -42,15 +44,16 @@ import lombok.Value;
 public class WatchedAchievements
 {
 	public static final WatchedAchievements NONE = new WatchedAchievements(
-		Collections.emptySet(), Collections.emptySet(), Collections.emptySet());
+		Collections.emptySet(), Collections.emptySet(), Collections.emptySet(), Collections.emptySet());
 
 	Set<Integer> questIds;
 	Set<Integer> varbits;
 	Set<Integer> combatAchievementIds;
+	Set<Integer> varps;
 
 	public boolean isEmpty()
 	{
-		return questIds.isEmpty() && varbits.isEmpty() && combatAchievementIds.isEmpty();
+		return questIds.isEmpty() && varbits.isEmpty() && combatAchievementIds.isEmpty() && varps.isEmpty();
 	}
 
 	public static WatchedAchievements from(GoalTree tree)
@@ -58,6 +61,7 @@ public class WatchedAchievements
 		Set<Integer> quests = new HashSet<>();
 		Set<Integer> varbits = new HashSet<>();
 		Set<Integer> tasks = new HashSet<>();
+		Set<Integer> varps = new HashSet<>();
 		tree.forEach(goal ->
 		{
 			Requirement requirement = goal.getRequirement();
@@ -75,8 +79,14 @@ public class WatchedAchievements
 			{
 				tasks.add(((CombatAchievementRequirement) requirement).getTaskId());
 			}
+			else if (requirement instanceof PointsRequirement)
+			{
+				// Läses när spelet ändrar en varbit eller varp och vid inloggning, inte varje tick.
+				PointsActivity activity = ((PointsRequirement) requirement).getActivity();
+				(activity.getSource() == PointsActivity.Source.VARBIT ? varbits : varps).add(activity.getId());
+			}
 		});
 		return new WatchedAchievements(Collections.unmodifiableSet(quests), Collections.unmodifiableSet(varbits),
-			Collections.unmodifiableSet(tasks));
+			Collections.unmodifiableSet(tasks), Collections.unmodifiableSet(varps));
 	}
 }

@@ -283,6 +283,7 @@ public final class TemplateExport
 		copy.diary = spec.diary;
 		copy.item = spec.item;
 		copy.killCount = spec.killCount;
+		copy.points = spec.points;
 		file.root = copy;
 		return JsonTemplate.from(file).build(Map.of()).getRequirement();
 	}
@@ -361,6 +362,14 @@ public final class TemplateExport
 			KillCountRequirement kc = (KillCountRequirement) requirement;
 			spec.killCount = activity(kc.getActivityType(), kc.getActivityId(), kc.getActivityName());
 			spec.killCount.count = kc.getTarget();
+			return true;
+		}
+		if (requirement instanceof com.gielinorgoals.model.PointsRequirement)
+		{
+			com.gielinorgoals.model.PointsRequirement points = (com.gielinorgoals.model.PointsRequirement) requirement;
+			spec.points = new JsonTemplate.PointsSpec();
+			spec.points.activity = points.getActivity().name();
+			spec.points.count = points.getTarget();
 			return true;
 		}
 		if (requirement instanceof CombatAchievementRequirement)

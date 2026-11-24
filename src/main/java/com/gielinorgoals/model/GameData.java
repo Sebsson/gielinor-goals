@@ -89,6 +89,14 @@ public interface GameData
 	}
 
 	/**
+	 * @return varpens värde, eller -1 om den inte är läst
+	 */
+	default int getVarp(int varpId)
+	{
+		return -1;
+	}
+
+	/**
 	 * @return antal quest points, eller -1 om det inte är läst
 	 */
 	default int getQuestPoints()

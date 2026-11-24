@@ -31,6 +31,7 @@ import com.gielinorgoals.model.Goal;
 import com.gielinorgoals.model.GoalIcon;
 import com.gielinorgoals.model.ItemRequirement;
 import com.gielinorgoals.model.KillCountRequirement;
+import com.gielinorgoals.model.PointsRequirement;
 import com.gielinorgoals.model.QuestPointsRequirement;
 import com.gielinorgoals.model.QuestRequirement;
 import com.gielinorgoals.model.Requirement;
@@ -193,6 +194,18 @@ public class GoalIcons
 		{
 			applySprite(KillCountIcons.spriteFor((KillCountRequirement) requirement), label);
 		}
+		else if (requirement instanceof PointsRequirement)
+		{
+			net.runelite.api.Skill skill = ((PointsRequirement) requirement).getActivity().getIconSkill();
+			if (skill != null)
+			{
+				label.setIcon(new ImageIcon(skillIconManager.getSkillImage(skill, true)));
+			}
+			else
+			{
+				applySprite(SpriteID.SideIcons.MINIGAMES, label);
+			}
+		}
 		else
 		{
 			label.setIcon(null);
@@ -237,6 +250,18 @@ public class GoalIcons
 		else if (requirement instanceof KillCountRequirement)
 		{
 			loadSprite(KillCountIcons.spriteFor((KillCountRequirement) requirement), consumer);
+		}
+		else if (requirement instanceof PointsRequirement)
+		{
+			net.runelite.api.Skill skill = ((PointsRequirement) requirement).getActivity().getIconSkill();
+			if (skill != null)
+			{
+				consumer.accept(skillIconManager.getSkillImage(skill, true));
+			}
+			else
+			{
+				loadSprite(SpriteID.SideIcons.MINIGAMES, consumer);
+			}
 		}
 	}
 

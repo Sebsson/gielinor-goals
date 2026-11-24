@@ -46,18 +46,20 @@ final class ImportValidator
 	static final int MAX_DONE_WHEN = 20;
 
 	private static final Set<String> ENVELOPE = Set.of("formatVersion", "kind", "template");
-	private static final Set<String> FILE = Set.of("formatVersion", "expandQuestChains", "id", "verifiedBy",
+	private static final Set<String> FILE = Set.of("formatVersion", "expandQuestChains", "version", "id", "verifiedBy",
 		"verifiedAt", "name", "description", "category", "tags", "root");
 	private static final Set<String> NODE = Set.of("id", "ref", "title", "aggregate", "wikiPage", "note",
 		"expandChain", "dropSource", "killCount", "icon", "doneWhen", "quest", "skill", "level", "xp",
-		"combatAchievement", "questPoints", "totalLevel", "combatLevel", "diary", "item", "children");
+		"combatAchievement", "questPoints", "totalLevel", "combatLevel", "diary", "item", "children", "points",
+		"replaces");
 	private static final Map<String, Set<String>> NESTED = Map.of(
 		"diary", Set.of("area", "tier"),
 		"item", Set.of("id", "name", "quantity", "includeVariants", "variants"),
 		"icon", Set.of("item", "activity", "sideIcon"),
 		"dropSource", Set.of("hiscore", "npc", "manual", "count", "rate", "perDrop"),
 		"killCount", Set.of("hiscore", "npc", "manual", "count", "rate", "perDrop"),
-		"combatAchievement", Set.of("id", "name", "tier"));
+		"combatAchievement", Set.of("id", "name", "tier"),
+		"points", Set.of("activity", "count"));
 	private static final Set<String> NODE_BOOLEANS = Set.of("aggregate", "expandChain");
 	private static final Set<String> NODE_NUMBERS = Set.of("level", "xp", "questPoints", "totalLevel", "combatLevel");
 
@@ -153,17 +155,21 @@ final class ImportValidator
 					where);
 			}
 		}
-		JsonElement doneWhen = node.get("doneWhen");
-		if (doneWhen != null)
+		for (String field : new String[]{"doneWhen", "replaces"})
 		{
-			JsonArray keys = array(doneWhen, "doneWhen in " + where);
-			if (keys.size() > MAX_DONE_WHEN)
+			JsonElement value = node.get(field);
+			if (value != null)
 			{
-				throw new IllegalArgumentException("doneWhen in " + where + " has more than " + MAX_DONE_WHEN + " keys");
-			}
-			for (JsonElement key : keys)
-			{
-				string(key, MAX_TEXT_LENGTH, "A doneWhen key in " + where);
+				JsonArray keys = array(value, field + " in " + where);
+				if (keys.size() > MAX_DONE_WHEN)
+				{
+					throw new IllegalArgumentException(field + " in " + where + " has more than " + MAX_DONE_WHEN
+						+ " keys");
+				}
+				for (JsonElement key : keys)
+				{
+					string(key, MAX_TEXT_LENGTH, "A " + field + " key in " + where);
+				}
 			}
 		}
 		JsonElement children = node.get("children");

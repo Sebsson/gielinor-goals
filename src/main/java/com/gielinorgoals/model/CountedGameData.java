@@ -76,6 +76,12 @@ public final class CountedGameData implements GameData
 	}
 
 	@Override
+	public int getVarp(int varpId)
+	{
+		return data.getVarp(varpId);
+	}
+
+	@Override
 	public int getQuestPoints()
 	{
 		return data.getQuestPoints();

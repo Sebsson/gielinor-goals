@@ -101,6 +101,16 @@ public class TemplateNode
 	@Nullable
 	private String ref;
 
+	// Nycklar för mål i en äldre version av templaten som den här noden ersätter.
+	@Setter
+	@Nullable
+	private List<String> replaces;
+
+	// Bara på roten: templatens version när förslaget byggdes.
+	@Setter
+	@Nullable
+	private Integer templateVersion;
+
 	public TemplateNode(String title, @Nullable Requirement requirement, boolean aggregate)
 	{
 		this.title = title;

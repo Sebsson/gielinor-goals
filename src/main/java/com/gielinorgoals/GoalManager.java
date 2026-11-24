@@ -876,10 +876,23 @@ public class GoalManager
 	public void applyTemplateUpdate(String rootId, List<TemplateUpdates.Addition> additions, List<String> removeGoalIds,
 		List<String> declinedKeys)
 	{
+		applyTemplateUpdate(rootId, additions, removeGoalIds, declinedKeys, null);
+	}
+
+	/**
+	 * @param templateVersion templatens version efter uppdateringen, eller null för oförändrad
+	 */
+	public void applyTemplateUpdate(String rootId, List<TemplateUpdates.Addition> additions, List<String> removeGoalIds,
+		List<String> declinedKeys, @Nullable Integer templateVersion)
+	{
 		Goal root = tree.find(rootId);
 		if (!isEditable() || root == null)
 		{
 			return;
+		}
+		if (templateVersion != null)
+		{
+			root.setTemplateVersion(templateVersion);
 		}
 
 		for (TemplateUpdates.Addition addition : additions)

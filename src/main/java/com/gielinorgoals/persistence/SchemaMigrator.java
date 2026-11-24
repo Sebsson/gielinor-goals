@@ -69,8 +69,11 @@ public class SchemaMigrator
 	 * 12 – valfritt fält templateChoices på template-rötter (valparametrar som text). Ingen
 	 *     dataändring; höjd så att äldre versioner blir skrivskyddade i stället för att tyst
 	 *     kasta bort valen.
+	 * 13 – kravtypen POINTS (poäng läst från en varbit eller varp) och valfritt fält
+	 *     templateVersion på template-rötter. Ingen dataändring; höjd så att äldre versioner
+	 *     blir skrivskyddade i stället för att läsa POINTS-mål som trasiga.
 	 */
-	public static final int CURRENT_VERSION = 12;
+	public static final int CURRENT_VERSION = 13;
 	static final String VERSION_FIELD = "schemaVersion";
 	private static final String GOALS_FIELD = GoalSerializer.GOALS_FIELD;
 	private static final String ROOT_IDS_FIELD = GoalSerializer.ROOT_IDS_FIELD;
@@ -95,7 +98,8 @@ public class SchemaMigrator
 			Map.entry(8, SchemaMigrator::noStructuralChange),
 			Map.entry(9, SchemaMigrator::noStructuralChange),
 			Map.entry(10, SchemaMigrator::noStructuralChange),
-			Map.entry(11, SchemaMigrator::noStructuralChange)));
+			Map.entry(11, SchemaMigrator::noStructuralChange),
+			Map.entry(12, SchemaMigrator::noStructuralChange)));
 	}
 
 	/**

@@ -270,7 +270,7 @@ final class GoalActions
 		if (selection != null && stillSameProfile(owner, guard))
 		{
 			goalManager.applyTemplateUpdate(goal.getId(), selection.getAdditions(), selection.getRemoveGoalIds(),
-				selection.getDeclinedKeys());
+				selection.getDeclinedKeys(), plan.getTemplateVersion());
 		}
 	}
 

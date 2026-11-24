@@ -60,6 +60,21 @@ public class TemplateUpdates
 	{
 		TemplateNode node;
 		String parentGoalId;
+		// Målet som noden ersätter (templatens "replaces"), eller null för ett rent tillägg.
+		@javax.annotation.Nullable
+		Goal replaces;
+
+		public Addition(TemplateNode node, String parentGoalId)
+		{
+			this(node, parentGoalId, null);
+		}
+
+		public Addition(TemplateNode node, String parentGoalId, @javax.annotation.Nullable Goal replaces)
+		{
+			this.node = node;
+			this.parentGoalId = parentGoalId;
+			this.replaces = replaces;
+		}
 	}
 
 	@Getter
@@ -67,8 +82,11 @@ public class TemplateUpdates
 	{
 		private final Goal root;
 		private final List<Addition> additions = new ArrayList<>();
-		// Mål som templaten skapade men som inte längre finns i den.
+		// Mål som templaten skapade men som inte längre finns i den (utom de som ersätts).
 		private final List<Goal> removed = new ArrayList<>();
+		// Templatens nuvarande version och den som målen senast fick.
+		private int templateVersion = 1;
+		private int goalVersion = 1;
 
 		private Plan(Goal root)
 		{
@@ -78,6 +96,11 @@ public class TemplateUpdates
 		public boolean isEmpty()
 		{
 			return additions.isEmpty() && removed.isEmpty();
+		}
+
+		public boolean isNewVersion()
+		{
+			return templateVersion > goalVersion;
 		}
 	}
 
@@ -148,20 +171,40 @@ public class TemplateUpdates
 			? Collections.emptySet()
 			: new HashSet<>(root.getTemplateIgnoredKeys());
 		Plan plan = new Plan(root);
+		GoalTemplate source = catalog.find(root.getTemplateId());
+		plan.templateVersion = source == null ? 1 : source.getVersion();
+		plan.goalVersion = root.getTemplateVersion() == null ? 1 : root.getTemplateVersion();
 		Set<String> added = new HashSet<>();
 		findAdditions(template, root, present, ignored, added, plan);
 
 		Set<String> templateKeys = new HashSet<>();
 		collectKeys(template, templateKeys);
+		// Mål som en nod ersätter föreslås bara tillsammans med bytet; har användaren valt bort
+		// bytet ligger det gamla målet kvar utan att föreslås som borttaget.
+		Set<String> replacedKeys = new HashSet<>();
+		collectReplacedKeys(template, replacedKeys);
 		for (Goal goal : below)
 		{
 			if (goal.getTemplateNodeKey() != null && !templateKeys.contains(goal.getTemplateNodeKey())
-				&& !plan.removed.contains(goal))
+				&& !replacedKeys.contains(goal.getTemplateNodeKey())
+				&& !plan.removed.contains(goal) && !isReplaced(plan, goal))
 			{
 				plan.removed.add(goal);
 			}
 		}
 		return plan;
+	}
+
+	private static boolean isReplaced(Plan plan, Goal goal)
+	{
+		for (Addition addition : plan.additions)
+		{
+			if (addition.getReplaces() == goal)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -243,8 +286,39 @@ public class TemplateUpdates
 			// Samma nyckel flera gånger i templaten blir ett tillägg; insättningen kopplar resten.
 			if (added.add(key))
 			{
-				plan.additions.add(new Addition(child, parentGoal.getId()));
+				plan.additions.add(new Addition(child, parentGoal.getId(), replacedGoal(child, present)));
 			}
+		}
+	}
+
+	// Ett befintligt mål med en av nodens "replaces"-nycklar, som noden ersätter.
+	@javax.annotation.Nullable
+	private static Goal replacedGoal(TemplateNode node, Map<String, Goal> present)
+	{
+		if (node.getReplaces() == null)
+		{
+			return null;
+		}
+		for (String key : node.getReplaces())
+		{
+			Goal goal = present.get(key);
+			if (goal != null)
+			{
+				return goal;
+			}
+		}
+		return null;
+	}
+
+	private static void collectReplacedKeys(TemplateNode node, Set<String> out)
+	{
+		for (TemplateNode child : node.getChildren())
+		{
+			if (child.getReplaces() != null)
+			{
+				out.addAll(child.getReplaces());
+			}
+			collectReplacedKeys(child, out);
 		}
 	}
 

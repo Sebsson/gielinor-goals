@@ -84,6 +84,15 @@ public interface GoalTemplate
 		return false;
 	}
 
+	/**
+	 * Innehållets version; höjs när templaten ändras på ett sätt som insatta mål bör få veta,
+	 * t.ex. när en manuell räknare byts mot ett mål som läses från spelet.
+	 */
+	default int getVersion()
+	{
+		return 1;
+	}
+
 	default List<TemplateParameter> getParameters()
 	{
 		return Collections.emptyList();

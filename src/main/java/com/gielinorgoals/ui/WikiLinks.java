@@ -116,6 +116,10 @@ final class WikiLinks
 		{
 			return killCount((KillCountRequirement) requirement);
 		}
+		if (requirement instanceof com.gielinorgoals.model.PointsRequirement)
+		{
+			return page(((com.gielinorgoals.model.PointsRequirement) requirement).getActivity().getWikiPage());
+		}
 		return null;
 	}
 
