@@ -96,7 +96,23 @@ public class GielinorGoalsPanel extends PluginPanel
 	private List<Object> builtFor;
 	private final JLabel statusLabel = new JLabel();
 	private final JLabel bankLabel = new JLabel();
-	private final JPanel listPanel = new JPanel(new DynamicGridLayout(0, 1, 0, 2));
+	private final JPanel listPanel = new JPanel(new DynamicGridLayout(0, 1, 0, 2))
+	{
+		@Override
+		protected void paintChildren(java.awt.Graphics g)
+		{
+			super.paintChildren(g);
+			// Linjen för var en dragen rad hamnar ritas ovanpå raderna.
+			if (rowDrag != null)
+			{
+				rowDrag.paint(g);
+			}
+		}
+	};
+	// Dra och släpp i listan; skapas i konstruktorn när listan finns.
+	private RowDragController rowDrag;
+	// En ombyggnad som kom medan en rad drogs; görs när dragningen är slut.
+	private boolean rebuildAfterDrag;
 	private final CompletedTab completedTab;
 	private final MaterialTabGroup tabGroup;
 	private final MaterialTab activeTab;
@@ -284,6 +300,7 @@ public class GielinorGoalsPanel extends PluginPanel
 	private JScrollPane buildList()
 	{
 		listPanel.setOpaque(false);
+		rowDrag = new RowDragController(listPanel, goalManager, this::afterDrag);
 
 		// Wrappern håller raderna uppe i panelen i stället för att sträcka ut dem.
 		JPanel wrapper = new JPanel(new BorderLayout());
@@ -296,6 +313,16 @@ public class GielinorGoalsPanel extends PluginPanel
 		scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(8, 0));
 		scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 		return scrollPane;
+	}
+
+	// Ombyggnaden som väntade medan en rad drogs.
+	private void afterDrag()
+	{
+		if (rebuildAfterDrag)
+		{
+			rebuildAfterDrag = false;
+			rebuild();
+		}
 	}
 
 	private void addRootGoal()
@@ -349,6 +376,12 @@ public class GielinorGoalsPanel extends PluginPanel
 	 */
 	public void rebuild()
 	{
+		// Raderna byts inte ut mitt i en dragning; ombyggnaden görs när den är slut.
+		if (rowDrag != null && rowDrag.isActive())
+		{
+			rebuildAfterDrag = true;
+			return;
+		}
 		boolean editable = goalManager.isEditable();
 		newGoalField.setEnabled(editable);
 		addButton.setEnabled(editable);
@@ -370,7 +403,7 @@ public class GielinorGoalsPanel extends PluginPanel
 
 		listPanel.removeAll();
 		Map<String, List<Goal>> parents = parentsOf(tree);
-		GoalRow highlighted = addRows(tree, tree.getRoots(), null, null, 0, editable, parents);
+		GoalRow highlighted = addRows(tree, tree.getRoots(), null, null, null, 0, editable, parents);
 
 		updateStatus(tree);
 		updateSummary(tree);
@@ -426,7 +459,8 @@ public class GielinorGoalsPanel extends PluginPanel
 
 	@Nullable
 	private GoalRow addRows(GoalTree tree, List<Goal> goals, @Nullable String parentId,
-		@Nullable String grandparentId, int depth, boolean editable, Map<String, List<Goal>> parents)
+		@Nullable String grandparentId, @Nullable GoalRow parentRow, int depth, boolean editable,
+		Map<String, List<Goal>> parents)
 	{
 		GoalRow highlighted = null;
 		for (Goal goal : goals)
@@ -437,9 +471,9 @@ public class GielinorGoalsPanel extends PluginPanel
 			}
 
 			boolean isHighlighted = goal.getId().equals(highlightId);
-			GoalRow row = new GoalRow(goal, parentId, grandparentId, goalManager.getProgress(goal.getId()), depth,
-				tree, goalManager, services, editable, isHighlighted && highlighted == null,
-				parents.getOrDefault(goal.getId(), List.of()));
+			GoalRow row = new GoalRow(goal, parentId, grandparentId, parentRow, goalManager.getProgress(goal.getId()),
+				depth, tree, goalManager, services, editable, isHighlighted && highlighted == null,
+				parents.getOrDefault(goal.getId(), List.of()), rowDrag);
 			listPanel.add(row);
 			if (isHighlighted && highlighted == null)
 			{
@@ -447,8 +481,8 @@ public class GielinorGoalsPanel extends PluginPanel
 			}
 			if (goal.isExpanded())
 			{
-				GoalRow below = addRows(tree, tree.getChildren(goal), goal.getId(), parentId, depth + 1, editable,
-					parents);
+				GoalRow below = addRows(tree, tree.getChildren(goal), goal.getId(), parentId, row, depth + 1,
+					editable, parents);
 				highlighted = highlighted != null ? highlighted : below;
 			}
 		}

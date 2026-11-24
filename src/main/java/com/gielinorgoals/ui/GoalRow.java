@@ -75,6 +75,8 @@ class GoalRow extends JPanel
 	private static final int ICON_WIDTH = 24;
 	// Bakgrund för målet som visas från Completed-fliken.
 	private static final Color HIGHLIGHT_COLOR = new Color(74, 60, 30);
+	// Bakgrund för raden som dras ("lyft").
+	private static final Color LIFTED_COLOR = ColorScheme.MEDIUM_GRAY_COLOR;
 	// Liten länkikon för delmål som finns under flera föräldrar; ritas en gång.
 	static final ImageIcon LINK_ICON = new ImageIcon(drawLinkIcon());
 
@@ -84,6 +86,16 @@ class GoalRow extends JPanel
 	private final String parentId;
 	@Nullable
 	private final String grandparentId;
+	// Raden för föräldern den här raden visas under (förälder-instansen); null på rotnivå.
+	// Ett delat mål kan visas under flera rader för samma förälder; bara syskonen under
+	// samma rad är giltiga platser när man drar.
+	@Nullable
+	private final GoalRow parentRow;
+	private final int depth;
+	// Null när listan inte går att ändra; då finns inget grepp att dra i.
+	@Nullable
+	private final RowDragController drag;
+	private boolean lifted;
 	// Byts av updateProgress() när bara spelläget ändrats; allt annat kräver en ny rad.
 	@Nullable
 	private GoalProgress progress;
@@ -103,17 +115,23 @@ class GoalRow extends JPanel
 	private final JCheckBox checkBox;
 	@Nullable
 	private final ProgressBar bar;
+	private final DragHandle handle;
 
 	/**
 	 * @param parents alla föräldrar till målet, räknade en gång av panelen för hela listan
+	 * @param parentRow raden raden visas under, null på rotnivå
+	 * @param drag dragningen i listan, null om raden inte kan dras
 	 */
-	GoalRow(Goal goal, @Nullable String parentId, @Nullable String grandparentId, @Nullable GoalProgress progress,
-		int depth, GoalTree tree, GoalManager goalManager, DialogServices services, boolean editable,
-		boolean highlighted, List<Goal> parents)
+	GoalRow(Goal goal, @Nullable String parentId, @Nullable String grandparentId, @Nullable GoalRow parentRow,
+		@Nullable GoalProgress progress, int depth, GoalTree tree, GoalManager goalManager, DialogServices services,
+		boolean editable, boolean highlighted, List<Goal> parents, @Nullable RowDragController drag)
 	{
 		this.goal = goal;
 		this.parentId = parentId;
 		this.grandparentId = grandparentId;
+		this.parentRow = parentRow;
+		this.depth = depth;
+		this.drag = editable ? drag : null;
 		this.progress = progress;
 		this.tree = tree;
 		this.goalManager = goalManager;
@@ -130,11 +148,16 @@ class GoalRow extends JPanel
 			new EmptyBorder(0, depth * INDENT_PX, 0, 0),
 			new CompoundBorder(new MatteBorder(0, 3, 0, 0, statusColor()), new EmptyBorder(5, 4, 5, 4))));
 
-		JPanel left = new JPanel(new BorderLayout(2, 0));
+		JPanel left = new JPanel(new BorderLayout(1, 0));
 		left.setOpaque(false);
-		left.add(buildExpandToggle(), BorderLayout.WEST);
+		handle = buildHandle();
+		left.add(handle, BorderLayout.WEST);
+		JPanel controls = new JPanel(new BorderLayout(2, 0));
+		controls.setOpaque(false);
+		controls.add(buildExpandToggle(), BorderLayout.WEST);
 		checkBox = buildCheckBox();
-		left.add(checkBox, BorderLayout.CENTER);
+		controls.add(checkBox, BorderLayout.CENTER);
+		left.add(controls, BorderLayout.CENTER);
 
 		// Samma hover-text på hela raden, så att siffrorna syns var man än håller musen.
 		String tooltip = buildTooltip();
@@ -194,21 +217,120 @@ class GoalRow extends JPanel
 			@Override
 			public void mouseEntered(MouseEvent e)
 			{
-				setBackground(ColorScheme.DARKER_GRAY_HOVER_COLOR);
+				if (!lifted)
+				{
+					setBackground(ColorScheme.DARKER_GRAY_HOVER_COLOR);
+				}
+				handle.repaint();
 			}
 
 			@Override
 			public void mouseExited(MouseEvent e)
 			{
 				// Musen kan ha gått in i en av radens egna komponenter.
-				if (getMousePosition(true) == null)
+				if (getMousePosition(true) == null && !lifted)
 				{
 					setBackground(baseBackground);
 				}
+				handle.repaint();
 			}
 		};
 		addMouseListener(rowMouse);
 		center.addMouseListener(rowMouse);
+	}
+
+	// Greppet (⋮⋮) syns vid hovring. Bara greppet startar en dragning, så att klick på resten
+	// av raden markerar, fäller ut och bockar av som förut.
+	private DragHandle buildHandle()
+	{
+		DragHandle grip = new DragHandle(() -> drag != null
+			&& (drag.isDragging(this) || getMousePosition(true) != null));
+		if (drag == null)
+		{
+			grip.setCursor(null);
+			grip.setToolTipText(null);
+			return grip;
+		}
+		MouseAdapter mouse = new MouseAdapter()
+		{
+			@Override
+			public void mousePressed(MouseEvent e)
+			{
+				drag.start(GoalRow.this, e);
+			}
+
+			@Override
+			public void mouseDragged(MouseEvent e)
+			{
+				drag.drag(e);
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e)
+			{
+				drag.release(e);
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e)
+			{
+				grip.repaint();
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e)
+			{
+				grip.repaint();
+			}
+		};
+		grip.addMouseListener(mouse);
+		grip.addMouseMotionListener(mouse);
+		return grip;
+	}
+
+	/**
+	 * Markerar raden som "lyft" medan den dras.
+	 */
+	void setLifted(boolean lifted)
+	{
+		this.lifted = lifted;
+		setBackground(lifted ? LIFTED_COLOR : getMousePosition(true) != null
+			? ColorScheme.DARKER_GRAY_HOVER_COLOR : baseBackground);
+		handle.repaint();
+	}
+
+	@Override
+	public void removeNotify()
+	{
+		// En rad som tas bort mitt i en dragning avbryter den, så att timern inte lever kvar.
+		if (drag != null && drag.isDragging(this))
+		{
+			drag.cancel();
+		}
+		super.removeNotify();
+	}
+
+	@Nullable
+	String getParentId()
+	{
+		return parentId;
+	}
+
+	@Nullable
+	GoalRow getParentRow()
+	{
+		return parentRow;
+	}
+
+	int getDepth()
+	{
+		return depth;
+	}
+
+	// Var linjen för en släppt rad börjar, i höjd med radens indrag.
+	int getIndentPx()
+	{
+		return depth * INDENT_PX;
 	}
 
 	// Grön för klara, orange för automatiska mål på väg, grå för manuella.

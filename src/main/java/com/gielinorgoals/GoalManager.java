@@ -1043,6 +1043,15 @@ public class GoalManager
 		apply(tree -> tree.moveDown(parentId, id));
 	}
 
+	/**
+	 * Dra och släpp: flyttar målet till platsen före {@code beforeSiblingId} (null = sist)
+	 * under föräldern raden visas under. En sparning och en ombyggnad.
+	 */
+	public void moveWithinParent(@Nullable String parentId, String id, @Nullable String beforeSiblingId)
+	{
+		apply(tree -> tree.moveWithinParent(parentId, id, beforeSiblingId));
+	}
+
 	public void indent(@Nullable String parentId, String id)
 	{
 		apply(tree -> tree.indent(parentId, id));

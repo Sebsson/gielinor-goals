@@ -290,6 +290,54 @@ public class GoalTree
 	}
 
 	/**
+	 * Flyttar målet bland sina syskon under {@code parentId} (null = rotnivå), till platsen
+	 * direkt före syskonet {@code beforeSiblingId}, eller sist om det är null. Bara den
+	 * förälderns ordning ändras; ett delat mål ligger kvar på sin plats under andra föräldrar,
+	 * och målets egna delmål följer med orörda.
+	 *
+	 * @return false om flytten inte är giltig (målet eller syskonet finns inte under
+	 * föräldern) eller inte ändrar något
+	 */
+	public boolean moveWithinParent(@Nullable String parentId, String goalId, @Nullable String beforeSiblingId)
+	{
+		List<String> siblings = siblings(parentId);
+		if (siblings == null || !siblings.contains(goalId) || goalId.equals(beforeSiblingId)
+			|| (beforeSiblingId != null && !siblings.contains(beforeSiblingId)))
+		{
+			return false;
+		}
+		List<String> reordered = new ArrayList<>(siblings);
+		reordered.remove(goalId);
+		reordered.add(beforeSiblingId == null ? reordered.size() : reordered.indexOf(beforeSiblingId), goalId);
+		if (reordered.equals(siblings))
+		{
+			return false;
+		}
+		siblings.clear();
+		siblings.addAll(reordered);
+		return true;
+	}
+
+	/**
+	 * Syskonet direkt efter {@code afterSiblingId} i den fullständiga syskonlistan, utan det
+	 * mål som flyttas; null om det är sist. Används när ett mål släpps "efter X", så att
+	 * dolda syskon efter X ligger kvar efter det flyttade målet.
+	 */
+	@Nullable
+	public String siblingAfter(@Nullable String parentId, String afterSiblingId, String movingId)
+	{
+		List<String> siblings = siblings(parentId);
+		if (siblings == null)
+		{
+			return null;
+		}
+		List<String> others = new ArrayList<>(siblings);
+		others.remove(movingId);
+		int index = others.indexOf(afterSiblingId);
+		return index < 0 || index + 1 >= others.size() ? null : others.get(index + 1);
+	}
+
+	/**
 	 * Gör målet till sista delmålet under syskonet ovanför (som Tab i en punktlista).
 	 * Bara kopplingen i {@code parentId} flyttas; andra föräldrar påverkas inte.
 	 */

@@ -37,6 +37,11 @@ import lombok.Value;
  * Väljer vilka mål som är "nästa" att jobba på: ej klara mål utan ej klara delmål,
  * i listans ordning. En förälder visas alltså inte förrän dess delmål är klara, eftersom
  * det är delmålen man faktiskt gör först.
+ * <p>
+ * Ordningen är prioriteten: rötterna gås igenom i rotlistans ordning och delmålen i
+ * förälderns ordning (djupet först), så bland likvärdiga kandidater föreslås det mål som
+ * ligger tidigare under sin förälder först. Användaren ändrar den genom att dra rader eller
+ * med "Move up/down". Ett delat mål föreslås via den första föräldern där det nås.
  */
 public final class NextGoals
 {
