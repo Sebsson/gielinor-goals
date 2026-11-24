@@ -30,19 +30,20 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.KeyEventDispatcher;
-import java.awt.KeyboardFocusManager;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.dnd.DragSource;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
+import javax.swing.AbstractAction;
 import javax.swing.JComponent;
 import javax.swing.JViewport;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import net.runelite.client.ui.ColorScheme;
@@ -53,7 +54,7 @@ import net.runelite.client.ui.ColorScheme;
  * som visas under samma förälderrad. En linje visar var raden hamnar och syns bara på giltiga
  * platser. Esc, eller att släppa utanför en giltig plats, avbryter utan ändring.
  * <p>
- * Allt körs på EDT. Auto-scroll-timern och Esc-lyssnaren finns bara under dragningen och tas
+ * Allt körs på EDT. Auto-scroll-timern och Esc-bindningen finns bara under dragningen och tas
  * alltid bort när den slutar, vare sig den släpps eller avbryts.
  */
 final class RowDragController
@@ -63,6 +64,8 @@ final class RowDragController
 	private static final int SCROLL_STEP_PX = 14;
 	private static final int SCROLL_DELAY_MS = 30;
 	private static final Color LINE_COLOR = ColorScheme.BRAND_ORANGE;
+	private static final KeyStroke ESCAPE = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
+	private static final String CANCEL_ACTION = "gielinorGoalsCancelRowDrag";
 
 	private final JComponent list;
 	private final GoalManager goalManager;
@@ -85,14 +88,22 @@ final class RowDragController
 	private Point lastScreen;
 	@Nullable
 	private Timer scrollTimer;
-	@Nullable
-	private KeyEventDispatcher escape;
 
 	RowDragController(JComponent list, GoalManager goalManager, Runnable onEnd)
 	{
 		this.list = list;
 		this.goalManager = goalManager;
 		this.onEnd = onEnd;
+		// Vanlig Swing-tangentbindning på listan i stället för en global tangentlyssnare.
+		// Den gör ingenting när ingen rad dras.
+		list.getActionMap().put(CANCEL_ACTION, new AbstractAction()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				cancel();
+			}
+		});
 	}
 
 	boolean isActive()
@@ -119,16 +130,8 @@ final class RowDragController
 		collectRows(row);
 		row.setLifted(true);
 
-		escape = event ->
-		{
-			if (event.getID() == KeyEvent.KEY_PRESSED && event.getKeyCode() == KeyEvent.VK_ESCAPE)
-			{
-				cancel();
-				return true;
-			}
-			return false;
-		};
-		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(escape);
+		// Esc avbryter bara under dragningen, och bara när fokus ligger i RuneLite-fönstrets Swing-delar.
+		list.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(ESCAPE, CANCEL_ACTION);
 		scrollTimer = new Timer(SCROLL_DELAY_MS, ev -> autoScroll());
 		update(e);
 	}
@@ -376,11 +379,7 @@ final class RowDragController
 	{
 		stopTimer();
 		scrollTimer = null;
-		if (escape != null)
-		{
-			KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(escape);
-			escape = null;
-		}
+		list.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).remove(ESCAPE);
 		if (dragged != null)
 		{
 			dragged.setLifted(false);
