@@ -34,13 +34,15 @@ public class TemplateIconIdsTest
 		ItemID.ARDY_CAPE_ELITE,
 		ItemID.DRAMEN_STAFF,
 		ItemID.SKILLCAPE_QP,
-		ItemID.SKILLCAPE_AD);
+		ItemID.SKILLCAPE_AD,
+		ItemID.SKILLCAPE_MAX,
+		ItemID.VARROCK_ARMOUR_ELITE);
 
 	@Test
 	public void everyItemIconIsAKnownGamevalItem()
 	{
 		Set<Integer> used = new TreeSet<>();
-		for (GoalTemplate template : new TemplateCatalog(new Gson()).getTemplates())
+		for (GoalTemplate template : TestCombatAchievements.catalog(new Gson()).getTemplates())
 		{
 			if (template.getIcon() != null && template.getIcon().getItemId() != null)
 			{

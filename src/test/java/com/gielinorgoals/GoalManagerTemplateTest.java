@@ -3,6 +3,9 @@ package com.gielinorgoals;
 import com.gielinorgoals.template.QuestRequirementsDb;
 import com.gielinorgoals.template.TemplateUpdates;
 import com.gielinorgoals.template.TemplateCatalog;
+import com.gielinorgoals.model.DiaryArea;
+import com.gielinorgoals.model.DiaryRequirement;
+import com.gielinorgoals.model.DiaryTier;
 import com.gielinorgoals.model.GameData;
 import com.gielinorgoals.model.Goal;
 import com.gielinorgoals.model.QuestRequirement;
@@ -126,6 +129,74 @@ public class GoalManagerTemplateTest
 		assertEquals(1, announced.size());
 		assertEquals(2, announced.get(0).size());
 		assertFalse(announced.get(0).get(0).isCompletedAtApprox());
+	}
+
+	@Test
+	public void goalsReadForTheFirstTimeAfterInsertCompleteQuietly()
+	{
+		// Diaries läses först när de bevakas, alltså ticket efter insättningen.
+		TemplateNode easy = new com.gielinorgoals.template.DiaryTierTemplate().build(Map.of(), Map.of());
+		Goal root = manager.insertTemplate(easy).getRoot();
+		assertFalse(root.isCompleted());
+
+		Map<Integer, Integer> varbits = new java.util.HashMap<>();
+		for (DiaryArea area : DiaryArea.values())
+		{
+			varbits.put(area.varbitFor(DiaryTier.EASY), area.completeValueFor(DiaryTier.EASY));
+		}
+		manager.updateGameData(PROFILE, varbits(varbits));
+
+		// Alla var klara redan innan: tyst, med ungefärligt datum, även för roten.
+		assertTrue(announced.isEmpty());
+		assertTrue(root.isCompleted());
+		assertTrue(root.isCompletedAtApprox());
+		for (Goal child : manager.getTree().getChildren(root))
+		{
+			assertTrue(child.isCompletedAtApprox());
+		}
+	}
+
+	@Test
+	public void goalWithKnownDataThatCompletesLaterIsAnnounced()
+	{
+		manager.insertTemplate(new com.gielinorgoals.template.DiaryTierTemplate().build(Map.of(), Map.of()));
+		Map<Integer, Integer> varbits = new java.util.HashMap<>();
+		for (DiaryArea area : DiaryArea.values())
+		{
+			varbits.put(area.varbitFor(DiaryTier.EASY), 0);
+		}
+		// Varrock var redan klar vid första läsningen, de andra inte.
+		varbits.put(DiaryArea.VARROCK.varbitFor(DiaryTier.EASY), 1);
+		manager.updateGameData(PROFILE, varbits(varbits));
+		assertTrue(announced.isEmpty());
+
+		varbits.put(DiaryArea.FALADOR.varbitFor(DiaryTier.EASY), 1);
+		manager.updateGameData(PROFILE, varbits(varbits));
+
+		// Falador klarades nu: en vanlig popup med exakt datum.
+		assertEquals(1, announced.size());
+		assertEquals(1, announced.get(0).size());
+		assertEquals(new DiaryRequirement(DiaryArea.FALADOR, DiaryTier.EASY), announced.get(0).get(0).getRequirement());
+		assertFalse(announced.get(0).get(0).isCompletedAtApprox());
+	}
+
+	private static GameData varbits(Map<Integer, Integer> values)
+	{
+		Map<Integer, Integer> copy = new java.util.HashMap<>(values);
+		return new GameData()
+		{
+			@Override
+			public long getXp(Skill skill)
+			{
+				return -1;
+			}
+
+			@Override
+			public int getVarbit(int varbitId)
+			{
+				return copy.getOrDefault(varbitId, -1);
+			}
+		};
 	}
 
 	@Test

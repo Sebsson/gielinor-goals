@@ -6,7 +6,7 @@
     "to use them)'. Dramen eller lunar staff behövs, utom med elite Lumbridge & Draynor Diary.",
     "Fairytale I tar med de andra fyra quests via kedjan; Fairytale II-steget är ett manuellt mål eftersom bara en del krävs.",
     "https://oldschool.runescape.wiki/w/Ardougne_cloak - cloak 1-4 för easy/medium/hard/elite Ardougne Diary, hämtas gratis",
-    "hos Two-pints i Flying Horse Inn. Item-id: 13121-13124 (gameval ARDY_CAPE_EASY/MEDIUM/HARD/ELITE). Dramen staff: 772.",
+    "hos Two-pints i Flying Horse Inn. Item-id: 13121-13124 (gameval ARDY_CAPE_EASY/MEDIUM/HARD/ELITE), med varianter som diary-rewards-templaten, så att de kopplas ihop. Dramen staff: 772.",
     "Fairytale I och II lades till i quest-requirements.json samma dag."
   ],
   "id": "ardougne-cloak",
@@ -50,13 +50,13 @@
         "aggregate": true,
         "icon": {"sideIcon": "INVENTORY"},
         "children": [
-          {"item": {"id": 13121, "name": "Ardougne cloak 1"}, "doneWhen": ["item:13122"], "note": "Free from Two-pints in the Flying Horse Inn.",
+          {"item": {"id": 13121, "name": "Ardougne cloak 1", "includeVariants": true}, "doneWhen": ["item:13122"], "note": "Free from Two-pints in the Flying Horse Inn.",
             "children": [{"diary": {"area": "ARDOUGNE", "tier": "EASY"}}]},
-          {"item": {"id": 13122, "name": "Ardougne cloak 2"}, "doneWhen": ["item:13123"], "note": "Free from Two-pints.",
+          {"item": {"id": 13122, "name": "Ardougne cloak 2", "includeVariants": true}, "doneWhen": ["item:13123"], "note": "Free from Two-pints.",
             "children": [{"diary": {"area": "ARDOUGNE", "tier": "MEDIUM"}}]},
-          {"item": {"id": 13123, "name": "Ardougne cloak 3"}, "doneWhen": ["item:13124"], "note": "Free from Two-pints.",
+          {"item": {"id": 13123, "name": "Ardougne cloak 3", "includeVariants": true}, "doneWhen": ["item:13124"], "note": "Free from Two-pints.",
             "children": [{"diary": {"area": "ARDOUGNE", "tier": "HARD"}}]},
-          {"item": {"id": 13124, "name": "Ardougne cloak 4"}, "note": "Free from Two-pints. Unlimited teleports to the Ardougne farming patch.",
+          {"item": {"id": 13124, "name": "Ardougne cloak 4", "includeVariants": true}, "note": "Free from Two-pints. Unlimited teleports to the Ardougne farming patch.",
             "children": [{"diary": {"area": "ARDOUGNE", "tier": "ELITE"}}]}
         ]
       }

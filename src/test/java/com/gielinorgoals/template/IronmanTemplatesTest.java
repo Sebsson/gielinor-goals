@@ -158,7 +158,7 @@ public class IronmanTemplatesTest
 	public void everyNodeInEveryTemplateHasAnIcon()
 	{
 		// Mål utan krav visar sin egen ikon; utan någon av dem blir raden tom bredvid titeln.
-		for (GoalTemplate template : new TemplateCatalog(new Gson()).getTemplates())
+		for (GoalTemplate template : TestCombatAchievements.catalog(new Gson()).getTemplates())
 		{
 			assertTrue(template.getName(), template.getIconRequirement() != null || template.getIcon() != null);
 			assertIcons(template.getName(), template.build(Map.of("level", 70)));

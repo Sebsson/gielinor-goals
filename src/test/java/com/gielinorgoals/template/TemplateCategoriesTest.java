@@ -18,10 +18,16 @@ public class TemplateCategoriesTest
 		Map<String, List<GoalTemplate>> grouped = TemplateCategories.group(templates, "", false);
 
 		assertEquals(List.of(TemplateCategories.CAPES, TemplateCategories.IRONMAN_EARLY, TemplateCategories.IRONMAN_MID,
-			TemplateCategories.IRONMAN_LATE, TemplateCategories.SKILLS), new ArrayList<>(grouped.keySet()));
-		assertEquals(List.of("Quest cape", "Achievement diary cape"), names(grouped.get(TemplateCategories.CAPES)));
+			TemplateCategories.IRONMAN_LATE, TemplateCategories.BOSSES, TemplateCategories.SKILLS, TemplateCategories.QUESTS,
+			TemplateCategories.DIARIES), new ArrayList<>(grouped.keySet()));
+		assertEquals(List.of("Quest cape", "Achievement diary cape", "Max cape"),
+			names(grouped.get(TemplateCategories.CAPES)));
+		assertEquals(List.of("Combat Achievements tier"), names(grouped.get(TemplateCategories.BOSSES)));
+		assertEquals(List.of("Quest series"), names(grouped.get(TemplateCategories.QUESTS)));
+		assertEquals(List.of("All diaries in a tier", "Diary reward items"), names(grouped.get(TemplateCategories.DIARIES)));
 		assertEquals("Barrows gloves", names(grouped.get(TemplateCategories.IRONMAN_MID)).get(0));
-		assertEquals(List.of("Base N"), names(grouped.get(TemplateCategories.SKILLS)));
+		assertEquals(List.of("Base N", "Skill ladder", "Total level N", "Combat level N"),
+			names(grouped.get(TemplateCategories.SKILLS)));
 	}
 
 	@Test
@@ -30,7 +36,8 @@ public class TemplateCategoriesTest
 		Map<String, List<GoalTemplate>> grouped = TemplateCategories.group(templates, "", true);
 
 		assertEquals(List.of(TemplateCategories.IRONMAN_EARLY, TemplateCategories.IRONMAN_MID,
-			TemplateCategories.IRONMAN_LATE, TemplateCategories.CAPES, TemplateCategories.SKILLS),
+			TemplateCategories.IRONMAN_LATE, TemplateCategories.CAPES, TemplateCategories.BOSSES, TemplateCategories.SKILLS,
+			TemplateCategories.QUESTS, TemplateCategories.DIARIES),
 			new ArrayList<>(grouped.keySet()));
 	}
 
@@ -38,9 +45,12 @@ public class TemplateCategoriesTest
 	public void searchMatchesNamesAndTags()
 	{
 		assertEquals(List.of("Barrows gloves"), names(flat(TemplateCategories.group(templates, "rfd", false))));
-		assertEquals(List.of("Quest cape", "Barrows gloves"),
+		assertEquals(List.of("Quest cape", "Barrows gloves", "Quest series"),
 			names(flat(TemplateCategories.group(templates, "QUEST", false))));
-		assertEquals(List.of("Base N"), names(flat(TemplateCategories.group(templates, "base", false))));
+		assertEquals(List.of("Max cape", "Base N"), names(flat(TemplateCategories.group(templates, "base", false))));
+		assertEquals(List.of("Combat Achievements tier"),
+			names(flat(TemplateCategories.group(templates, "combat achievements", false))));
+		assertEquals(List.of("Max cape"), names(flat(TemplateCategories.group(templates, "max cape", false))));
 		assertTrue(TemplateCategories.group(templates, "nothing like this", false).isEmpty());
 	}
 

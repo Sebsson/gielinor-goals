@@ -276,6 +276,7 @@ public class GoalManager
 		gameDataProfileKey = dataProfileKey;
 		gameData = data;
 
+		Map<String, GoalProgress> before = progress;
 		List<Goal> completed = evaluate();
 		if (!completed.isEmpty())
 		{
@@ -283,11 +284,64 @@ public class GoalManager
 			if (initialSync.isActive())
 			{
 				markApprox(completed);
+				save();
+				completionListener.accept(completed);
 			}
-			save();
-			completionListener.accept(completed);
+			else
+			{
+				List<Goal> announced = withoutFirstReadings(completed, before);
+				save();
+				if (!announced.isEmpty())
+				{
+					completionListener.accept(announced);
+				}
+			}
 		}
 		listener.run();
+	}
+
+	/**
+	 * Mål vars data lästes för första gången (t.ex. quests, diaries och combat achievements,
+	 * som bara läses när de bevakas, alltså först ticket efter att en template satts in) var
+	 * klara redan innan; de bockas av tyst med ungefärligt datum. Mål utan eget krav (räknare
+	 * och doneWhen) som blev klara samtidigt följer med tyst om alla krav som klarades i samma
+	 * utvärdering var sådana förstagångsläsningar, så att en insatt template inte ger en popup-flod.
+	 *
+	 * @return målen som ska annonseras
+	 */
+	private static List<Goal> withoutFirstReadings(List<Goal> completed, Map<String, GoalProgress> before)
+	{
+		List<Goal> announced = new ArrayList<>();
+		List<Goal> quiet = new ArrayList<>();
+		List<Goal> withoutRequirement = new ArrayList<>();
+		for (Goal goal : completed)
+		{
+			if (goal.getRequirement() == null)
+			{
+				withoutRequirement.add(goal);
+			}
+			else if (before.containsKey(goal.getId()))
+			{
+				announced.add(goal);
+			}
+			else
+			{
+				quiet.add(goal);
+			}
+		}
+		if (announced.isEmpty() && !quiet.isEmpty())
+		{
+			quiet.addAll(withoutRequirement);
+		}
+		else
+		{
+			announced.addAll(withoutRequirement);
+		}
+		markApprox(quiet);
+		// Samma ordning som utvärderingen gav.
+		List<Goal> ordered = new ArrayList<>(completed);
+		ordered.retainAll(announced);
+		return ordered;
 	}
 
 	/**

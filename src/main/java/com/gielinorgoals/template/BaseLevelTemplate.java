@@ -84,14 +84,23 @@ public class BaseLevelTemplate implements GoalTemplate
 		return List.of(LEVEL);
 	}
 
-	// Skill.OVERALL är markerad som deprecated men måste ändå uteslutas här.
-	@SuppressWarnings("deprecation")
 	@Override
 	public TemplateNode build(Map<String, Integer> parameters)
 	{
 		int level = LEVEL.valueIn(parameters);
-		TemplateNode root = TemplateNode.aggregate("Base " + level);
-		root.setIcon(GoalIcon.side(GoalIcon.SideIcon.STATS));
+		return build(level, "Base " + level, GoalIcon.side(GoalIcon.SideIcon.STATS));
+	}
+
+	/**
+	 * Samma level i varje skill under en rot med given titel och ikon; används även av
+	 * {@link MaxCapeTemplate}.
+	 */
+	// Skill.OVERALL är markerad som deprecated men måste ändå uteslutas här.
+	@SuppressWarnings("deprecation")
+	static TemplateNode build(int level, String title, GoalIcon icon)
+	{
+		TemplateNode root = TemplateNode.aggregate(title);
+		root.setIcon(icon);
 		for (Skill skill : Skill.values())
 		{
 			if (skill != Skill.OVERALL)

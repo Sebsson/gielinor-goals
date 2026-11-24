@@ -1,0 +1,21 @@
+{
+  "_comment": [
+    "Belöningsföremålen från achievement diaries, nivå 1-4 (easy, medium, hard, elite), per område.",
+    "Namn enligt OSRS Wiki, https://oldschool.runescape.wiki/w/Achievement_Diary (avsnittet Rewards), 2026-11-24.",
+    "Item-id ur RuneLites gameval ItemID; DiaryRewardsTest jämför varje id med sin konstant."
+  ],
+  "areas": [
+    {"area": "ARDOUGNE", "name": "Ardougne cloak", "items": [13121, 13122, 13123, 13124]},
+    {"area": "DESERT", "name": "Desert amulet", "items": [13133, 13134, 13135, 13136]},
+    {"area": "FALADOR", "name": "Falador shield", "items": [13117, 13118, 13119, 13120]},
+    {"area": "FREMENNIK", "name": "Fremennik sea boots", "items": [13129, 13130, 13131, 13132]},
+    {"area": "KANDARIN", "name": "Kandarin headgear", "items": [13137, 13138, 13139, 13140]},
+    {"area": "KARAMJA", "name": "Karamja gloves", "items": [11136, 11138, 11140, 13103]},
+    {"area": "KOUREND", "name": "Rada's blessing", "items": [22941, 22943, 22945, 22947]},
+    {"area": "LUMBRIDGE", "name": "Explorer's ring", "items": [13125, 13126, 13127, 13128]},
+    {"area": "MORYTANIA", "name": "Morytania legs", "items": [13112, 13113, 13114, 13115]},
+    {"area": "VARROCK", "name": "Varrock armour", "items": [13104, 13105, 13106, 13107]},
+    {"area": "WESTERN", "name": "Western banner", "items": [13141, 13142, 13143, 13144]},
+    {"area": "WILDERNESS", "name": "Wilderness sword", "items": [13108, 13109, 13110, 13111]}
+  ]
+}

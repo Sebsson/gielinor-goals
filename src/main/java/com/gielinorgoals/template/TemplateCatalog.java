@@ -24,6 +24,7 @@
  */
 package com.gielinorgoals.template;
 
+import com.gielinorgoals.ui.CombatAchievementCatalog;
 import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,12 +41,33 @@ public class TemplateCatalog
 	private final List<GoalTemplate> templates;
 
 	@Inject
+	TemplateCatalog(Gson gson, QuestRequirementsDb questRequirements, CombatAchievementCatalog combatAchievements)
+	{
+		this(gson, questRequirements, (CombatAchievementSource) combatAchievements);
+	}
+
+	/**
+	 * Utan klient: combat achievement-templaten ber om inloggning. För tester.
+	 */
 	public TemplateCatalog(Gson gson)
+	{
+		this(gson, QuestRequirementsDb.load(gson), CombatAchievementSource.NONE);
+	}
+
+	public TemplateCatalog(Gson gson, QuestRequirementsDb questRequirements, CombatAchievementSource combatAchievements)
 	{
 		List<GoalTemplate> all = new ArrayList<>();
 		all.add(new QuestCapeTemplate(QuestCapeExclusions.load(gson)));
 		all.add(new DiaryCapeTemplate());
+		all.add(new MaxCapeTemplate());
 		all.add(new BaseLevelTemplate());
+		all.add(new SkillLadderTemplate());
+		all.add(AccountLevelTemplate.totalLevel());
+		all.add(AccountLevelTemplate.combatLevel());
+		all.add(new CombatAchievementTemplate(combatAchievements));
+		all.add(new QuestSeriesTemplate(questRequirements));
+		all.add(new DiaryTierTemplate());
+		all.add(new DiaryRewardsTemplate(DiaryRewards.load(gson)));
 		// Handplockade templates från JSON-filer i resources.
 		all.addAll(JsonTemplates.load(gson));
 		templates = Collections.unmodifiableList(all);

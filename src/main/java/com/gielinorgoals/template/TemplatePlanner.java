@@ -106,6 +106,19 @@ public final class TemplatePlanner
 
 		Plan plan = new Plan();
 		List<TemplateNode> planned = new ArrayList<>();
+		// Samma regel som insättningen: en rot med ett krav som redan finns kopplas in.
+		Goal existingRoot = TemplateInserter.findExisting(existingGoals, root.getRequirement());
+		if (existingRoot != null)
+		{
+			plan.statuses.put(root, Status.LINKED);
+			plan.existing.put(root, existingRoot);
+			plan.linkedGoals++;
+			planChildren(root, existingGoals, planned, data, plan);
+			boolean done = existingRoot.isCompleted() || met(root.getRequirement(), data);
+			plan.done.put(root, done);
+			plan.alreadyDone += done ? 1 : 0;
+			return plan;
+		}
 		plan.statuses.put(root, Status.NEW);
 		if (root.getRequirement() != null)
 		{

@@ -35,7 +35,7 @@ public class StressTest
 		Gson gson = new Gson();
 		GoalManager manager = TestGoalManagers.inMemory("stress");
 		QuestRequirementsDb db = QuestRequirementsDb.load(gson);
-		for (GoalTemplate template : new TemplateCatalog(gson).getTemplates())
+		for (GoalTemplate template : com.gielinorgoals.template.TestCombatAchievements.catalog(gson).getTemplates())
 		{
 			TemplateNode node = template.build(Map.of("level", 99));
 			QuestChains.expand(node, db, manager.getTree());

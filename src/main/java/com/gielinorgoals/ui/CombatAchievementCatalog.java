@@ -24,6 +24,8 @@
  */
 package com.gielinorgoals.ui;
 
+import com.gielinorgoals.model.CombatAchievementRequirement;
+import com.gielinorgoals.template.CombatAchievementSource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -34,6 +36,7 @@ import javax.swing.SwingUtilities;
 import lombok.Value;
 import net.runelite.api.Client;
 import net.runelite.api.EnumComposition;
+import net.runelite.api.GameState;
 import net.runelite.api.StructComposition;
 import net.runelite.client.callback.ClientThread;
 
@@ -44,7 +47,7 @@ import net.runelite.client.callback.ClientThread;
  * param 1306 är uppgiftens id, 1308 namnet och 1309 beskrivningen.
  */
 @Singleton
-public class CombatAchievementCatalog
+public class CombatAchievementCatalog implements CombatAchievementSource
 {
 	static final int[] TIER_ENUMS = {3981, 3982, 3983, 3984, 3985, 3986};
 	static final String[] TIER_NAMES = {"Easy", "Medium", "Hard", "Elite", "Master", "Grandmaster"};
@@ -119,6 +122,31 @@ public class CombatAchievementCatalog
 			tasks = loaded;
 		}
 		return loaded;
+	}
+
+	/**
+	 * Alla uppgifter som krav, för combat achievement-templaten. Utloggad ger null, eftersom
+	 * templaten då inte kan visa vilka som redan är klara. Klienttråden.
+	 */
+	@Override
+	@javax.annotation.Nullable
+	public List<CombatAchievementRequirement> tasksIfLoggedIn()
+	{
+		if (client != null && client.getGameState() != GameState.LOGGED_IN)
+		{
+			return null;
+		}
+		List<Task> all = tasks();
+		if (all.isEmpty())
+		{
+			return null;
+		}
+		List<CombatAchievementRequirement> requirements = new ArrayList<>(all.size());
+		for (Task task : all)
+		{
+			requirements.add(new CombatAchievementRequirement(task.getId(), task.getName(), task.getTier()));
+		}
+		return requirements;
 	}
 
 	private List<Task> load()

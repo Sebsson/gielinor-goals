@@ -116,6 +116,22 @@ public final class TemplateInserter
 			before.add(goal.getId());
 		}
 
+		// En rot med eget krav (t.ex. Total level 1500) som redan finns som mål blir det
+		// befintliga målet, i stället för en dubblett. Det befintliga målet får ingen template.
+		Goal existingRoot = findExisting(withRequirement, template.getRequirement());
+		if (existingRoot != null)
+		{
+			if (parentId != null)
+			{
+				tree.link(parentId, existingRoot.getId());
+			}
+			Result result = new Result(existingRoot);
+			result.linked.add(existingRoot);
+			insertChildren(tree, template, existingRoot, withRequirement, before, result);
+			collapseCounters(result);
+			return result;
+		}
+
 		Goal root = create(template);
 		if (template.getTemplateId() != null)
 		{
