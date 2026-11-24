@@ -77,8 +77,9 @@ final class TemplateDialog
 {
 	private static final int INDENT_PX = 14;
 	private static final int PREVIEW_WIDTH = 380;
-	// Ungefär tre templates åt gången; resten nås genom att skrolla.
-	private static final int LIST_HEIGHT = 150;
+	// Ungefär sex templates åt gången; dialogen kan göras större och avdelaren mot
+	// förhandsvisningen dras för att visa fler.
+	private static final int LIST_HEIGHT = 300;
 	// Textbredd i listan: dialogens bredd minus ikon, marginaler och skrollist.
 	private static final int LIST_TEXT_WIDTH = 290;
 	private static final Icon NO_ICON = new ImageIcon(new java.awt.image.BufferedImage(1, 1,
@@ -180,8 +181,8 @@ final class TemplateDialog
 			ironman, builder);
 		dialog.loadCompletion(completion);
 		JPanel content = dialog.buildContent();
-		int choice = JOptionPane.showOptionDialog(parent, content, "Add from template",
-			JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, new Object[]{"Add", "Cancel"}, "Add");
+		Object[] options = {"Add", "Cancel"};
+		int choice = showResizable(parent, content, "Add from template", options);
 		return choice == 0 ? dialog.current : null;
 	}
 
@@ -221,13 +222,41 @@ final class TemplateDialog
 				BorderLayout.NORTH);
 		}
 		Object[] options = {"Add as goals", "Save as my template", "Both", "Cancel"};
-		int choice = JOptionPane.showOptionDialog(parent, content, "Import: " + payload.getName(),
-			JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+		int choice = showResizable(parent, content, "Import: " + payload.getName(), options);
 		if (choice < 0 || choice > 2 || dialog.current == null)
 		{
 			return null;
 		}
 		return new ImportChoice(dialog.current, choice != 1, choice != 0);
+	}
+
+	// Som JOptionPane.showOptionDialog, men dialogen går att ändra storlek på och får inte bli
+	// högre än skärmen.
+	private static int showResizable(Component parent, JPanel content, String title, Object[] options)
+	{
+		JOptionPane pane = new JOptionPane(content, JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION, null, options,
+			options[0]);
+		javax.swing.JDialog window = pane.createDialog(parent, title);
+		window.setResizable(true);
+		java.awt.Rectangle screen = window.getGraphicsConfiguration().getBounds();
+		java.awt.Insets insets = java.awt.Toolkit.getDefaultToolkit().getScreenInsets(window.getGraphicsConfiguration());
+		int maxHeight = screen.height - insets.top - insets.bottom;
+		if (window.getHeight() > maxHeight)
+		{
+			window.setSize(window.getWidth(), maxHeight);
+			window.setLocationRelativeTo(parent);
+		}
+		window.setVisible(true);
+		window.dispose();
+		Object value = pane.getValue();
+		for (int i = 0; i < options.length; i++)
+		{
+			if (options[i].equals(value))
+			{
+				return i;
+			}
+		}
+		return JOptionPane.CLOSED_OPTION;
 	}
 
 	// Quests och diaries bevakas bara när de är mål, så förhandsvisningen läser in full status
@@ -368,8 +397,22 @@ final class TemplateDialog
 			listScroll.setVisible(false);
 		}
 		JPanel content = new JPanel(new BorderLayout(0, 8));
-		content.add(importMode ? options : top, BorderLayout.NORTH);
-		content.add(previewScroll, BorderLayout.CENTER);
+		if (importMode)
+		{
+			content.add(options, BorderLayout.NORTH);
+			content.add(previewScroll, BorderLayout.CENTER);
+		}
+		else
+		{
+			// Avdelaren kan dras för att ge listan eller förhandsvisningen mer plats; när dialogen
+			// görs större delas den nya höjden lika.
+			javax.swing.JSplitPane split = new javax.swing.JSplitPane(javax.swing.JSplitPane.VERTICAL_SPLIT, top,
+				previewScroll);
+			split.setResizeWeight(0.5);
+			split.setContinuousLayout(true);
+			split.setBorder(null);
+			content.add(split, BorderLayout.CENTER);
+		}
 		content.add(summaryLabel, BorderLayout.SOUTH);
 
 		fillList();
