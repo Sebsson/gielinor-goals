@@ -75,8 +75,10 @@ public class SchemaMigrator
 	 * 14 – valfritt fält countsAlso på item-krav (föremål som redan förbrukat målets föremål,
 	 *     t.ex. crystal legs = 2 armour seeds). Ingen dataändring; höjd så att äldre versioner
 	 *     blir skrivskyddade i stället för att tyst kasta bort fältet.
+	 * 15 – valfritt fält doneWhenAll på mål (klart först när alla doneWhen-nycklar är klara, t.ex.
+	 *     poäng som gått åt till flera delar). Ingen dataändring; höjd av samma skäl.
 	 */
-	public static final int CURRENT_VERSION = 14;
+	public static final int CURRENT_VERSION = 15;
 	static final String VERSION_FIELD = "schemaVersion";
 	private static final String GOALS_FIELD = GoalSerializer.GOALS_FIELD;
 	private static final String ROOT_IDS_FIELD = GoalSerializer.ROOT_IDS_FIELD;
@@ -103,7 +105,8 @@ public class SchemaMigrator
 			Map.entry(10, SchemaMigrator::noStructuralChange),
 			Map.entry(11, SchemaMigrator::noStructuralChange),
 			Map.entry(12, SchemaMigrator::noStructuralChange),
-			Map.entry(13, SchemaMigrator::noStructuralChange)));
+			Map.entry(13, SchemaMigrator::noStructuralChange),
+			Map.entry(14, SchemaMigrator::noStructuralChange)));
 	}
 
 	/**

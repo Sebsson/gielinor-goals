@@ -1,0 +1,57 @@
+{
+  "_comment": [
+    "Ordning: https://oldschool.runescape.wiki/w/Ironman_guide (ändrad 26 okt 2026, hämtad 2026-11-24). Guiden delar bara in i faser (Early-game, Mid-game, Approaching late-game) och anger ingen ordning inom en fas, så ordningen inom paketet är ett eget förslag utifrån krav och nytta.",
+    "Guiden nämner Infernal cape bland late-game-höjdpunkterna. Dizana's quiver, Doom of Mokhaiotl, The Hueycoatl och base 90",
+    "nämns inte; guiden nämner maxning under Approaching late-game.",
+    "Paketet innehåller bara referenser till andra templates och anteckningar, ingen egen kravdata; delarna verifieras i",
+    "sina egna filer."
+  ],
+  "id": "package-late-iron",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Late ironman",
+  "description": "Late ironman goals in a suggested order, from the Infernal cape to base 90",
+  "category": "Packages",
+  "tags": [
+    "late iron",
+    "late ironman",
+    "late game",
+    "end game",
+    "ironman",
+    "checklista",
+    "checklist",
+    "package"
+  ],
+  "root": {
+    "title": "Late ironman",
+    "aggregate": true,
+    "icon": {
+      "sideIcon": "COMBAT"
+    },
+    "children": [
+      {
+        "template": "infernal-cape",
+        "note": "The best melee cape; a late-game highlight in the guide."
+      },
+      {
+        "template": "dizanas-quiver",
+        "note": "The best ranged cape slot, from the Fortis Colosseum."
+      },
+      {
+        "template": "doom-of-mokhaiotl",
+        "note": "A late boss with strong drops for an end-game ironman."
+      },
+      {
+        "template": "the-hueycoatl",
+        "note": "A late boss in Varlamore with useful supplies and drops."
+      },
+      {
+        "template": "base-level",
+        "note": "High levels everywhere before maxing.",
+        "params": {
+          "level": 90
+        }
+      }
+    ]
+  }
+}

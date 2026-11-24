@@ -1,0 +1,74 @@
+{
+  "_comment": [
+    "Ordning: https://oldschool.runescape.wiki/w/Ironman_guide (ändrad 26 okt 2026, hämtad 2026-11-24). Guiden delar bara in i faser (Early-game, Mid-game, Approaching late-game) och anger ingen ordning inom en fas, så ordningen inom paketet är ett eget förslag utifrån krav och nytta.",
+    "Guiden nämner under Mid-game: Elite void, Dragon warhammer och Bow of Faerdhinen; crystal armour från Corrupted Gauntlet",
+    "under Approaching late-game. Lunar spellbook, Ancient Magicks, Ash sanctifier och Prifddinas nämns inte.",
+    "Avvikelser: guiden lägger Fire cape och Slayer helmet under Early-game och Zenyte under late-game; de är med här enligt uppdraget.",
+    "Paketet innehåller bara referenser till andra templates och anteckningar, ingen egen kravdata; delarna verifieras i",
+    "sina egna filer."
+  ],
+  "id": "package-mid-iron",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Mid ironman",
+  "description": "Mid ironman unlocks in a suggested order, from the Lunar spellbook to the Bow of Faerdhinen",
+  "category": "Packages",
+  "tags": [
+    "mid iron",
+    "mid ironman",
+    "mid game",
+    "ironman",
+    "checklista",
+    "checklist",
+    "package"
+  ],
+  "root": {
+    "title": "Mid ironman",
+    "aggregate": true,
+    "icon": {
+      "sideIcon": "COMBAT"
+    },
+    "children": [
+      {
+        "template": "lunar-spellbook",
+        "note": "Lunar Diplomacy opens NPC Contact, Vengeance and many utility spells for the rest of the game."
+      },
+      {
+        "template": "ancient-magicks",
+        "note": "Desert Treasure I gives ice spells for multi-combat slayer and bossing."
+      },
+      {
+        "template": "fire-cape",
+        "note": "The best melee cape until the Infernal cape. The guide counts it as an early milestone."
+      },
+      {
+        "template": "slayer-helm",
+        "note": "Makes every slayer task faster; the guide counts it as an early milestone."
+      },
+      {
+        "template": "elite-void",
+        "note": "A key gear upgrade in the guide for higher-level bossing and raids."
+      },
+      {
+        "template": "ash-sanctifier",
+        "note": "Turns demonic ashes into Prayer XP while slaying, after the hard Kourend & Kebos Diary."
+      },
+      {
+        "template": "zenyte-jewellery",
+        "note": "Strong amulets and rings from demonic gorillas. The guide lists zenyte among late-game highlights."
+      },
+      {
+        "template": "prifddinas",
+        "note": "Song of the Elves opens the elf city, needed for the Gauntlet below."
+      },
+      {
+        "template": "dragon-warhammer",
+        "note": "A key upgrade in the guide: its special attack lowers bosses' Defence."
+      },
+      {
+        "template": "bowfa-crystal",
+        "note": "A key upgrade in the guide from the Corrupted Gauntlet, the end-game ranged setup for many irons."
+      }
+    ]
+  }
+}

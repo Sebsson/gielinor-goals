@@ -88,6 +88,11 @@ public class TemplateNode
 	@Nullable
 	private List<String> doneWhen;
 
+	// True: noden är klar först när alla doneWhen-nycklar är klara, t.ex. poäng som gått åt
+	// till flera delar. Annars räcker en.
+	@Setter
+	private boolean doneWhenAll;
+
 	// False om ett quest inte ska fällas ut med sin kedja trots att kedjor är påslagna.
 	@Setter
 	private boolean expandChain = true;

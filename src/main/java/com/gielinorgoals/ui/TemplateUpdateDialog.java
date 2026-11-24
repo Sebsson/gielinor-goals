@@ -63,6 +63,8 @@ final class TemplateUpdateDialog
 		List<String> removeGoalIds;
 		// Nycklar för tillägg som användaren bockade ur; de föreslås inte igen.
 		List<String> declinedKeys;
+		// Befintliga mål som uppdateras där de står.
+		List<TemplateUpdates.Change> changes;
 	}
 
 	private final TemplateUpdates.Plan plan;
@@ -70,6 +72,7 @@ final class TemplateUpdateDialog
 	private final Map<TemplateNode, JCheckBox> nodeBoxes = new IdentityHashMap<>();
 	private final Map<TemplateNode, TemplateNode> parents = new IdentityHashMap<>();
 	private final List<JCheckBox> removeBoxes = new ArrayList<>();
+	private final List<JCheckBox> changeBoxes = new ArrayList<>();
 	private final JLabel summary = new JLabel(" ");
 
 	private TemplateUpdateDialog(TemplateUpdates.Plan plan, GoalTree tree)
@@ -110,6 +113,20 @@ final class TemplateUpdateDialog
 		for (TemplateUpdates.Addition addition : plan.getAdditions())
 		{
 			(addition.getReplaces() != null ? replacements : additions).add(addition);
+		}
+		if (!plan.getChanges().isEmpty() && replacements.isEmpty())
+		{
+			rows.add(heading("Changed in the template"));
+		}
+		for (TemplateUpdates.Change change : plan.getChanges())
+		{
+			// Ibockat som standard: målet stannar där det är och räknar bara mer.
+			JCheckBox box = new JCheckBox("\"" + change.getGoal().getDisplayTitle()
+				+ "\" also counts what you already got from it", true);
+			box.setFocusPainted(false);
+			box.addActionListener(e -> updateSummary());
+			changeBoxes.add(box);
+			rows.add(box);
 		}
 		if (!replacements.isEmpty())
 		{
@@ -239,7 +256,13 @@ final class TemplateUpdateDialog
 		{
 			removes += addition.getReplaces() != null && addition.getNode().isIncluded() ? 1 : 0;
 		}
-		summary.setText("Adds " + adds + (adds == 1 ? " goal" : " goals") + ", removes " + removes);
+		int changed = 0;
+		for (JCheckBox box : changeBoxes)
+		{
+			changed += box.isSelected() ? 1 : 0;
+		}
+		summary.setText("Adds " + adds + (adds == 1 ? " goal" : " goals") + ", removes " + removes
+			+ (changed == 0 ? "" : ", updates " + changed));
 	}
 
 	private Selection selection()
@@ -271,7 +294,20 @@ final class TemplateUpdateDialog
 				remove.add(plan.getRemoved().get(i).getId());
 			}
 		}
-		return new Selection(chosen, remove, declined);
+		List<TemplateUpdates.Change> changes = new ArrayList<>();
+		for (int i = 0; i < changeBoxes.size(); i++)
+		{
+			TemplateUpdates.Change change = plan.getChanges().get(i);
+			if (changeBoxes.get(i).isSelected())
+			{
+				changes.add(change);
+			}
+			else
+			{
+				declined.add(change.declineKey());
+			}
+		}
+		return new Selection(chosen, remove, declined, changes);
 	}
 
 	private static void collectDeclined(TemplateNode node, List<String> out)

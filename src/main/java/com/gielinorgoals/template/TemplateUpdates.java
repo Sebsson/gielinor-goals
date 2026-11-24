@@ -77,6 +77,27 @@ public class TemplateUpdates
 		}
 	}
 
+	/**
+	 * Ett befintligt mål vars krav har ändrats i templaten utan att nyckeln ändrats, t.ex. ett
+	 * item-mål som fått motsvarigheter (countsAlso). Målet uppdateras där det står.
+	 */
+	@Value
+	public static class Change
+	{
+		Goal goal;
+		TemplateNode node;
+
+		/**
+		 * Nyckeln som sparas om användaren väljer bort ändringen, så att den inte föreslås igen.
+		 */
+		public String declineKey()
+		{
+			return CHANGE_KEY_PREFIX + node.getKey();
+		}
+	}
+
+	static final String CHANGE_KEY_PREFIX = "change:";
+
 	@Getter
 	public static class Plan
 	{
@@ -84,6 +105,7 @@ public class TemplateUpdates
 		private final List<Addition> additions = new ArrayList<>();
 		// Mål som templaten skapade men som inte längre finns i den (utom de som ersätts).
 		private final List<Goal> removed = new ArrayList<>();
+		private final List<Change> changes = new ArrayList<>();
 		// Templatens nuvarande version och den som målen senast fick.
 		private int templateVersion = 1;
 		private int goalVersion = 1;
@@ -95,7 +117,7 @@ public class TemplateUpdates
 
 		public boolean isEmpty()
 		{
-			return additions.isEmpty() && removed.isEmpty();
+			return additions.isEmpty() && removed.isEmpty() && changes.isEmpty();
 		}
 
 		public boolean isNewVersion()
@@ -154,9 +176,12 @@ public class TemplateUpdates
 	 */
 	public Plan plan(GoalTree tree, Goal root, TemplateNode template)
 	{
-		// Alla mål under roten (även inkopplade och delade), i visningsordning.
+		// Alla mål under roten (även inkopplade och delade), i visningsordning. Under ett delat mål
+		// (som också hör till en annan template) går jämförelsen inte vidare; det målet sköts av
+		// sin egen template.
+		Set<String> foreign = foreignRoots(tree, root);
 		List<Goal> below = new ArrayList<>();
-		collect(tree, root, below, new HashSet<>());
+		collect(tree, root, below, new HashSet<>(), foreign);
 		Map<String, Goal> present = new LinkedHashMap<>();
 		for (Goal goal : below)
 		{
@@ -175,7 +200,9 @@ public class TemplateUpdates
 		plan.templateVersion = source == null ? 1 : source.getVersion();
 		plan.goalVersion = root.getTemplateVersion() == null ? 1 : root.getTemplateVersion();
 		Set<String> added = new HashSet<>();
-		findAdditions(template, root, present, ignored, added, plan);
+		// Del-templates (i ett paket) jämförs med sin egen plan och sina egna inställningar.
+		Map<String, Goal> parts = new LinkedHashMap<>();
+		findAdditions(template, root, present, ignored, added, plan, tree, foreign, new HashSet<>(), parts);
 
 		Set<String> templateKeys = new HashSet<>();
 		collectKeys(template, templateKeys);
@@ -190,6 +217,38 @@ public class TemplateUpdates
 				&& !plan.removed.contains(goal) && !isReplaced(plan, goal))
 			{
 				plan.removed.add(goal);
+			}
+		}
+
+		// Paketet visar delarnas ändringar som sina egna; en del som paketet valt bort tas inte med.
+		for (Goal part : parts.values())
+		{
+			Plan sub = plan(tree, part);
+			if (sub == null)
+			{
+				continue;
+			}
+			for (Addition addition : sub.additions)
+			{
+				if (!ignored.contains(addition.getNode().getKey()) && added.add(addition.getNode().getKey()))
+				{
+					plan.additions.add(addition);
+				}
+			}
+			for (Goal removed : sub.removed)
+			{
+				if (!plan.removed.contains(removed))
+				{
+					plan.removed.add(removed);
+				}
+			}
+			for (Change change : sub.changes)
+			{
+				if (!ignored.contains(change.declineKey())
+					&& plan.changes.stream().noneMatch(existing -> existing.getGoal() == change.getGoal()))
+				{
+					plan.changes.add(change);
+				}
 			}
 		}
 		return plan;
@@ -263,7 +322,7 @@ public class TemplateUpdates
 	}
 
 	private static void findAdditions(TemplateNode node, Goal parentGoal, Map<String, Goal> present, Set<String> ignored,
-		Set<String> added, Plan plan)
+		Set<String> added, Plan plan, GoalTree tree, Set<String> foreign, Set<String> descended, Map<String, Goal> parts)
 	{
 		for (TemplateNode child : node.getChildren())
 		{
@@ -275,11 +334,26 @@ public class TemplateUpdates
 			Goal goal = present.get(key);
 			if (goal != null)
 			{
-				// Bara mål som templaten skapade kan få nya delmål; ett inkopplat eget mål
-				// behåller sina egna delmål.
-				if (goal.getTemplateNodeKey() != null)
+				// Bara mål som templaten skapade kan få nya delmål; ett inkopplat eget mål, eller
+				// ett som också hör till en annan template, behåller sina egna delmål.
+				// Samma mål flera gånger i templaten (t.ex. Heroes' Quest i två kedjor) fick sina delmål
+				// från första förekomsten när det sattes in; bara den jämförs.
+				if (child.getRef() == null && goal.getTemplateNodeKey() != null && !isShared(tree, goal, foreign)
+					&& isChanged(goal, child)
+					&& !ignored.contains(CHANGE_KEY_PREFIX + key)
+					&& plan.changes.stream().noneMatch(change -> change.getGoal() == goal))
 				{
-					findAdditions(child, goal, present, ignored, added, plan);
+					plan.changes.add(new Change(goal, child));
+				}
+				if (goal.getTemplateId() != null && child.getTemplateId() != null)
+				{
+					// En del-template med egen rot: dess plan räknas för sig nedan.
+					parts.putIfAbsent(goal.getId(), goal);
+				}
+				else if (goal.getTemplateNodeKey() != null && !isShared(tree, goal, foreign)
+					&& descended.add(goal.getId()))
+				{
+					findAdditions(child, goal, present, ignored, added, plan, tree, foreign, descended, parts);
 				}
 				continue;
 			}
@@ -289,6 +363,29 @@ public class TemplateUpdates
 				plan.additions.add(new Addition(child, parentGoal.getId(), replacedGoal(child, present)));
 			}
 		}
+	}
+
+	/**
+	 * Om templaten nu räknar ett befintligt mål på ett annat sätt utan att nyckeln ändrats: ett
+	 * item-mål med andra motsvarigheter (countsAlso), eller andra doneWhen-nycklar, t.ex. när
+	 * Graceful fick räkna ägda delar mot märkena eller Elite void-poängen blev klara med delarna.
+	 * Andra skillnader i kravet ändrar nyckeln och blir tillägg och borttagningar i stället.
+	 */
+	static boolean isChanged(Goal goal, TemplateNode node)
+	{
+		if (goal.getRequirement() instanceof com.gielinorgoals.model.ItemRequirement
+			&& node.getRequirement() instanceof com.gielinorgoals.model.ItemRequirement)
+		{
+			com.gielinorgoals.model.ItemRequirement have = (com.gielinorgoals.model.ItemRequirement) goal.getRequirement();
+			com.gielinorgoals.model.ItemRequirement want = (com.gielinorgoals.model.ItemRequirement) node.getRequirement();
+			if (have.isSameGoal(want) && !have.getCountsAlso().equals(want.getCountsAlso()))
+			{
+				return true;
+			}
+		}
+		Set<String> haveKeys = goal.getDoneWhen() == null ? Set.of() : new HashSet<>(goal.getDoneWhen());
+		Set<String> wantKeys = node.getDoneWhen() == null ? Set.of() : new HashSet<>(node.getDoneWhen());
+		return !haveKeys.equals(wantKeys) || Boolean.TRUE.equals(goal.getDoneWhenAll()) != node.isDoneWhenAll();
 	}
 
 	// Ett befintligt mål med en av nodens "replaces"-nycklar, som noden ersätter.
@@ -331,15 +428,57 @@ public class TemplateUpdates
 		}
 	}
 
-	private static void collect(GoalTree tree, Goal goal, List<Goal> out, Set<String> visited)
+	private static void collect(GoalTree tree, Goal goal, List<Goal> out, Set<String> visited, Set<String> foreign)
 	{
 		for (Goal child : tree.getChildren(goal))
 		{
 			if (visited.add(child.getId()))
 			{
 				out.add(child);
-				collect(tree, child, out, visited);
+				// Under en del-template (egen rot) eller ett delat mål går jämförelsen inte vidare.
+				if (child.getTemplateId() == null && !isShared(tree, child, foreign))
+				{
+					collect(tree, child, out, visited, foreign);
+				}
 			}
 		}
+	}
+
+	/**
+	 * Template-rötter som inte hör ihop med {@code root}: varken roten själv, något ovanför den
+	 * (t.ex. paketet en del sitter i) eller något under den (delarna i ett paket).
+	 */
+	private static Set<String> foreignRoots(GoalTree tree, Goal root)
+	{
+		Set<String> foreign = new HashSet<>();
+		for (Goal goal : tree.flatten())
+		{
+			if (goal.getTemplateId() != null && !goal.getId().equals(root.getId())
+				&& !tree.isAncestor(goal.getId(), root.getId()) && !tree.isAncestor(root.getId(), goal.getId()))
+			{
+				foreign.add(goal.getId());
+			}
+		}
+		return foreign;
+	}
+
+	/**
+	 * Om målet också ligger under en annan template (t.ex. ett quest från Quest cape som
+	 * kopplades in i ett paket). Då är det den templatens mål, och dess delmål jämförs där.
+	 */
+	private static boolean isShared(GoalTree tree, Goal goal, Set<String> foreign)
+	{
+		if (foreign.contains(goal.getId()))
+		{
+			return true;
+		}
+		for (String other : foreign)
+		{
+			if (tree.isAncestor(other, goal.getId()))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 }

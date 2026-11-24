@@ -38,6 +38,8 @@ public final class TemplateCategories
 {
 	// Användarens egna templates; alltid överst.
 	public static final String MINE = "My templates";
+	// Paket av andra templates i en föreslagen ordning, t.ex. "Early ironman".
+	public static final String PACKAGES = "Packages";
 	public static final String CAPES = "Capes";
 	public static final String IRONMAN_EARLY = "Ironman · Early";
 	public static final String IRONMAN_MID = "Ironman · Mid";
@@ -69,6 +71,7 @@ public final class TemplateCategories
 	{
 		List<String> order = new ArrayList<>();
 		order.add(MINE);
+		order.add(PACKAGES);
 		if (ironman)
 		{
 			order.addAll(IRONMAN);

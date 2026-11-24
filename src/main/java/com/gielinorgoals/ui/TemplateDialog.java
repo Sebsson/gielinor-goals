@@ -97,7 +97,8 @@ final class TemplateDialog
 	private final java.util.Set<GoalTemplate> iconsRequested = java.util.Collections.newSetFromMap(
 		new IdentityHashMap<>());
 	private final GoalTree tree;
-	private final GameData data;
+	// Spelläget; byts mot ett med full quest-, diary- och CA-status när den har lästs in.
+	private GameData data;
 
 	// Listan blandar kategorirubriker (String) och templates (GoalTemplate).
 	private final DefaultListModel<Object> listModel = new DefaultListModel<>();
@@ -168,7 +169,8 @@ final class TemplateDialog
 	@Nullable
 	static TemplateNode show(Component parent, java.util.function.Supplier<List<GoalTemplate>> templates,
 		@Nullable CustomTemplates custom, @Nullable ShareCodec shareCodec, GoalTree tree, GameData data,
-		GoalIcons icons, QuestRequirementsDb questRequirements, boolean ironman, TemplateBuilder builder)
+		GoalIcons icons, QuestRequirementsDb questRequirements, boolean ironman, TemplateBuilder builder,
+		@Nullable com.gielinorgoals.tracking.CompletionLookup completion)
 	{
 		if (templates.get().isEmpty())
 		{
@@ -176,6 +178,7 @@ final class TemplateDialog
 		}
 		TemplateDialog dialog = new TemplateDialog(templates, custom, shareCodec, tree, data, icons, questRequirements,
 			ironman, builder);
+		dialog.loadCompletion(completion);
 		JPanel content = dialog.buildContent();
 		int choice = JOptionPane.showOptionDialog(parent, content, "Add from template",
 			JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, new Object[]{"Add", "Cancel"}, "Add");
@@ -201,10 +204,12 @@ final class TemplateDialog
 	 */
 	@Nullable
 	static ImportChoice showImport(Component parent, ShareCodec.Payload payload, GoalTree tree, GameData data,
-		GoalIcons icons, QuestRequirementsDb questRequirements, TemplateBuilder builder)
+		GoalIcons icons, QuestRequirementsDb questRequirements, TemplateBuilder builder,
+		@Nullable com.gielinorgoals.tracking.CompletionLookup completion)
 	{
 		TemplateDialog dialog = new TemplateDialog(() -> List.of(payload.getTemplate()), null, null, tree, data, icons,
 			questRequirements, false, builder);
+		dialog.loadCompletion(completion);
 		dialog.importMode = true;
 		dialog.merge = payload.getKind() == ShareCodec.Kind.GOALS;
 		JPanel content = new JPanel(new BorderLayout(0, 8));
@@ -223,6 +228,25 @@ final class TemplateDialog
 			return null;
 		}
 		return new ImportChoice(dialog.current, choice != 1, choice != 0);
+	}
+
+	// Quests och diaries bevakas bara när de är mål, så förhandsvisningen läser in full status
+	// när dialogen öppnas (som redigeringsdialogen gör) och visar sedan "✓" även för dem.
+	private void loadCompletion(@Nullable com.gielinorgoals.tracking.CompletionLookup completion)
+	{
+		if (completion == null)
+		{
+			return;
+		}
+		GameData base = data;
+		completion.load(status ->
+		{
+			if (status.isKnown())
+			{
+				data = new com.gielinorgoals.model.CompletionOverlay(base, status);
+				refreshStatuses();
+			}
+		});
 	}
 
 	private JPanel buildContent()
@@ -606,10 +630,26 @@ final class TemplateDialog
 		current.setTemplateParams(params);
 		current.setTemplateChoices(choices.isEmpty() ? null : new HashMap<>(choices));
 		current.setTemplateVersion(template.getVersion() > 1 ? template.getVersion() : null);
+		// Del-templates i ett paket får samma val av kedjor, så att deras egna uppdateringar stämmer.
+		markChains(current, chains);
 		addRows(current, null, 0);
 		refreshStatuses();
 		previewPanel.revalidate();
 		previewPanel.repaint();
+	}
+
+	private static void markChains(TemplateNode node, boolean chains)
+	{
+		for (TemplateNode child : node.getChildren())
+		{
+			if (child.getTemplateId() != null && child.getTemplateParams() != null)
+			{
+				Map<String, Integer> params = new HashMap<>(child.getTemplateParams());
+				params.put(TemplateUpdates.QUEST_CHAINS_PARAM, chains ? 1 : 0);
+				child.setTemplateParams(params);
+			}
+			markChains(child, chains);
+		}
 	}
 
 	private void addRows(TemplateNode node, @Nullable TemplateNode parent, int depth)
@@ -670,6 +710,26 @@ final class TemplateDialog
 			panel.setBorder(new EmptyBorder(0, depth * INDENT_PX, 0, 4));
 			panel.add(checkBox, BorderLayout.CENTER);
 			panel.add(status, BorderLayout.EAST);
+			if (parent != null && node.getTemplateId() != null)
+			{
+				// En del-template i ett paket: dess ikon, och hela delen bockas ur med rutan.
+				JLabel icon = new JLabel();
+				checkBox.setToolTipText("Untick to leave out the whole template");
+				Consumer<java.awt.image.BufferedImage> show = image -> SwingUtilities.invokeLater(() ->
+				{
+					icon.setIcon(new ImageIcon(image.getScaledInstance(-1, 16, java.awt.Image.SCALE_SMOOTH)));
+					panel.revalidate();
+				});
+				if (node.getIcon() != null)
+				{
+					icons.loadImage(node.getIcon(), show);
+				}
+				else if (node.getRequirement() != null)
+				{
+					icons.loadImage(node.getRequirement(), show);
+				}
+				panel.add(icon, BorderLayout.WEST);
+			}
 		}
 
 		private void update(TemplatePlanner.Plan plan)

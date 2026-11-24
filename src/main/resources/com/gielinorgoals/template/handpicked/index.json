@@ -44,6 +44,10 @@
     "spirit-angler.json",
     "dizanas-quiver.json",
     "mythical-cape.json",
-    "champions-cape.json"
+    "champions-cape.json",
+    "package-early-iron.json",
+    "package-mid-iron.json",
+    "package-late-iron.json",
+    "package-all-capes.json"
   ]
 }

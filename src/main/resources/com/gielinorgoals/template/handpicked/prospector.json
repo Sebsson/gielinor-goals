@@ -5,11 +5,13 @@
     "legs 50, boots 30 (180 för setet). Alternativt Petrified Pete (Volcanic Mine) för 120 000 poäng för setet; priset per del står",
     "inte på sidan. Golden nugget 12012 (MOTHERLODE_NUGGET).",
     "Delar: MOTHERLODE_REWARD_HAT 12013, _TOP 12014, _LEGS 12015, _BOOTS 12016. Osäkert: delarnas item-id är tagna från gameval-namnen (se nedan), inte lästa från wikins infoboxar.",
-    "Osäkert: sidan anger ingen nivå för Motherlode Mine eller butiken, så det finns inget skill-mål."
+    "Osäkert: sidan anger ingen nivå för Motherlode Mine eller butiken, så det finns inget skill-mål.",
+    "Version 2 (2026-11-24): ägda delar räknas mot nuggets med sitt pris (countsAlso)."
   ],
   "id": "prospector",
   "verifiedBy": "",
   "verifiedAt": "",
+  "version": 2,
   "name": "Prospector kit",
   "description": "180 golden nuggets from the Motherlode Mine for the prospector kit",
   "category": "Skilling outfits",
@@ -43,7 +45,29 @@
             "item": {
               "id": 12012,
               "name": "Golden nugget",
-              "quantity": 180
+              "quantity": 180,
+              "countsAlso": [
+                {
+                  "item": 12013,
+                  "each": 40,
+                  "includeVariants": true
+                },
+                {
+                  "item": 12014,
+                  "each": 60,
+                  "includeVariants": true
+                },
+                {
+                  "item": 12015,
+                  "each": 50,
+                  "includeVariants": true
+                },
+                {
+                  "item": 12016,
+                  "each": 30,
+                  "includeVariants": true
+                }
+              ]
             },
             "note": "From cleaning pay-dirt in the Motherlode Mine (about 3% per pay-dirt)."
           },

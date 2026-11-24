@@ -91,10 +91,10 @@ public class OutfitTemplatesTest
 		assertTrue(requirements("farmers-outfit").contains(new PointsRequirement(PointsActivity.TITHE_FARM, 400)));
 		assertTrue(requirements("smiths-uniform").contains(new PointsRequirement(PointsActivity.GIANTS_FOUNDRY, 15000)));
 		assertTrue(requirements("carpenters-outfit").contains(KillCountRequirement.manual("Carpenter points", 2000)));
-		assertTrue(requirements("prospector").contains(new ItemRequirement(ItemID.MOTHERLODE_NUGGET, "Golden nugget", 180,
-			false)));
-		assertTrue(requirements("spirit-angler").contains(new ItemRequirement(ItemID.SPIRIT_FLAKES, "Spirit flakes", 4800,
-			false)));
+		ItemRequirement nuggets = new ItemRequirement(ItemID.MOTHERLODE_NUGGET, "Golden nugget", 180, false);
+		assertTrue(requirements("prospector").stream().anyMatch(r -> nuggets.isSameGoal((com.gielinorgoals.model.Requirement) r)));
+		ItemRequirement flakes = new ItemRequirement(ItemID.SPIRIT_FLAKES, "Spirit flakes", 4800, false);
+		assertTrue(requirements("spirit-angler").stream().anyMatch(r -> flakes.isSameGoal((com.gielinorgoals.model.Requirement) r)));
 		assertTrue(requirements("dizanas-quiver").contains(new QuestRequirement(Quest.CHILDREN_OF_THE_SUN.getId(),
 			Quest.CHILDREN_OF_THE_SUN.getName())));
 		assertTrue(requirements("mythical-cape").contains(new QuestRequirement(Quest.DRAGON_SLAYER_II.getId(),

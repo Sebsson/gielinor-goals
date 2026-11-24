@@ -885,10 +885,35 @@ public class GoalManager
 	public void applyTemplateUpdate(String rootId, List<TemplateUpdates.Addition> additions, List<String> removeGoalIds,
 		List<String> declinedKeys, @Nullable Integer templateVersion)
 	{
+		applyTemplateUpdate(rootId, additions, removeGoalIds, declinedKeys, templateVersion, List.of());
+	}
+
+	/**
+	 * @param changes befintliga mål vars krav uppdateras där de står (t.ex. nya motsvarigheter)
+	 */
+	public void applyTemplateUpdate(String rootId, List<TemplateUpdates.Addition> additions, List<String> removeGoalIds,
+		List<String> declinedKeys, @Nullable Integer templateVersion, List<TemplateUpdates.Change> changes)
+	{
 		Goal root = tree.find(rootId);
 		if (!isEditable() || root == null)
 		{
 			return;
+		}
+		for (TemplateUpdates.Change change : changes)
+		{
+			Goal goal = tree.find(change.getGoal().getId());
+			if (goal == null)
+			{
+				continue;
+			}
+			// Samma nyckel, så kravet byts bara när det är samma mål med nya motsvarigheter.
+			if (change.getNode().getRequirement() != null && goal.getRequirement() != null
+				&& change.getNode().getRequirement().isSameGoal(goal.getRequirement()))
+			{
+				goal.setRequirement(change.getNode().getRequirement());
+			}
+			goal.setDoneWhen(change.getNode().getDoneWhen() == null ? null : new ArrayList<>(change.getNode().getDoneWhen()));
+			goal.setDoneWhenAll(change.getNode().isDoneWhenAll() ? Boolean.TRUE : null);
 		}
 		if (templateVersion != null)
 		{

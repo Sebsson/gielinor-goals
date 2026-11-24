@@ -277,3 +277,27 @@ The piece item IDs in this section come from the gameval names, not from the wik
 - There are 10 champions plus Leon d'Cour. The cape is 21439, confirmed on the wiki.
 - Drop sources used, one main monster per scroll: imp, goblin, skeleton, zombie, hill giant, hobgoblin, ghoul, earth warrior, jogre and lesser demon. Other monsters also drop each scroll.
 - **(uncertain)** The scroll IDs come from the gameval names: 6798 to 6807 (`CHAMPIONS_CHALLENGE_*`).
+
+---
+
+## Packages (milestone 14)
+
+Packages contain only references to other templates and notes, so only the order needs checking. The guide ([Ironman guide](https://oldschool.runescape.wiki/w/Ironman_guide)) groups items by stage but gives no order within a stage. The order inside each package is therefore a suggestion. Each part is verified in its own section above.
+
+### Early ironman (`package-early-iron.json`)
+- [ ] Order verified
+- Order: Ectophial, Dragon scimitar, Ardougne cloak and fairy rings, Graceful, Fighter torso, Dragon defender, Rune pouch, Barrows gloves, Ava's assembler, Bonecrusher, Herb sack, Seed box, Base 70.
+- **Differs from the guide:** the guide places Ava's assembler in late game.
+
+### Mid ironman (`package-mid-iron.json`)
+- [ ] Order verified
+- Order: Lunar spellbook, Ancient Magicks, Fire cape, Slayer helmet, Elite void, Ash sanctifier, Zenyte jewellery, Prifddinas access, Dragon warhammer, Bow of Faerdhinen and crystal armour.
+- **Differs from the guide:** the guide places Fire cape and Slayer helmet in early game, and zenyte in late game.
+
+### Late ironman (`package-late-iron.json`)
+- [ ] Order verified
+- Order: Infernal cape, Dizana's quiver, Doom of Mokhaiotl, The Hueycoatl, Base 90.
+
+### All capes (`package-all-capes.json`)
+- [ ] Order verified
+- Order: Quest cape, Achievement diary cape, Max cape, Fire cape, Infernal cape, Dizana's quiver, Mythical cape, Champion's cape, Imbued god cape, Ardougne cloak 4 (from diary rewards, Ardougne).

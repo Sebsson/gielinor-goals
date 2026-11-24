@@ -7,11 +7,13 @@
     "Kolumnen Cost i butikstabellen har ingen valuta; den är inte med. Temple Trekking: undead lumberjacks, 25 % per kill, en del per händelse.",
     "Delar: RAMBLE_LUMBERJACK_HAT 10941, _TOP 10939, _LEGS 10940, _BOOTS 10933. Osäkert: gameval har även FORESTRY_LUMBERJACK_*",
     "(28169-28175); det är oklart vilken av dem Forestry-butiken ger. Delarna räknas med varianter, men om RuneLites variationstabell inte kopplar ihop dem syns de nya inte.",
-    "Logs: MAPLE_LOGS 1517, YEW_LOGS 1515, MAGIC_LOGS 1513, REDWOOD_LOGS 19669."
+    "Logs: MAPLE_LOGS 1517, YEW_LOGS 1515, MAGIC_LOGS 1513, REDWOOD_LOGS 19669.",
+    "Version 2 (2026-11-24): ägda delar räknas mot bark och stockar med sitt pris (countsAlso)."
   ],
   "id": "lumberjack",
   "verifiedBy": "",
   "verifiedAt": "",
+  "version": 2,
   "name": "Lumberjack outfit",
   "description": "Anima-infused bark and logs from Forestry, or Temple Trekking, for the lumberjack outfit",
   "category": "Skilling outfits",
@@ -45,7 +47,29 @@
             "item": {
               "id": 28134,
               "name": "Anima-infused bark",
-              "quantity": 5000
+              "quantity": 5000,
+              "countsAlso": [
+                {
+                  "item": 10941,
+                  "each": 1200,
+                  "includeVariants": true
+                },
+                {
+                  "item": 10939,
+                  "each": 1500,
+                  "includeVariants": true
+                },
+                {
+                  "item": 10940,
+                  "each": 1300,
+                  "includeVariants": true
+                },
+                {
+                  "item": 10933,
+                  "each": 1000,
+                  "includeVariants": true
+                }
+              ]
             },
             "note": "From Forestry events while woodcutting."
           },
@@ -53,28 +77,81 @@
             "item": {
               "id": 1517,
               "name": "Maple logs",
-              "quantity": 100
+              "quantity": 100,
+              "countsAlso": [
+                {
+                  "item": 10933,
+                  "each": 100,
+                  "includeVariants": true
+                }
+              ]
             }
           },
           {
             "item": {
               "id": 1515,
               "name": "Yew logs",
-              "quantity": 620
+              "quantity": 620,
+              "countsAlso": [
+                {
+                  "item": 10941,
+                  "each": 200,
+                  "includeVariants": true
+                },
+                {
+                  "item": 10939,
+                  "each": 60,
+                  "includeVariants": true
+                },
+                {
+                  "item": 10940,
+                  "each": 160,
+                  "includeVariants": true
+                },
+                {
+                  "item": 10933,
+                  "each": 200,
+                  "includeVariants": true
+                }
+              ]
             }
           },
           {
             "item": {
               "id": 1513,
               "name": "Magic logs",
-              "quantity": 360
+              "quantity": 360,
+              "countsAlso": [
+                {
+                  "item": 10941,
+                  "each": 100,
+                  "includeVariants": true
+                },
+                {
+                  "item": 10939,
+                  "each": 120,
+                  "includeVariants": true
+                },
+                {
+                  "item": 10940,
+                  "each": 140,
+                  "includeVariants": true
+                }
+              ]
             }
           },
           {
             "item": {
               "id": 19669,
               "name": "Redwood logs",
-              "quantity": 120
+              "quantity": 120,
+              "countsAlso": [
+                {
+                  "item": 10939,
+                  "each": 120,
+                  "includeVariants": true
+                }
+              ]
             }
           },
           {

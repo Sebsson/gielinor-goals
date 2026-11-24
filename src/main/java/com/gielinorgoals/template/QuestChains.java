@@ -84,8 +84,14 @@ public final class QuestChains
 	private static TemplateNode expand(TemplateNode root, QuestRequirementsDb db,
 		@javax.annotation.Nullable GoalTree existing, @javax.annotation.Nullable TemplateNode alwaysExpand)
 	{
+		// Del-templates i ett paket fälls ut var för sig, som när de sätts in ensamma, så att en
+		// del ser likadan ut i paketet som när den byggs om för sin egen uppdatering.
+		for (TemplateNode part : partRoots(root))
+		{
+			expand(part, db, existing, alwaysExpand);
+		}
 		List<TemplateNode> questNodes = new ArrayList<>();
-		collectQuestNodes(root, questNodes);
+		collectOwnQuestNodes(root, root, questNodes);
 		if (questNodes.isEmpty())
 		{
 			return root;
@@ -163,6 +169,46 @@ public final class QuestChains
 		List<TemplateNode> nodes = new ArrayList<>();
 		collectQuestNodes(root, nodes);
 		return !nodes.isEmpty();
+	}
+
+	// De översta noderna under roten som kommer från en template-referens.
+	private static List<TemplateNode> partRoots(TemplateNode root)
+	{
+		List<TemplateNode> parts = new ArrayList<>();
+		collectPartRoots(root, parts);
+		return parts;
+	}
+
+	private static void collectPartRoots(TemplateNode node, List<TemplateNode> out)
+	{
+		for (TemplateNode child : node.getChildren())
+		{
+			if (child.getTemplateId() != null)
+			{
+				out.add(child);
+			}
+			else
+			{
+				collectPartRoots(child, out);
+			}
+		}
+	}
+
+	// Quest-noder under roten, utom de i del-templates (de fälls ut för sig).
+	private static void collectOwnQuestNodes(TemplateNode node, TemplateNode root, List<TemplateNode> out)
+	{
+		if (node != root && node.getTemplateId() != null)
+		{
+			return;
+		}
+		if (node.getRequirement() instanceof QuestRequirement && node.isExpandChain())
+		{
+			out.add(node);
+		}
+		for (TemplateNode child : node.getChildren())
+		{
+			collectOwnQuestNodes(child, root, out);
+		}
 	}
 
 	private static void collectQuestNodes(TemplateNode node, List<TemplateNode> out)
@@ -261,7 +307,11 @@ public final class QuestChains
 			}
 			for (TemplateNode child : new ArrayList<>(node.getChildren()))
 			{
-				visit(child);
+				// En del-template är redan utfälld för sig.
+				if (child.getTemplateId() == null)
+				{
+					visit(child);
+				}
 			}
 		}
 

@@ -106,7 +106,7 @@ public final class GoalEvaluator
 		boolean changed = true;
 		while (changed)
 		{
-			changed = completeImplied(order, now, keyOf, newlyCompleted);
+			changed = completeImplied(order, now, keyOf, newlyCompleted, data);
 			changed |= completeAggregates(tree, order, now, progress, fromRequirement, newlyCompleted);
 		}
 
@@ -115,7 +115,7 @@ public final class GoalEvaluator
 
 	// Mål som bockas av för att ett annat mål de nämner i doneWhen är klart.
 	private static boolean completeImplied(List<Goal> goals, long now, Function<Goal, String> keyOf,
-		List<Goal> newlyCompleted)
+		List<Goal> newlyCompleted, GameData data)
 	{
 		Set<String> doneKeys = new HashSet<>();
 		boolean anyWaiting = false;
@@ -142,7 +142,7 @@ public final class GoalEvaluator
 		boolean changed = false;
 		for (Goal goal : goals)
 		{
-			if (!goal.isCompleted() && impliedBy(goal.getDoneWhen(), doneKeys))
+			if (!goal.isCompleted() && implied(goal, doneKeys, data))
 			{
 				goal.markCompleted(true, now);
 				newlyCompleted.add(goal);
@@ -150,6 +150,72 @@ public final class GoalEvaluator
 			}
 		}
 		return changed;
+	}
+
+	// Klart via doneWhen: någon nyckel, eller med doneWhenAll alla, är klar som mål eller i spelet.
+	private static boolean implied(Goal goal, Set<String> doneKeys, GameData data)
+	{
+		List<String> keys = goal.getDoneWhen();
+		if (keys == null || keys.isEmpty())
+		{
+			return false;
+		}
+		if (!Boolean.TRUE.equals(goal.getDoneWhenAll()))
+		{
+			return impliedBy(keys, doneKeys) || metInGame(keys, data);
+		}
+		for (String key : keys)
+		{
+			if (!doneKeys.contains(key) && !metInGame(List.of(key), data))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Som {@link #metInGame(List, GameData)}, men med {@code all} måste varje nyckel vara uppfylld.
+	 */
+	public static boolean metInGame(@Nullable List<String> doneWhen, boolean all, GameData data)
+	{
+		if (!all || doneWhen == null || doneWhen.isEmpty())
+		{
+			return metInGame(doneWhen, data);
+		}
+		for (String key : doneWhen)
+		{
+			if (!metInGame(List.of(key), data))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Om någon av nycklarna redan är uppfylld i spelet, t.ex. "quest:47" när Fairytale II är klart,
+	 * även om det inte finns något mål med den nyckeln.
+	 */
+	public static boolean metInGame(@Nullable List<String> doneWhen, GameData data)
+	{
+		if (doneWhen == null)
+		{
+			return false;
+		}
+		for (String key : doneWhen)
+		{
+			Requirement requirement = KeyRequirements.parse(key);
+			if (requirement != null)
+			{
+				GoalProgress progress = requirement.progress(data);
+				if (progress != null && progress.isComplete())
+				{
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	private static boolean impliedBy(@Nullable List<String> doneWhen, Set<String> doneKeys)

@@ -17,7 +17,8 @@ public class TemplateCategoriesTest
 	{
 		Map<String, List<GoalTemplate>> grouped = TemplateCategories.group(templates, "", false);
 
-		assertEquals(List.of(TemplateCategories.CAPES, TemplateCategories.IRONMAN_EARLY, TemplateCategories.IRONMAN_MID,
+		assertEquals(List.of(TemplateCategories.PACKAGES, TemplateCategories.CAPES, TemplateCategories.IRONMAN_EARLY,
+			TemplateCategories.IRONMAN_MID,
 			TemplateCategories.IRONMAN_LATE, TemplateCategories.BOSSES, TemplateCategories.SKILLS,
 			TemplateCategories.SKILLING_OUTFITS, TemplateCategories.QUESTS, TemplateCategories.DIARIES),
 			new ArrayList<>(grouped.keySet()));
@@ -37,7 +38,7 @@ public class TemplateCategoriesTest
 	{
 		Map<String, List<GoalTemplate>> grouped = TemplateCategories.group(templates, "", true);
 
-		assertEquals(List.of(TemplateCategories.IRONMAN_EARLY, TemplateCategories.IRONMAN_MID,
+		assertEquals(List.of(TemplateCategories.PACKAGES, TemplateCategories.IRONMAN_EARLY, TemplateCategories.IRONMAN_MID,
 			TemplateCategories.IRONMAN_LATE, TemplateCategories.CAPES, TemplateCategories.BOSSES, TemplateCategories.SKILLS,
 			TemplateCategories.SKILLING_OUTFITS, TemplateCategories.QUESTS, TemplateCategories.DIARIES),
 			new ArrayList<>(grouped.keySet()));

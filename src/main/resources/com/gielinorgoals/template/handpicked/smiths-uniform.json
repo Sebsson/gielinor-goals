@@ -3,11 +3,13 @@
     "Källor (OSRS Wiki, hämtade 2026-11-24):",
     "https://oldschool.runescape.wiki/w/Smiths%27_Uniform (ändrad 1 nov 2026) - Foundry reputation: tunic 4 000, trousers 4 000,",
     "gloves 3 500, boots 3 500 (15 000 för setet).",
-    "Delar: SMITHING_UNIFORM_TORSO 27023, _LEGS 27025, _GLOVES 27029 (iced 27031 räknas bara via varianter - osäkert), _BOOTS 27027. Osäkert: delarnas item-id är tagna från gameval-namnen (se nedan), inte lästa från wikins infoboxar."
+    "Delar: SMITHING_UNIFORM_TORSO 27023, _LEGS 27025, _GLOVES 27029 (iced 27031 räknas bara via varianter - osäkert), _BOOTS 27027. Osäkert: delarnas item-id är tagna från gameval-namnen (se nedan), inte lästa från wikins infoboxar.",
+    "Version 2 (2026-11-24): reputation räknas som klar när alla fyra delarna finns (doneWhenAll)."
   ],
   "id": "smiths-uniform",
   "verifiedBy": "",
   "verifiedAt": "",
+  "version": 2,
   "name": "Smiths' uniform",
   "description": "15,000 Giants' Foundry reputation for the smiths' uniform",
   "category": "Skilling outfits",
@@ -42,7 +44,14 @@
               "activity": "GIANTS_FOUNDRY",
               "count": 15000
             },
-            "note": "Reputation is spent when you buy. Tunic 4,000, trousers 4,000, gloves 3,500, boots 3,500."
+            "note": "Reputation is spent when you buy. Tunic 4,000, trousers 4,000, gloves 3,500, boots 3,500.",
+            "doneWhen": [
+              "item:27023",
+              "item:27025",
+              "item:27029",
+              "item:27027"
+            ],
+            "doneWhenAll": true
           }
         ]
       },

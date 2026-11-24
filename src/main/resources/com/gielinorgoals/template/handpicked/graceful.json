@@ -6,11 +6,13 @@
     "https://oldschool.runescape.wiki/w/Mark_of_Grace - Item ID 11849 (gameval GRACE). Fås på rooftop-agilitybanor.",
     "Item-id för delarna fanns inte på sidorna; de kommer från gameval: 11850 GRACEFUL_HOOD, 11852 GRACEFUL_CAPE,",
     "11854 GRACEFUL_TOP, 11856 GRACEFUL_LEGS, 11858 GRACEFUL_GLOVES, 11860 GRACEFUL_BOOTS. Varianter (färgade) räknas.",
-    "Wikin anger inga krav för att köpa grundsetet."
+    "Wikin anger inga krav för att köpa grundsetet.",
+    "Version 2 (2026-11-24): ägda delar räknas mot märkena de kostade (countsAlso), så att märkesmålet blir klart med hela setet."
   ],
   "id": "graceful",
   "verifiedBy": "",
   "verifiedAt": "",
+  "version": 2,
   "name": "Graceful outfit",
   "description": "260 marks of grace and all six graceful pieces",
   "category": "Ironman · Early",
@@ -36,8 +38,16 @@
         "aggregate": true,
         "icon": {"sideIcon": "INVENTORY"},
         "children": [
-          {"item": {"id": 11849, "name": "Mark of Grace", "quantity": 260},
-            "note": "The whole set: hood 35, cape 40, top 55, legs 60, gloves 30, boots 40. Marks spent on pieces no longer count, so tick this off by hand if you buy as you go."},
+          {"item": {"id": 11849, "name": "Mark of Grace", "quantity": 260,
+              "countsAlso": [
+                {"item": 11850, "each": 35, "includeVariants": true},
+                {"item": 11852, "each": 40, "includeVariants": true},
+                {"item": 11854, "each": 55, "includeVariants": true},
+                {"item": 11856, "each": 60, "includeVariants": true},
+                {"item": 11858, "each": 30, "includeVariants": true},
+                {"item": 11860, "each": 40, "includeVariants": true}
+              ]},
+            "note": "The whole set: hood 35, cape 40, top 55, legs 60, gloves 30, boots 40. Pieces you own count toward the marks they cost."},
           {"item": {"id": 11850, "name": "Graceful hood", "includeVariants": true}, "note": "35 marks."},
           {"item": {"id": 11852, "name": "Graceful cape", "includeVariants": true}, "note": "40 marks."},
           {"item": {"id": 11854, "name": "Graceful top", "includeVariants": true}, "note": "55 marks."},

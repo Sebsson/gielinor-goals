@@ -1,0 +1,92 @@
+{
+  "_comment": [
+    "Ordning: https://oldschool.runescape.wiki/w/Ironman_guide (ändrad 26 okt 2026, hämtad 2026-11-24). Guiden delar bara in i faser (Early-game, Mid-game, Approaching late-game) och anger ingen ordning inom en fas, så ordningen inom paketet är ett eget förslag utifrån krav och nytta.",
+    "Guiden nämner under Early-game: Ardougne cloak 1, fairy rings (Lost City/Fairytale I), Graceful, Fighter torso, Dragon",
+    "defender och Barrows gloves (RFD markerar ofta övergången till mid-game). Ectophial, Dragon scimitar, Rune pouch, Bonecrusher,",
+    "Herb sack, Seed box och base 70 nämns inte; guiden säger att early game tränar skills till ungefär 60-70.",
+    "Avvikelse: guiden lägger Ava's assembler under Approaching late-game (Vorkath); den är med här enligt uppdraget.",
+    "Ardougne cloak och fairy rings är en referens till ardougne-cloak, som har båda (och cloak 1-4); så blir det inga dubbletter",
+    "mot diary-reward-templaten, som delar samma cloak-mål via dubblettregeln.",
+    "Paketet innehåller bara referenser till andra templates och anteckningar, ingen egen kravdata; delarna verifieras i",
+    "sina egna filer."
+  ],
+  "id": "package-early-iron",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Early ironman",
+  "description": "Early ironman unlocks in a suggested order, from the Ectophial to base 70",
+  "category": "Packages",
+  "tags": [
+    "early iron",
+    "early ironman",
+    "early game",
+    "ironman",
+    "checklista",
+    "checklist",
+    "package"
+  ],
+  "root": {
+    "title": "Early ironman",
+    "aggregate": true,
+    "icon": {
+      "sideIcon": "INVENTORY"
+    },
+    "children": [
+      {
+        "template": "ectophial",
+        "note": "A short quest for an unlimited teleport to Port Phasmatys, used for Morytania trips all game."
+      },
+      {
+        "template": "dragon-scimitar",
+        "note": "Monkey Madness I gives the best early melee weapon and opens Ape Atoll."
+      },
+      {
+        "template": "ardougne-cloak",
+        "note": "The easy Ardougne Diary gives monastery teleports, and fairy rings open travel everywhere. Both early, as the guide suggests."
+      },
+      {
+        "template": "graceful",
+        "note": "Lighter, faster travel on foot; the guide suggests it around 60 Agility, before heavy questing."
+      },
+      {
+        "template": "fighter-torso",
+        "note": "A common early milestone in the guide: strong melee strength bonus from Barbarian Assault."
+      },
+      {
+        "template": "dragon-defender",
+        "note": "A common early milestone in the guide: the best early off-hand for melee."
+      },
+      {
+        "template": "rune-pouch",
+        "note": "Frees inventory space for runes on every trip once you have slayer points."
+      },
+      {
+        "template": "barrows-gloves",
+        "note": "The guide calls Recipe for Disaster a common end of the early game: the best gloves for a long time."
+      },
+      {
+        "template": "avas-assembler",
+        "note": "The best ranged cape slot. The guide places it after Vorkath, so it may come last here."
+      },
+      {
+        "template": "bonecrusher",
+        "note": "Buries bones automatically for Prayer XP while slaying, after the hard Morytania Diary."
+      },
+      {
+        "template": "herb-sack",
+        "note": "Holds herbs on slayer tasks; bought with slayer points."
+      },
+      {
+        "template": "seed-box",
+        "note": "Holds seeds for farming runs; bought with Tithe Farm points."
+      },
+      {
+        "template": "base-level",
+        "note": "The guide says the early game trains skills to about 60-70; base 70 rounds it off.",
+        "params": {
+          "level": 70
+        }
+      }
+    ]
+  }
+}

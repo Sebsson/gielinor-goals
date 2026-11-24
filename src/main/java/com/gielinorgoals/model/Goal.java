@@ -76,6 +76,8 @@ public class Goal
 	// Målet räknas som klart när något mål med en av de här nycklarna är klart, t.ex.
 	// "item:12954" på en bronze defender. Nycklarna är template-nycklar (TemplateKeys).
 	private List<String> doneWhen;
+	// True om alla doneWhen-nycklar måste vara klara; null eller false = någon av dem.
+	private Boolean doneWhenAll;
 	// Null betyder ett manuellt mål som bara bockas av för hand.
 	private Requirement requirement;
 	// Delmålens id:n i användarens ordning. Målen själva ligger i GoalTree, så att ett

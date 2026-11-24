@@ -4,11 +4,13 @@
     "https://oldschool.runescape.wiki/w/Spirit_angler%27s_outfit (ändrad 28 okt 2026) - Gita Prymes: 1 200 spirit flakes plus samma",
     "del av angler's outfit per del (4 800 flakes för setet). Spirit flakes från Tempoross reward pool. Spirit flakes 25588 (SPIRIT_FLAKES).",
     "Delar: SPIRIT_ANGLER_HAT 25592 (headband), _TOP 25594, _LEGS 25596 (waders), _BOOTS 25598. Osäkert: delarnas item-id är tagna från gameval-namnen (se nedan), inte lästa från wikins infoboxar.",
-    "Angler-delarna är samma krav som i Angler-templaten och kopplas ihop med dem via dubblettregeln."
+    "Angler-delarna är samma krav som i Angler-templaten och kopplas ihop med dem via dubblettregeln.",
+    "Version 2 (2026-11-24): ägda spirit angler-delar räknas som 1 200 spirit flakes var (countsAlso)."
   ],
   "id": "spirit-angler",
   "verifiedBy": "",
   "verifiedAt": "",
+  "version": 2,
   "name": "Spirit angler's outfit",
   "description": "4,800 spirit flakes from Tempoross and the angler's outfit",
   "category": "Skilling outfits",
@@ -40,7 +42,29 @@
             "item": {
               "id": 25588,
               "name": "Spirit flakes",
-              "quantity": 4800
+              "quantity": 4800,
+              "countsAlso": [
+                {
+                  "item": 25592,
+                  "each": 1200,
+                  "includeVariants": true
+                },
+                {
+                  "item": 25594,
+                  "each": 1200,
+                  "includeVariants": true
+                },
+                {
+                  "item": 25596,
+                  "each": 1200,
+                  "includeVariants": true
+                },
+                {
+                  "item": 25598,
+                  "each": 1200,
+                  "includeVariants": true
+                }
+              ]
             },
             "note": "From the Tempoross reward pool. 1,200 per piece."
           },

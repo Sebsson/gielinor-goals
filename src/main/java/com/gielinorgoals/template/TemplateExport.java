@@ -224,6 +224,7 @@ public final class TemplateExport
 		if (goal.getDoneWhen() != null && !goal.getDoneWhen().isEmpty())
 		{
 			spec.doneWhen = new ArrayList<>(goal.getDoneWhen());
+			spec.doneWhenAll = Boolean.TRUE.equals(goal.getDoneWhenAll()) ? Boolean.TRUE : null;
 		}
 
 		String key = TemplateKeys.of(requirementOf(spec));

@@ -113,7 +113,7 @@ public final class TemplatePlanner
 			plan.statuses.put(root, Status.LINKED);
 			plan.existing.put(root, existingRoot);
 			plan.linkedGoals++;
-			planChildren(root, existingGoals, planned, data, plan);
+			planChildren(tree, root, existingGoals, planned, data, plan);
 			boolean done = existingRoot.isCompleted() || met(root.getRequirement(), data);
 			plan.done.put(root, done);
 			plan.alreadyDone += done ? 1 : 0;
@@ -124,7 +124,7 @@ public final class TemplatePlanner
 		{
 			planned.add(root);
 		}
-		planChildren(root, existingGoals, planned, data, plan);
+		planChildren(tree, root, existingGoals, planned, data, plan);
 		plan.done.put(root, isDone(root, root.getRequirement(), data, plan));
 		return plan;
 	}
@@ -197,7 +197,7 @@ public final class TemplatePlanner
 		}
 	}
 
-	private static void planChildren(TemplateNode node, List<Goal> existingGoals, List<TemplateNode> planned,
+	private static void planChildren(GoalTree tree, TemplateNode node, List<Goal> existingGoals, List<TemplateNode> planned,
 		GameData data, Plan plan)
 	{
 		for (TemplateNode child : node.getChildren())
@@ -215,7 +215,11 @@ public final class TemplatePlanner
 				continue;
 			}
 
-			Goal existing = TemplateInserter.findExisting(existingGoals, child.getRequirement());
+			Goal existing = TemplateInserter.findTemplateRoot(tree, child);
+			if (existing == null)
+			{
+				existing = TemplateInserter.findExisting(existingGoals, child.getRequirement());
+			}
 			if (existing != null)
 			{
 				plan.statuses.put(child, Status.LINKED);
@@ -239,7 +243,7 @@ public final class TemplatePlanner
 			{
 				planned.add(child);
 			}
-			planChildren(child, existingGoals, planned, data, plan);
+			planChildren(tree, child, existingGoals, planned, data, plan);
 			boolean done = isDone(child, child.getRequirement(), data, plan);
 			plan.done.put(child, done);
 			plan.alreadyDone += done ? 1 : 0;
@@ -252,11 +256,13 @@ public final class TemplatePlanner
 	{
 		if (requirement != null)
 		{
-			return met(requirement, data);
+			return met(requirement, data)
+				|| com.gielinorgoals.model.GoalEvaluator.metInGame(node.getDoneWhen(), node.isDoneWhenAll(), data);
 		}
 		if (!node.isAggregate())
 		{
-			return false;
+			// Ett manuellt mål med doneWhen, t.ex. Fairytale II-steget när questen redan är klar.
+			return com.gielinorgoals.model.GoalEvaluator.metInGame(node.getDoneWhen(), node.isDoneWhenAll(), data);
 		}
 		int counted = 0;
 		for (TemplateNode child : node.getChildren())

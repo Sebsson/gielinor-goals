@@ -1,0 +1,77 @@
+{
+  "_comment": [
+    "Ordning: https://oldschool.runescape.wiki/w/Ironman_guide (ändrad 26 okt 2026, hämtad 2026-11-24). Guiden delar bara in i faser (Early-game, Mid-game, Approaching late-game) och anger ingen ordning inom en fas, så ordningen inom paketet är ett eget förslag utifrån krav och nytta.",
+    "Kappor bara; t.ex. Fighter torso är inte en kappa. Ordningen följer ungefär svårighet: quest- och diary-kapporna först,",
+    "sedan stridskapporna. Fire cape kommer före Infernal cape, som kräver den.",
+    "Ardougne cloak 4 kommer från diary-rewards med Ardougne, som delar cloak-målen med ardougne-cloak via dubblettregeln.",
+    "Paketet innehåller bara referenser till andra templates och anteckningar, ingen egen kravdata; delarna verifieras i",
+    "sina egna filer."
+  ],
+  "id": "package-all-capes",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "All capes",
+  "description": "Every cape: quest, diary and max capes, combat capes, the mythical and champion's capes, the imbued god cape and Ardougne cloak 4",
+  "category": "Packages",
+  "tags": [
+    "capes",
+    "all capes",
+    "cape",
+    "checklist",
+    "checklista",
+    "checklist",
+    "package"
+  ],
+  "root": {
+    "title": "All capes",
+    "aggregate": true,
+    "icon": {
+      "sideIcon": "EQUIPMENT"
+    },
+    "children": [
+      {
+        "template": "quest-cape",
+        "note": "Every quest; many of them are needed for the other capes anyway."
+      },
+      {
+        "template": "diary-cape",
+        "note": "Every achievement diary."
+      },
+      {
+        "template": "max-cape",
+        "note": "Level 99 in every skill."
+      },
+      {
+        "template": "fire-cape",
+        "note": "From the Fight Caves, needed before the Infernal cape."
+      },
+      {
+        "template": "infernal-cape",
+        "note": "From the Inferno, which needs a fire cape to enter."
+      },
+      {
+        "template": "dizanas-quiver",
+        "note": "From the Fortis Colosseum."
+      },
+      {
+        "template": "mythical-cape",
+        "note": "From the Myths' Guild after Dragon Slayer II."
+      },
+      {
+        "template": "champions-cape",
+        "note": "Every champion in the Champions' Challenge."
+      },
+      {
+        "template": "imbued-god-cape",
+        "note": "An imbued god cape from Mage Arena II."
+      },
+      {
+        "template": "diary-rewards",
+        "note": "Ardougne cloak 4 from the elite Ardougne Diary.",
+        "params": {
+          "area": "ARDOUGNE"
+        }
+      }
+    ]
+  }
+}

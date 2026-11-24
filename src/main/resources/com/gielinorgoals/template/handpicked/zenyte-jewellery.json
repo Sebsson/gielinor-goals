@@ -12,11 +12,15 @@
     "Resultat (gameval): 19550 ZENYTE_RING_ENCHANTED (Ring of suffering), 19547 ZENYTE_NECKLACE_ENCHANTED (Necklace of anguish),",
     "19544 ZENYTE_BRACELET_ENCHANTED (Tormented bracelet), 19553 ZENYTE_AMULET_ENCHANTED (Amulet of torture).",
     "Lås upp tar bara med nivåerna för att tillverka och förtrolla; bärkravet (75 Hitpoints) är inte med.",
-    "Fyra shards och fyra onyx räcker till alla fyra smyckena."
+    "Fyra shards och fyra onyx räcker till alla fyra smyckena.",
+    "Version 2 (2026-11-24): shards och onyx som redan blivit uncut zenyte, zenyte eller smycken räknas (countsAlso), ett per föremål;",
+    "cut onyx räknas också mot onyx. Id ur gameval: 19496 UNCUT_ZENYTE, 19493 ZENYTE, 19501 UNSTRUNG_ZENYTE_AMULET, 19538/19535/19532/19541",
+    "ZENYTE_RING/NECKLACE/BRACELET/AMULET och de förtrollade (med varianter)."
   ],
   "id": "zenyte-jewellery",
   "verifiedBy": "",
   "verifiedAt": "",
+  "version": 2,
   "name": "Zenyte jewellery",
   "description": "Monkey Madness II, four zenyte shards, four onyx and the levels to craft and enchant all four pieces",
   "category": "Ironman · Late",
@@ -47,10 +51,23 @@
         "aggregate": true,
         "icon": {"sideIcon": "INVENTORY"},
         "children": [
-          {"item": {"id": 19529, "name": "Zenyte shard", "quantity": 4},
+          {"item": {"id": 19529, "name": "Zenyte shard", "quantity": 4,
+              "countsAlso": [
+                {"item": 19496, "each": 1}, {"item": 19493, "each": 1}, {"item": 19501, "each": 1},
+                {"item": 19538, "each": 1}, {"item": 19535, "each": 1}, {"item": 19532, "each": 1}, {"item": 19541, "each": 1},
+                {"item": 19550, "each": 1, "includeVariants": true}, {"item": 19547, "each": 1, "includeVariants": true},
+                {"item": 19544, "each": 1, "includeVariants": true}, {"item": 19553, "each": 1, "includeVariants": true}
+              ]},
             "dropSource": {"npc": "Demonic gorilla", "rate": 300},
-            "note": "1/300 from demonic gorillas. One per piece of jewellery."},
-          {"item": {"id": 6571, "name": "Uncut onyx", "quantity": 4},
+            "note": "1/300 from demonic gorillas. One per piece of jewellery; zenyte you already made counts too."},
+          {"item": {"id": 6571, "name": "Uncut onyx", "quantity": 4,
+              "countsAlso": [
+                {"item": 6573, "each": 1},
+                {"item": 19496, "each": 1}, {"item": 19493, "each": 1}, {"item": 19501, "each": 1},
+                {"item": 19538, "each": 1}, {"item": 19535, "each": 1}, {"item": 19532, "each": 1}, {"item": 19541, "each": 1},
+                {"item": 19550, "each": 1, "includeVariants": true}, {"item": 19547, "each": 1, "includeVariants": true},
+                {"item": 19544, "each": 1, "includeVariants": true}, {"item": 19553, "each": 1, "includeVariants": true}
+              ]},
             "note": "TzHaar-Hur-Lek sells one for 300,000 tokkul (260,000 with Karamja gloves). Also Zulrah (2 × 1/1,024), Skotizo (1/1,000) and Zalcano (1/8,000). Cut it with 67 Crafting."},
           {
             "title": "Jewellery",

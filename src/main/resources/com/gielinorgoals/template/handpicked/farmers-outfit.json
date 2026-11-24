@@ -5,11 +5,13 @@
     "boro trousers 125, boots 50 (400 för setet).",
     "Delar (manlig variant; den kvinnliga räknas bara om variationstabellen kopplar ihop dem - osäkert): TITHE_REWARD_HAT_MALE 13646 (female 13647),",
     "TITHE_REWARD_TORSO_MALE 13642 (13643), TITHE_REWARD_LEGS_MALE 13640 (13641), TITHE_REWARD_FEET_MALE 13644 (13645).",
-    "Osäkert: delarnas item-id är tagna från gameval-namnen (se nedan), inte lästa från wikins infoboxar. Sidan säger inte om varianterna har olika id; gameval har två."
+    "Osäkert: delarnas item-id är tagna från gameval-namnen (se nedan), inte lästa från wikins infoboxar. Sidan säger inte om varianterna har olika id; gameval har två.",
+    "Version 2 (2026-11-24): poängen räknas som klara när alla fyra delarna finns (doneWhenAll)."
   ],
   "id": "farmers-outfit",
   "verifiedBy": "",
   "verifiedAt": "",
+  "version": 2,
   "name": "Farmer's outfit",
   "description": "400 Tithe Farm points for the farmer's outfit",
   "category": "Skilling outfits",
@@ -43,7 +45,14 @@
               "activity": "TITHE_FARM",
               "count": 400
             },
-            "note": "Points are spent when you buy. Strawhat 75, jacket 150, trousers 125, boots 50."
+            "note": "Points are spent when you buy. Strawhat 75, jacket 150, trousers 125, boots 50.",
+            "doneWhen": [
+              "item:13646",
+              "item:13642",
+              "item:13640",
+              "item:13644"
+            ],
+            "doneWhenAll": true
           }
         ]
       },

@@ -27,6 +27,7 @@ package com.gielinorgoals.tracking;
 import com.gielinorgoals.model.CombatAchievementRequirement;
 import com.gielinorgoals.model.DiaryRequirement;
 import com.gielinorgoals.model.GoalTree;
+import com.gielinorgoals.model.KeyRequirements;
 import com.gielinorgoals.model.PointsActivity;
 import com.gielinorgoals.model.PointsRequirement;
 import com.gielinorgoals.model.QuestRequirement;
@@ -56,6 +57,20 @@ public class WatchedAchievements
 		return questIds.isEmpty() && varbits.isEmpty() && combatAchievementIds.isEmpty() && varps.isEmpty();
 	}
 
+	private static void watch(Requirement requirement, Set<Integer> quests, Set<Integer> varbits)
+	{
+		if (requirement instanceof QuestRequirement)
+		{
+			quests.add(((QuestRequirement) requirement).getQuestId());
+		}
+		else if (requirement instanceof DiaryRequirement)
+		{
+			DiaryRequirement diary = (DiaryRequirement) requirement;
+			varbits.add(diary.varbit());
+			varbits.add(diary.countVarbit());
+		}
+	}
+
 	public static WatchedAchievements from(GoalTree tree)
 	{
 		Set<Integer> quests = new HashSet<>();
@@ -64,6 +79,15 @@ public class WatchedAchievements
 		Set<Integer> varps = new HashSet<>();
 		tree.forEach(goal ->
 		{
+			// doneWhen kan peka på ett quest eller en diary som inte är ett eget mål (t.ex.
+			// Fairytale II för fairy rings); de läses också, så att nyckeln kan uppfyllas från spelet.
+			if (goal.getDoneWhen() != null)
+			{
+				for (String key : goal.getDoneWhen())
+				{
+					watch(KeyRequirements.parse(key), quests, varbits);
+				}
+			}
 			Requirement requirement = goal.getRequirement();
 			if (requirement instanceof QuestRequirement)
 			{

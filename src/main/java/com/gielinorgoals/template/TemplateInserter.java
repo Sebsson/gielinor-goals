@@ -113,9 +113,10 @@ public final class TemplateInserter
 			}
 		}
 
-		// Bara mål som fanns före insättningen räknas som inkopplade befintliga mål.
+		// Bara mål som fanns före insättningen räknas som inkopplade befintliga mål, även
+		// template-rötter utan eget krav (från en referens i ett paket).
 		java.util.Set<String> before = new java.util.HashSet<>();
-		for (Goal goal : withRequirement)
+		for (Goal goal : tree.flatten())
 		{
 			before.add(goal.getId());
 		}
@@ -173,10 +174,10 @@ public final class TemplateInserter
 		java.util.Set<String> before = new java.util.HashSet<>();
 		for (Goal goal : tree.flatten())
 		{
+			before.add(goal.getId());
 			if (goal.getRequirement() != null)
 			{
 				withRequirement.add(goal);
-				before.add(goal.getId());
 			}
 		}
 
@@ -350,7 +351,11 @@ public final class TemplateInserter
 				continue;
 			}
 
-			Goal existing = findExisting(withRequirement, child.getRequirement());
+			Goal existing = findTemplateRoot(tree, child);
+			if (existing == null)
+			{
+				existing = findExisting(withRequirement, child.getRequirement());
+			}
 			if (existing != null)
 			{
 				if (child.getLocalId() != null)
@@ -402,6 +407,45 @@ public final class TemplateInserter
 		return null;
 	}
 
+	/**
+	 * En befintlig insättning av samma template med samma värden, för en nod som kommer från en
+	 * template-referens (t.ex. Barrows gloves i ett paket); annars null.
+	 */
+	@Nullable
+	public static Goal findTemplateRoot(GoalTree tree, TemplateNode node)
+	{
+		if (node.getTemplateId() == null)
+		{
+			return null;
+		}
+		for (Goal goal : tree.flatten())
+		{
+			if (node.getTemplateId().equals(goal.getTemplateId())
+				&& sameValues(goal.getTemplateParams(), node.getTemplateParams())
+				&& java.util.Objects.equals(emptyToNull(goal.getTemplateChoices()), emptyToNull(node.getTemplateChoices())))
+			{
+				return goal;
+			}
+		}
+		return null;
+	}
+
+	// Samma parametrar; valet av quest-kedjor räknas inte, det gäller bara utfällningen.
+	private static boolean sameValues(@Nullable java.util.Map<String, Integer> a, @Nullable java.util.Map<String, Integer> b)
+	{
+		java.util.Map<String, Integer> left = a == null ? new java.util.HashMap<>() : new java.util.HashMap<>(a);
+		java.util.Map<String, Integer> right = b == null ? new java.util.HashMap<>() : new java.util.HashMap<>(b);
+		left.remove(TemplateUpdates.QUEST_CHAINS_PARAM);
+		right.remove(TemplateUpdates.QUEST_CHAINS_PARAM);
+		return left.equals(right);
+	}
+
+	@Nullable
+	private static java.util.Map<String, String> emptyToNull(@Nullable java.util.Map<String, String> map)
+	{
+		return map == null || map.isEmpty() ? null : map;
+	}
+
 	private static Goal create(TemplateNode node)
 	{
 		Goal goal = new Goal(node.getTitle());
@@ -413,6 +457,17 @@ public final class TemplateInserter
 		goal.setDropSource(node.getDropSource());
 		goal.setIcon(node.getIcon());
 		goal.setDoneWhen(node.getDoneWhen() == null ? null : new ArrayList<>(node.getDoneWhen()));
+		goal.setDoneWhenAll(node.isDoneWhenAll() ? Boolean.TRUE : null);
+		if (node.getTemplateId() != null)
+		{
+			// Roten från en refererad template blir en egen template-rot, med egen uppdatering.
+			goal.setTemplateId(node.getTemplateId());
+			goal.setTemplateParams(node.getTemplateParams() == null ? null
+				: new java.util.LinkedHashMap<>(node.getTemplateParams()));
+			goal.setTemplateChoices(emptyToNull(node.getTemplateChoices()) == null ? null
+				: new java.util.LinkedHashMap<>(node.getTemplateChoices()));
+			goal.setTemplateVersion(node.getTemplateVersion());
+		}
 		return goal;
 	}
 }

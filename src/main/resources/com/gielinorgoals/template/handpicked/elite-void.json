@@ -7,11 +7,13 @@
     "https://oldschool.runescape.wiki/w/Elite_void_top - Item ID 13072 (gameval ELITE_VOID_KNIGHT_TOP). Osäkert: elite void robe",
     "13073 (ELITE_VOID_KNIGHT_ROBES) är taget från gameval-namnet.",
     "Void knight top och robe är samma krav som i Void Knight equipment-templaten och kopplas ihop med dem via",
-    "dubblettregeln. Pest Control-poäng är en manuell räknare."
+    "dubblettregeln. Pest Control-poäng är en manuell räknare.",
+    "Version 2 (2026-11-24): poängen räknas som klara när båda elite-delarna finns (doneWhenAll), eftersom de gått åt till dem."
   ],
   "id": "elite-void",
   "verifiedBy": "",
   "verifiedAt": "",
+  "version": 2,
   "name": "Elite void",
   "description": "The hard Western Provinces Diary and 400 Pest Control points to upgrade void",
   "category": "Ironman · Late",
@@ -29,6 +31,7 @@
         "children": [
           {"diary": {"area": "WESTERN", "tier": "HARD"}},
           {"killCount": {"manual": "Pest Control points", "count": 400},
+            "doneWhen": ["item:13072", "item:13073"], "doneWhenAll": true,
             "note": "200 points for each upgrade, on top of the points for the normal void pieces."}
         ]
       },

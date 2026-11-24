@@ -51,7 +51,7 @@ final class ImportValidator
 	private static final Set<String> NODE = Set.of("id", "ref", "title", "aggregate", "wikiPage", "note",
 		"expandChain", "dropSource", "killCount", "icon", "doneWhen", "quest", "skill", "level", "xp",
 		"combatAchievement", "questPoints", "totalLevel", "combatLevel", "diary", "item", "children", "points",
-		"replaces");
+		"replaces", "doneWhenAll");
 	private static final Map<String, Set<String>> NESTED = Map.of(
 		"diary", Set.of("area", "tier"),
 		"item", Set.of("id", "name", "quantity", "includeVariants", "variants", "countsAlso"),
@@ -61,7 +61,7 @@ final class ImportValidator
 		"combatAchievement", Set.of("id", "name", "tier"),
 		"points", Set.of("activity", "count"));
 	private static final Set<String> COUNTS_ALSO = Set.of("item", "each", "includeVariants");
-	private static final Set<String> NODE_BOOLEANS = Set.of("aggregate", "expandChain");
+	private static final Set<String> NODE_BOOLEANS = Set.of("aggregate", "expandChain", "doneWhenAll");
 	private static final Set<String> NODE_NUMBERS = Set.of("level", "xp", "questPoints", "totalLevel", "combatLevel");
 
 	private int nodes;

@@ -6,11 +6,13 @@
     "Molch pearl 22820 (gameval AERIAL_FISHING_PEARL); aerial fishing kräver 43 Fishing enligt molch pearl-sidan.",
     "Delar: TRAWLER_REWARD_HAT 13258, TRAWLER_REWARD_TOP 13259, TRAWLER_REWARD_LEGS 13260, TRAWLER_REWARD_BOOTS 13261.",
     "Osäkert: delarnas item-id är tagna från gameval-namnen (se nedan), inte lästa från wikins infoboxar.",
-    "En del räknas som klar även när den har gjorts om till spirit angler (doneWhen), eftersom delen då förbrukas."
+    "En del räknas som klar även när den har gjorts om till spirit angler (doneWhen), eftersom delen då förbrukas.",
+    "Version 2 (2026-11-24): ägda delar, även de som gjorts om till spirit angler, räknas som 50 molch pearls var."
   ],
   "id": "angler",
   "verifiedBy": "",
   "verifiedAt": "",
+  "version": 2,
   "name": "Angler's outfit",
   "description": "Every piece of the angler outfit, from Fishing Trawler or molch pearls",
   "category": "Skilling outfits",
@@ -44,7 +46,49 @@
             "item": {
               "id": 22820,
               "name": "Molch pearl",
-              "quantity": 200
+              "quantity": 200,
+              "countsAlso": [
+                {
+                  "item": 13258,
+                  "each": 50,
+                  "includeVariants": true
+                },
+                {
+                  "item": 13259,
+                  "each": 50,
+                  "includeVariants": true
+                },
+                {
+                  "item": 13260,
+                  "each": 50,
+                  "includeVariants": true
+                },
+                {
+                  "item": 13261,
+                  "each": 50,
+                  "includeVariants": true
+                },
+                {
+                  "item": 25592,
+                  "each": 50,
+                  "includeVariants": true
+                },
+                {
+                  "item": 25594,
+                  "each": 50,
+                  "includeVariants": true
+                },
+                {
+                  "item": 25596,
+                  "each": 50,
+                  "includeVariants": true
+                },
+                {
+                  "item": 25598,
+                  "each": 50,
+                  "includeVariants": true
+                }
+              ]
             },
             "note": "50 per piece from Alry the Angler on Molch Island. Aerial fishing needs 43 Fishing. Not needed if every piece comes from the Fishing Trawler."
           },

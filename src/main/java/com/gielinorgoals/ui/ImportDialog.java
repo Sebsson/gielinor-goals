@@ -69,7 +69,7 @@ final class ImportDialog
 
 		TemplateDialog.ImportChoice choice = TemplateDialog.showImport(owner, payload, goalManager.getTree(),
 			services.currentGameData(), services.getIcons(), services.getQuestRequirements(),
-			services.getTemplateBuilder());
+			services.getTemplateBuilder(), services.getCompletionLookup());
 		if (choice == null || !GoalActions.stillSameProfile(owner, guard))
 		{
 			return;

@@ -84,6 +84,12 @@ import net.runelite.client.hiscore.HiscoreSkill;
  * så att uppdateringsdialogen kan säga det. {@code "replaces": ["kc:manual:slayer points:750"]}
  * på en nod betyder att den ersätter ett mål med den nyckeln från en äldre version; dialogen
  * visar då bytet som en ändring i stället för ett nytt och ett borttaget mål.
+ * <p>
+ * {@code {"template": "fire-cape"}} eller {@code {"template": "base-level", "params": {"level": 70}}}
+ * är en referens: noden blir den refererade templatens hela träd, som om den satts in där.
+ * Talparametrar anges som tal och valparametrar som text. Två referenser till samma template med
+ * samma värden blir en delad nod. Referenser finns bara i de inbyggda templates; katalogen
+ * kontrollerar att id:na finns och att inga templates refererar till varandra i en cykel.
  */
 public class JsonTemplate implements GoalTemplate
 {
@@ -115,6 +121,9 @@ public class JsonTemplate implements GoalTemplate
 		String id;
 		// Bara "ref": samma nod som den med det id:t, som delmål även här.
 		String ref;
+		// En annan template som delmål; "params" ger dess parametrar (tal eller val som text).
+		String template;
+		Map<String, com.google.gson.JsonElement> params;
 		String title;
 		Boolean aggregate;
 		// Egen sida på OSRS Wiki för "Open on wiki"; går före den som härleds ur kravet.
@@ -131,6 +140,8 @@ public class JsonTemplate implements GoalTemplate
 		List<String> doneWhen;
 		// Nycklar för mål i en äldre version som den här noden ersätter.
 		List<String> replaces;
+		// True: klar först när alla doneWhen-nycklar är klara.
+		Boolean doneWhenAll;
 		PointsSpec points;
 		String quest;
 		String skill;
@@ -213,6 +224,29 @@ public class JsonTemplate implements GoalTemplate
 	private boolean verified;
 	private boolean expandQuestChains = true;
 	private int version = 1;
+	// Slår upp refererade templates; sätts av katalogen. Null betyder att referenser inte byggs.
+	@Nullable
+	private java.util.function.Function<String, GoalTemplate> resolver;
+
+	// Templates som byggs just nu på den här tråden, för att hitta cykler mellan templates.
+	private static final ThreadLocal<java.util.Deque<String>> BUILDING =
+		ThreadLocal.withInitial(java.util.ArrayDeque::new);
+
+	// Allt som hör till ett bygge av trädet.
+	private static final class Build
+	{
+		final Map<String, TemplateNode> defined = new java.util.HashMap<>();
+		final java.util.Set<String> open = new java.util.HashSet<>();
+		// Referens (id och värden) → noden den gav, så att en dubbel referens blir en delad nod.
+		final Map<String, TemplateNode> references = new java.util.HashMap<>();
+		@Nullable
+		final java.util.function.Function<String, GoalTemplate> resolver;
+
+		Build(@Nullable java.util.function.Function<String, GoalTemplate> resolver)
+		{
+			this.resolver = resolver;
+		}
+	}
 
 	/**
 	 * Formatets nuvarande version. En fil med högre version kommer från en nyare version av
@@ -335,10 +369,120 @@ public class JsonTemplate implements GoalTemplate
 		return root.icon == null ? null : toIcon(root.icon);
 	}
 
+	/**
+	 * Den egna versionen plus de refererade templates ändringar, så att ett paket får en ny
+	 * version när en del-template får det, utan att paketets fil behöver ändras.
+	 */
 	@Override
 	public int getVersion()
 	{
-		return version;
+		int total = version;
+		if (resolver != null)
+		{
+			for (String id : new java.util.LinkedHashSet<>(referencedIds()))
+			{
+				GoalTemplate target = resolver.apply(id);
+				if (target != null && !BUILDING.get().contains(id))
+				{
+					BUILDING.get().push(getId());
+					try
+					{
+						total += target.getVersion() - 1;
+					}
+					finally
+					{
+						BUILDING.get().pop();
+					}
+				}
+			}
+		}
+		return total;
+	}
+
+	void setResolver(java.util.function.Function<String, GoalTemplate> resolver)
+	{
+		this.resolver = resolver;
+	}
+
+	/**
+	 * Id:n för de templates som den här refererar till direkt, i filens ordning.
+	 */
+	List<String> referencedIds()
+	{
+		List<String> ids = new java.util.ArrayList<>();
+		collectReferences(root, ids);
+		return ids;
+	}
+
+	/**
+	 * Parametrarna för varje referens, i samma ordning som {@link #referencedIds()}.
+	 */
+	List<Map<String, com.google.gson.JsonElement>> referencedParams()
+	{
+		List<Map<String, com.google.gson.JsonElement>> params = new java.util.ArrayList<>();
+		collectReferenceParams(root, params);
+		return params;
+	}
+
+	private static void collectReferences(@Nullable NodeSpec spec, List<String> out)
+	{
+		if (spec == null)
+		{
+			return;
+		}
+		if (spec.template != null)
+		{
+			out.add(spec.template);
+		}
+		if (spec.children != null)
+		{
+			spec.children.forEach(child -> collectReferences(child, out));
+		}
+	}
+
+	private static void collectReferenceParams(@Nullable NodeSpec spec, List<Map<String, com.google.gson.JsonElement>> out)
+	{
+		if (spec == null)
+		{
+			return;
+		}
+		if (spec.template != null)
+		{
+			out.add(spec.params == null ? Map.of() : spec.params);
+		}
+		if (spec.children != null)
+		{
+			spec.children.forEach(child -> collectReferenceParams(child, out));
+		}
+	}
+
+	/**
+	 * Ett paket behöver spelets data om någon av templates det refererar till gör det.
+	 */
+	@Override
+	public boolean needsClientData()
+	{
+		if (resolver == null || BUILDING.get().contains(getId()))
+		{
+			return false;
+		}
+		BUILDING.get().push(getId());
+		try
+		{
+			for (String id : referencedIds())
+			{
+				GoalTemplate target = resolver.apply(id);
+				if (target != null && target.needsClientData())
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		finally
+		{
+			BUILDING.get().pop();
+		}
 	}
 
 	// Handplockade templates visar hela quest-kedjorna som standard; egna sparar sina kedjor.
@@ -351,7 +495,23 @@ public class JsonTemplate implements GoalTemplate
 	@Override
 	public TemplateNode build(Map<String, Integer> parameters)
 	{
-		return toNode(root, new java.util.HashMap<>(), new java.util.HashSet<>());
+		java.util.Deque<String> building = BUILDING.get();
+		if (building.contains(getId()))
+		{
+			List<String> chain = new java.util.ArrayList<>(building);
+			java.util.Collections.reverse(chain);
+			chain.add(getId());
+			throw new IllegalArgumentException("Templates refer to each other in a cycle: " + String.join(" -> ", chain));
+		}
+		building.push(getId());
+		try
+		{
+			return toNode(root, new Build(resolver));
+		}
+		finally
+		{
+			building.pop();
+		}
 	}
 
 	/**
@@ -412,7 +572,7 @@ public class JsonTemplate implements GoalTemplate
 	 * @param defined noder med id som redan är byggda
 	 * @param open    id:n för noderna på vägen hit; en ref till någon av dem vore en cykel
 	 */
-	private static TemplateNode toNode(NodeSpec spec, Map<String, TemplateNode> defined, java.util.Set<String> open)
+	private static TemplateNode toNode(NodeSpec spec, Build build)
 	{
 		if (spec == null)
 		{
@@ -420,7 +580,7 @@ public class JsonTemplate implements GoalTemplate
 		}
 		try
 		{
-			return toCheckedNode(spec, defined, open);
+			return toCheckedNode(spec, build);
 		}
 		catch (NodeException e)
 		{
@@ -432,12 +592,17 @@ public class JsonTemplate implements GoalTemplate
 		}
 	}
 
-	private static TemplateNode toCheckedNode(NodeSpec spec, Map<String, TemplateNode> defined,
-		java.util.Set<String> open)
+	private static TemplateNode toCheckedNode(NodeSpec spec, Build build)
 	{
+		Map<String, TemplateNode> defined = build.defined;
+		java.util.Set<String> open = build.open;
+		if (spec.template != null)
+		{
+			return toTemplateReference(spec, build);
+		}
 		if (spec.ref != null)
 		{
-			return toRef(spec, defined, open);
+			return toRef(spec, build);
 		}
 		if (spec.id != null)
 		{
@@ -446,7 +611,7 @@ public class JsonTemplate implements GoalTemplate
 				throw new IllegalArgumentException("Node id \"" + spec.id + "\" is empty or used twice");
 			}
 		}
-		TemplateNode node = toPlainNode(spec, defined, open);
+		TemplateNode node = toPlainNode(spec, build);
 		if (spec.id != null)
 		{
 			node.setLocalId(spec.id);
@@ -457,11 +622,13 @@ public class JsonTemplate implements GoalTemplate
 	}
 
 	// En nod som bara pekar på en tidigare nod: samma titel och krav, inga egna barn.
-	private static TemplateNode toRef(NodeSpec spec, Map<String, TemplateNode> defined, java.util.Set<String> open)
+	private static TemplateNode toRef(NodeSpec spec, Build build)
 	{
+		Map<String, TemplateNode> defined = build.defined;
+		java.util.Set<String> open = build.open;
 		if (spec.id != null || spec.title != null || spec.aggregate != null || spec.children != null
 			|| spec.note != null || spec.wikiPage != null || spec.icon != null || spec.doneWhen != null
-			|| spec.dropSource != null || spec.expandChain != null || spec.replaces != null
+			|| spec.dropSource != null || spec.expandChain != null || spec.replaces != null || spec.template != null
 			|| toRequirement(spec) != null)
 		{
 			throw new IllegalArgumentException("A node with \"ref\" can't have anything else");
@@ -484,7 +651,131 @@ public class JsonTemplate implements GoalTemplate
 		return node;
 	}
 
-	private static TemplateNode toPlainNode(NodeSpec spec, Map<String, TemplateNode> defined, java.util.Set<String> open)
+	/**
+	 * En referens till en annan template: dess hela träd, med templatens id och värden på roten
+	 * så att den kan kopplas till en befintlig insättning av samma template och uppdateras.
+	 */
+	private static TemplateNode toTemplateReference(NodeSpec spec, Build build)
+	{
+		if (spec.id != null || spec.ref != null || spec.title != null || spec.aggregate != null
+			|| spec.children != null || spec.wikiPage != null || spec.icon != null
+			|| spec.doneWhen != null || spec.dropSource != null || spec.expandChain != null || spec.replaces != null
+			|| toRequirement(spec) != null)
+		{
+			throw new IllegalArgumentException("A node with \"template\" can only have \"params\" and \"note\"");
+		}
+		if (build.resolver == null)
+		{
+			// Utan katalog (när filen läses): bara en platshållare, referensen kontrolleras senare.
+			return TemplateNode.aggregate("Template " + spec.template);
+		}
+		GoalTemplate target = build.resolver.apply(spec.template);
+		if (target == null)
+		{
+			throw new IllegalArgumentException("Unknown template \"" + abbreviate(spec.template) + "\"");
+		}
+		Map<String, Integer> numbers = new java.util.TreeMap<>();
+		Map<String, String> choices = new java.util.TreeMap<>();
+		parameterValues(target, spec.params, numbers, choices);
+
+		String key = target.getId() + numbers + choices;
+		TemplateNode first = build.references.get(key);
+		if (first != null)
+		{
+			// Samma template med samma värden en gång till: en delad nod.
+			if (first.getLocalId() == null)
+			{
+				first.setLocalId("template:" + key);
+			}
+			TemplateNode shared = new TemplateNode(first.getTitle(), first.getRequirement(), first.isAggregate());
+			shared.setRef(first.getLocalId());
+			shared.setIcon(first.getIcon());
+			shared.setWikiPage(first.getWikiPage());
+			shared.setExpandChain(false);
+			return shared;
+		}
+
+		TemplateNode node = target.build(numbers, choices);
+		if (spec.note != null && !spec.note.trim().isEmpty())
+		{
+			// Paketets anteckning, t.ex. varför delen kommer just här, går före templatens egen.
+			node.setNote(spec.note.trim());
+		}
+		node.setTemplateId(target.getId());
+		Map<String, Integer> params = new java.util.LinkedHashMap<>(numbers);
+		params.put(TemplateUpdates.QUEST_CHAINS_PARAM, 0);
+		node.setTemplateParams(params);
+		node.setTemplateChoices(choices.isEmpty() ? null : new java.util.LinkedHashMap<>(choices));
+		node.setTemplateVersion(target.getVersion() > 1 ? target.getVersion() : null);
+		build.references.put(key, node);
+		return node;
+	}
+
+	/**
+	 * Varje parameters värde: det som referensen anger, annars standardvärdet. Värdena sparas
+	 * fullständigt, så att samma template insatt via dialogen och via ett paket jämförs lika.
+	 */
+	static void parameterValues(GoalTemplate target, @Nullable Map<String, com.google.gson.JsonElement> given,
+		Map<String, Integer> numbers, Map<String, String> choices)
+	{
+		Map<String, Integer> givenNumbers = new java.util.HashMap<>();
+		Map<String, String> givenChoices = new java.util.HashMap<>();
+		if (given != null)
+		{
+			for (Map.Entry<String, com.google.gson.JsonElement> entry : given.entrySet())
+			{
+				TemplateParameter parameter = null;
+				for (TemplateParameter candidate : target.getParameters())
+				{
+					if (candidate.getKey().equals(entry.getKey()))
+					{
+						parameter = candidate;
+					}
+				}
+				if (parameter == null)
+				{
+					throw new IllegalArgumentException("Template \"" + target.getId() + "\" has no parameter \""
+						+ abbreviate(entry.getKey()) + "\"");
+				}
+				com.google.gson.JsonElement value = entry.getValue();
+				boolean number = value != null && value.isJsonPrimitive() && value.getAsJsonPrimitive().isNumber();
+				boolean text = value != null && value.isJsonPrimitive() && value.getAsJsonPrimitive().isString();
+				if (parameter.getKind() == TemplateParameter.Kind.NUMBER && number)
+				{
+					givenNumbers.put(entry.getKey(), value.getAsInt());
+				}
+				else if (parameter.getKind() == TemplateParameter.Kind.CHOICE && text)
+				{
+					String choice = value.getAsString();
+					if (parameter.getOptions().stream().noneMatch(option -> option.getValue().equals(choice)))
+					{
+						throw new IllegalArgumentException("\"" + abbreviate(choice) + "\" is not a choice for \""
+							+ entry.getKey() + "\" in template \"" + target.getId() + "\"");
+					}
+					givenChoices.put(entry.getKey(), choice);
+				}
+				else
+				{
+					throw new IllegalArgumentException("Parameter \"" + entry.getKey() + "\" of template \""
+						+ target.getId() + "\" should be " + (parameter.getKind() == TemplateParameter.Kind.NUMBER
+						? "a number" : "text"));
+				}
+			}
+		}
+		for (TemplateParameter parameter : target.getParameters())
+		{
+			if (parameter.getKind() == TemplateParameter.Kind.NUMBER)
+			{
+				numbers.put(parameter.getKey(), parameter.valueIn(givenNumbers));
+			}
+			else
+			{
+				choices.put(parameter.getKey(), parameter.choiceIn(givenChoices));
+			}
+		}
+	}
+
+	private static TemplateNode toPlainNode(NodeSpec spec, Build build)
 	{
 		Requirement requirement = toRequirement(spec);
 		String title = spec.title == null ? "" : spec.title;
@@ -517,6 +808,7 @@ public class JsonTemplate implements GoalTemplate
 				}
 			}
 			node.setDoneWhen(List.copyOf(spec.doneWhen));
+			node.setDoneWhenAll(Boolean.TRUE.equals(spec.doneWhenAll));
 		}
 		if (spec.replaces != null)
 		{
@@ -534,7 +826,7 @@ public class JsonTemplate implements GoalTemplate
 		{
 			for (NodeSpec child : spec.children)
 			{
-				node.add(toNode(child, defined, open));
+				node.add(toNode(child, build));
 			}
 		}
 		return node;

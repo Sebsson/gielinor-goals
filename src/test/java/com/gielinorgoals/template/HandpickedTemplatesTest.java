@@ -38,7 +38,8 @@ public class HandpickedTemplatesTest
 			"Ectophial", "Dragon scimitar", "Spirit trees", "Gnome gliders", "Bonecrusher", "Ash sanctifier", "Herb sack",
 			"Seed box", "Slayer helmet", "Void Knight equipment", "Elite void", "Angler's outfit", "Prospector kit",
 			"Lumberjack outfit", "Pyromancer outfit", "Rogue equipment", "Farmer's outfit", "Carpenter's outfit",
-			"Smiths' uniform", "Spirit angler's outfit", "Dizana's quiver", "Mythical cape", "Champion's cape"), names);
+			"Smiths' uniform", "Spirit angler's outfit", "Dizana's quiver", "Mythical cape", "Champion's cape", "Early ironman",
+			"Mid ironman", "Late ironman", "All capes"), names);
 	}
 
 	@Test
