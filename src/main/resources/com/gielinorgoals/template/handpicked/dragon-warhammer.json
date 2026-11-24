@@ -9,6 +9,8 @@
     "Shamans har inget KC-meddelande i chatten; räknaren går upp via loot-eventet (NPC-räknaren 'Lizardman shaman')."
   ],
   "id": "dragon-warhammer",
+  "verifiedBy": "",
+  "verifiedAt": "",
   "name": "Dragon warhammer",
   "description": "Lizardman shamans with a dry-streak meter on the 1/3,000 warhammer",
   "category": "Ironman · Mid",

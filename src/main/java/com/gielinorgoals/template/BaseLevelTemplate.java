@@ -38,7 +38,7 @@ import net.runelite.api.Skill;
  */
 public class BaseLevelTemplate implements GoalTemplate
 {
-	static final TemplateParameter LEVEL = new TemplateParameter("level", "Level in every skill",
+	static final TemplateParameter LEVEL = TemplateParameter.number("level", "Level in every skill",
 		SkillRequirement.MIN_LEVEL, Experience.MAX_REAL_LEVEL, 70);
 
 	@Override

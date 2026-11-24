@@ -109,12 +109,31 @@ public class QuestRequirementsDb
 		}
 	}
 
+	/**
+	 * En quest-serie från wikin, t.ex. "Elf", med questen i wikins kronologiska ordning.
+	 * Ett quest kan finnas i flera serier.
+	 */
+	@Getter
+	public static final class Series
+	{
+		private String name;
+		private List<Ref> quests;
+
+		public List<Ref> getQuests()
+		{
+			return quests == null ? Collections.emptyList() : quests;
+		}
+	}
+
 	private static final class FileSpec
 	{
 		List<Entry> quests;
+		List<Series> series;
 	}
 
 	private final Map<Integer, Entry> byId;
+	@Getter
+	private final List<Series> series;
 
 	@Inject
 	QuestRequirementsDb(Gson gson)
@@ -122,8 +141,20 @@ public class QuestRequirementsDb
 		this(read(gson));
 	}
 
+	private QuestRequirementsDb(FileSpec spec)
+	{
+		this(spec.quests == null ? Collections.emptyList() : spec.quests,
+			spec.series == null ? Collections.emptyList() : spec.series);
+	}
+
 	QuestRequirementsDb(List<Entry> entries)
 	{
+		this(entries, Collections.emptyList());
+	}
+
+	QuestRequirementsDb(List<Entry> entries, List<Series> series)
+	{
+		this.series = Collections.unmodifiableList(new ArrayList<>(series));
 		Map<Integer, Entry> map = new HashMap<>();
 		for (Entry entry : entries)
 		{
@@ -145,25 +176,25 @@ public class QuestRequirementsDb
 		return new QuestRequirementsDb(read(gson));
 	}
 
-	private static List<Entry> read(Gson gson)
+	private static FileSpec read(Gson gson)
 	{
 		try (InputStream in = QuestRequirementsDb.class.getResourceAsStream(RESOURCE))
 		{
 			if (in == null)
 			{
 				log.warn("Missing {}, quest chains are unavailable", RESOURCE);
-				return Collections.emptyList();
+				return new FileSpec();
 			}
 			try (Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8))
 			{
 				FileSpec spec = gson.fromJson(reader, FileSpec.class);
-				return spec == null || spec.quests == null ? Collections.emptyList() : spec.quests;
+				return spec == null ? new FileSpec() : spec;
 			}
 		}
 		catch (IOException | JsonParseException e)
 		{
 			log.warn("Could not read {}", RESOURCE, e);
-			return Collections.emptyList();
+			return new FileSpec();
 		}
 	}
 
@@ -179,6 +210,22 @@ public class QuestRequirementsDb
 	public Map<Integer, Entry> all()
 	{
 		return byId;
+	}
+
+	/**
+	 * Serien med det namnet, eller null.
+	 */
+	@Nullable
+	public Series series(String name)
+	{
+		for (Series candidate : series)
+		{
+			if (candidate.getName().equals(name))
+			{
+				return candidate;
+			}
+		}
+		return null;
 	}
 
 	/**

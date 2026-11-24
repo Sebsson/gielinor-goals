@@ -51,6 +51,12 @@ public class TemplateCatalog
 		templates = Collections.unmodifiableList(all);
 	}
 
+	// För tester: en egen lista.
+	TemplateCatalog(List<GoalTemplate> templates)
+	{
+		this.templates = Collections.unmodifiableList(templates);
+	}
+
 	public List<GoalTemplate> getTemplates()
 	{
 		return templates;

@@ -123,6 +123,8 @@ public final class TemplateInserter
 			root.setTemplateId(template.getTemplateId());
 			root.setTemplateParams(template.getTemplateParams() == null ? null
 				: new java.util.LinkedHashMap<>(template.getTemplateParams()));
+			root.setTemplateChoices(template.getTemplateChoices() == null || template.getTemplateChoices().isEmpty()
+				? null : new java.util.LinkedHashMap<>(template.getTemplateChoices()));
 			List<String> ignored = new ArrayList<>();
 			collectExcludedKeys(template, ignored);
 			root.setTemplateIgnoredKeys(ignored.isEmpty() ? null : ignored);

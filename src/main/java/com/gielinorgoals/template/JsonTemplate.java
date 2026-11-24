@@ -77,6 +77,9 @@ public class JsonTemplate implements GoalTemplate
 	{
 		// Stabilt id; om det saknas används filnamnet utan .json.
 		String id;
+		// Vem som har kontrollerat siffrorna mot wikin och när (t.ex. "2026-11-24"); tomt = inte än.
+		String verifiedBy;
+		String verifiedAt;
 		String name;
 		String description;
 		// En av kategorierna i TemplateCategories, t.ex. "Ironman · Mid".
@@ -155,6 +158,7 @@ public class JsonTemplate implements GoalTemplate
 	private String category = TemplateCategories.OTHER;
 	private List<String> tags = java.util.Collections.emptyList();
 	private final NodeSpec root;
+	private boolean verified;
 
 	private JsonTemplate(String id, String name, String description, NodeSpec root)
 	{
@@ -194,6 +198,7 @@ public class JsonTemplate implements GoalTemplate
 		{
 			template.tags = java.util.List.copyOf(spec.tags);
 		}
+		template.verified = notBlank(spec.verifiedBy) && notBlank(spec.verifiedAt);
 		// Bygg en gång direkt, så att fel i filen märks när den läses och inte i dialogen.
 		template.build(Map.of());
 		return template;
@@ -203,6 +208,19 @@ public class JsonTemplate implements GoalTemplate
 	public String getId()
 	{
 		return id;
+	}
+
+	/**
+	 * Om någon har kontrollerat templatens siffror mot wikin (verifiedBy och verifiedAt satta).
+	 */
+	public boolean isVerified()
+	{
+		return verified;
+	}
+
+	private static boolean notBlank(@Nullable String value)
+	{
+		return value != null && !value.trim().isEmpty();
 	}
 
 	@Override

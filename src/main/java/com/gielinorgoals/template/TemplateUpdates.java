@@ -115,17 +115,22 @@ public class TemplateUpdates
 	}
 
 	/**
-	 * @return tillägg och borttagna noder, eller null om templaten inte finns längre
+	 * @return tillägg och borttagna noder, eller null om templaten inte finns längre eller
+	 * behöver spelets data (då bygger {@link TemplateBuilder} om den och
+	 * {@link #plan(GoalTree, Goal, TemplateNode)} används)
 	 */
 	@Nullable
 	public Plan plan(GoalTree tree, Goal root)
 	{
 		TemplateNode template = rebuild(root);
-		if (template == null)
-		{
-			return null;
-		}
+		return template == null ? null : plan(tree, root, template);
+	}
 
+	/**
+	 * Jämför målen under roten med en färdigbyggd template, t.ex. en som byggts på klienttråden.
+	 */
+	public Plan plan(GoalTree tree, Goal root, TemplateNode template)
+	{
 		// Alla mål under roten (även inkopplade och delade), i visningsordning.
 		List<Goal> below = new ArrayList<>();
 		collect(tree, root, below, new HashSet<>());
@@ -160,27 +165,58 @@ public class TemplateUpdates
 	}
 
 	/**
-	 * Templaten byggd som när den sattes in: samma parametrar och samma val av quest-kedjor.
+	 * Templaten byggd som när den sattes in: samma parametrar, samma val och samma val av
+	 * quest-kedjor. Templates som behöver spelets data byggs inte här (den här metoden körs
+	 * på EDT); de ger null och byggs i stället med {@link #rebuildAsync}.
 	 */
 	@Nullable
 	public TemplateNode rebuild(Goal root)
 	{
 		GoalTemplate template = catalog.find(root.getTemplateId());
-		if (template == null)
+		if (template == null || template.needsClientData())
 		{
 			return null;
 		}
-		Map<String, Integer> params = root.getTemplateParams() == null
-			? Collections.emptyMap()
-			: root.getTemplateParams();
-		TemplateNode node = template.build(params);
-		if (Integer.valueOf(1).equals(params.get(QUEST_CHAINS_PARAM)))
+		return finish(root, template.build(numbers(root), choices(root)));
+	}
+
+	/**
+	 * Som {@link #rebuild} men för alla templates: de som behöver spelets data byggs på
+	 * klienttråden. {@code callback} körs på EDT; null om templaten inte finns längre.
+	 */
+	public void rebuildAsync(Goal root, TemplateBuilder builder, java.util.function.Consumer<TemplateBuilder.Result> callback)
+	{
+		GoalTemplate template = catalog.find(root.getTemplateId());
+		if (template == null)
+		{
+			callback.accept(null);
+			return;
+		}
+		builder.build(template, numbers(root), choices(root), result -> callback.accept(result.isReady()
+			? new TemplateBuilder.Result(finish(root, result.getNode()), null)
+			: result));
+	}
+
+	private TemplateNode finish(Goal root, TemplateNode node)
+	{
+		if (Integer.valueOf(1).equals(numbers(root).get(QUEST_CHAINS_PARAM)))
 		{
 			// Full utfällning; quests som redan fanns när templaten sattes in ligger under
 			// roten och räknas därför som befintliga i jämförelsen.
 			QuestChains.expand(node, questRequirements, null);
 		}
 		return node;
+	}
+
+	private static Map<String, Integer> numbers(Goal root)
+	{
+		return root.getTemplateParams() == null ? Collections.emptyMap() : root.getTemplateParams();
+	}
+
+	// Äldre sparade rötter saknar val; då gäller varje parameters standardval.
+	private static Map<String, String> choices(Goal root)
+	{
+		return root.getTemplateChoices() == null ? Collections.emptyMap() : root.getTemplateChoices();
 	}
 
 	private static void findAdditions(TemplateNode node, Goal parentGoal, Map<String, Goal> present, Set<String> ignored,

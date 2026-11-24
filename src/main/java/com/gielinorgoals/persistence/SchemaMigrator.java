@@ -66,8 +66,11 @@ public class SchemaMigrator
 	 *     (egen ikon för mål utan krav) och doneWhen (klart när ett annat mål är klart). Ingen
 	 *     dataändring; höjd så att äldre versioner blir skrivskyddade i stället för att
 	 *     tyst kasta bort drop-källorna när de sparar.
+	 * 12 – valfritt fält templateChoices på template-rötter (valparametrar som text). Ingen
+	 *     dataändring; höjd så att äldre versioner blir skrivskyddade i stället för att tyst
+	 *     kasta bort valen.
 	 */
-	public static final int CURRENT_VERSION = 11;
+	public static final int CURRENT_VERSION = 12;
 	static final String VERSION_FIELD = "schemaVersion";
 	private static final String GOALS_FIELD = GoalSerializer.GOALS_FIELD;
 	private static final String ROOT_IDS_FIELD = GoalSerializer.ROOT_IDS_FIELD;
@@ -80,17 +83,19 @@ public class SchemaMigrator
 
 	public SchemaMigrator()
 	{
-		this(Map.of(
-			1, SchemaMigrator::noStructuralChange,
-			2, SchemaMigrator::noStructuralChange,
-			3, SchemaMigrator::noStructuralChange,
-			4, SchemaMigrator::noStructuralChange,
-			5, SchemaMigrator::noStructuralChange,
-			6, SchemaMigrator::v6ToV7,
-			7, SchemaMigrator::noStructuralChange,
-			8, SchemaMigrator::noStructuralChange,
-			9, SchemaMigrator::noStructuralChange,
-			10, SchemaMigrator::noStructuralChange));
+		// Map.of räcker bara till tio par; nyckel = versionen steget uppgraderar från.
+		this(Map.<Integer, UnaryOperator<JsonObject>>ofEntries(
+			Map.entry(1, SchemaMigrator::noStructuralChange),
+			Map.entry(2, SchemaMigrator::noStructuralChange),
+			Map.entry(3, SchemaMigrator::noStructuralChange),
+			Map.entry(4, SchemaMigrator::noStructuralChange),
+			Map.entry(5, SchemaMigrator::noStructuralChange),
+			Map.entry(6, SchemaMigrator::v6ToV7),
+			Map.entry(7, SchemaMigrator::noStructuralChange),
+			Map.entry(8, SchemaMigrator::noStructuralChange),
+			Map.entry(9, SchemaMigrator::noStructuralChange),
+			Map.entry(10, SchemaMigrator::noStructuralChange),
+			Map.entry(11, SchemaMigrator::noStructuralChange)));
 	}
 
 	/**

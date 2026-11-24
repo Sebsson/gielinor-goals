@@ -5,7 +5,9 @@
   "quests: bara direkta förkrav som måste vara helt klara (wikins översta nivå i kravträdet).",
   "partial: krav som bara gäller påbörjat/delvis klart, med wikins text.",
   "skills: nivå och om kravet går att boosta enligt wikin. Strids- och föremålskrav är inte med.",
-  "id är quest-id i RuneLites Quest-enum; name finns för läsbarhet."
+  "id är quest-id i RuneLites Quest-enum; name finns för läsbarhet.",
+  "series: quest-serier från https://oldschool.runescape.wiki/w/Quests/Series, hämtad 2026-11-24 (sidan senast ändrad 19 november 2026), i wikins kronologiska ordning. Ej släppta och namnlösa poster (t.ex. The Chosen Commander, Fairytale III) är inte med eftersom de saknas i Quest-enumen.",
+  "Seriernas medlemmar och deras förkrav (50 quests) lades till 2026-11-24 från respektive quests Requirements-avsnitt på wikin."
  ],
  "quests": [
   {
@@ -2625,6 +2627,1908 @@
      "skill": "MAGIC",
      "level": 75,
      "boostable": false
+    }
+   ]
+  },
+  {
+   "id": 24,
+   "name": "Death to the Dorgeshuun",
+   "quests": [
+    {
+     "id": 87,
+     "name": "The Lost Tribe"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "AGILITY",
+     "level": 23,
+     "boostable": true
+    },
+    {
+     "skill": "THIEVING",
+     "level": 23,
+     "boostable": true
+    }
+   ]
+  },
+  {
+   "id": 1,
+   "name": "Another Slice of H.A.M.",
+   "quests": [
+    {
+     "id": 24,
+     "name": "Death to the Dorgeshuun"
+    },
+    {
+     "id": 63,
+     "name": "The Giant Dwarf"
+    },
+    {
+     "id": 29,
+     "name": "The Dig Site"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "ATTACK",
+     "level": 15,
+     "boostable": false
+    },
+    {
+     "skill": "PRAYER",
+     "level": 25,
+     "boostable": false
+    }
+   ]
+  },
+  {
+   "id": 165,
+   "name": "Land of the Goblins",
+   "quests": [
+    {
+     "id": 1,
+     "name": "Another Slice of H.A.M."
+    },
+    {
+     "id": 52,
+     "name": "Fishing Contest"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "AGILITY",
+     "level": 38,
+     "boostable": false
+    },
+    {
+     "skill": "FISHING",
+     "level": 40,
+     "boostable": false
+    },
+    {
+     "skill": "THIEVING",
+     "level": 45,
+     "boostable": false
+    },
+    {
+     "skill": "HERBLORE",
+     "level": 48,
+     "boostable": false
+    }
+   ]
+  },
+  {
+   "id": 39,
+   "name": "Elemental Workshop II",
+   "quests": [
+    {
+     "id": 38,
+     "name": "Elemental Workshop I"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "MAGIC",
+     "level": 20,
+     "boostable": true
+    },
+    {
+     "skill": "SMITHING",
+     "level": 30,
+     "boostable": true
+    }
+   ]
+  },
+  {
+   "id": 56,
+   "name": "The Fremennik Isles",
+   "quests": [
+    {
+     "id": 57,
+     "name": "The Fremennik Trials"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "CONSTRUCTION",
+     "level": 20,
+     "boostable": true
+    }
+   ]
+  },
+  {
+   "id": 55,
+   "name": "The Fremennik Exiles",
+   "quests": [
+    {
+     "id": 56,
+     "name": "The Fremennik Isles"
+    },
+    {
+     "id": 88,
+     "name": "Lunar Diplomacy"
+    },
+    {
+     "id": 98,
+     "name": "Mountain Daughter"
+    },
+    {
+     "id": 72,
+     "name": "Heroes' Quest"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "CRAFTING",
+     "level": 65,
+     "boostable": false
+    },
+    {
+     "skill": "SLAYER",
+     "level": 60,
+     "boostable": false
+    },
+    {
+     "skill": "SMITHING",
+     "level": 60,
+     "boostable": false
+    },
+    {
+     "skill": "FISHING",
+     "level": 60,
+     "boostable": false
+    },
+    {
+     "skill": "RUNECRAFT",
+     "level": 55,
+     "boostable": false
+    },
+    {
+     "skill": "MINING",
+     "level": 60,
+     "boostable": true
+    }
+   ]
+  },
+  {
+   "id": 3425,
+   "name": "The Path of Glouphrie",
+   "quests": [
+    {
+     "id": 45,
+     "name": "The Eyes of Glouphrie"
+    },
+    {
+     "id": 158,
+     "name": "Waterfall Quest"
+    },
+    {
+     "id": 150,
+     "name": "Tree Gnome Village"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "STRENGTH",
+     "level": 60,
+     "boostable": false
+    },
+    {
+     "skill": "SLAYER",
+     "level": 56,
+     "boostable": false
+    },
+    {
+     "skill": "THIEVING",
+     "level": 56,
+     "boostable": false
+    },
+    {
+     "skill": "RANGED",
+     "level": 47,
+     "boostable": false
+    },
+    {
+     "skill": "AGILITY",
+     "level": 45,
+     "boostable": false
+    }
+   ]
+  },
+  {
+   "id": 112,
+   "name": "Prince Ali Rescue",
+   "quests": [],
+   "skills": []
+  },
+  {
+   "id": 16,
+   "name": "Contact!",
+   "quests": [
+    {
+     "id": 112,
+     "name": "Prince Ali Rescue"
+    },
+    {
+     "id": 75,
+     "name": "Icthlarin's Little Helper"
+    }
+   ],
+   "skills": []
+  },
+  {
+   "id": 168,
+   "name": "Beneath Cursed Sands",
+   "quests": [
+    {
+     "id": 16,
+     "name": "Contact!"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "AGILITY",
+     "level": 62,
+     "boostable": false
+    },
+    {
+     "skill": "CRAFTING",
+     "level": 55,
+     "boostable": false
+    },
+    {
+     "skill": "FIREMAKING",
+     "level": 55,
+     "boostable": false
+    }
+   ]
+  },
+  {
+   "id": 2306,
+   "name": "Into the Tombs",
+   "quests": [
+    {
+     "id": 168,
+     "name": "Beneath Cursed Sands"
+    }
+   ],
+   "skills": []
+  },
+  {
+   "id": 113,
+   "name": "The Queen of Thieves",
+   "quests": [
+    {
+     "id": 13,
+     "name": "Client of Kourend"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "THIEVING",
+     "level": 20,
+     "boostable": false
+    }
+   ]
+  },
+  {
+   "id": 26,
+   "name": "The Depths of Despair",
+   "quests": [
+    {
+     "id": 13,
+     "name": "Client of Kourend"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "AGILITY",
+     "level": 18,
+     "boostable": false
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "name": "The Ascent of Arceuus",
+   "quests": [
+    {
+     "id": 13,
+     "name": "Client of Kourend"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "HUNTER",
+     "level": 12,
+     "boostable": false
+    }
+   ]
+  },
+  {
+   "id": 54,
+   "name": "The Forsaken Tower",
+   "quests": [
+    {
+     "id": 13,
+     "name": "Client of Kourend"
+    }
+   ],
+   "skills": []
+  },
+  {
+   "id": 143,
+   "name": "Tale of the Righteous",
+   "quests": [
+    {
+     "id": 13,
+     "name": "Client of Kourend"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "STRENGTH",
+     "level": 16,
+     "boostable": false
+    },
+    {
+     "skill": "MINING",
+     "level": 10,
+     "boostable": false
+    }
+   ]
+  },
+  {
+   "id": 81,
+   "name": "A Kingdom Divided",
+   "quests": [
+    {
+     "id": 26,
+     "name": "The Depths of Despair"
+    },
+    {
+     "id": 113,
+     "name": "The Queen of Thieves"
+    },
+    {
+     "id": 3,
+     "name": "The Ascent of Arceuus"
+    },
+    {
+     "id": 54,
+     "name": "The Forsaken Tower"
+    },
+    {
+     "id": 143,
+     "name": "Tale of the Righteous"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "AGILITY",
+     "level": 54,
+     "boostable": false
+    },
+    {
+     "skill": "THIEVING",
+     "level": 52,
+     "boostable": false
+    },
+    {
+     "skill": "WOODCUTTING",
+     "level": 52,
+     "boostable": false
+    },
+    {
+     "skill": "HERBLORE",
+     "level": 50,
+     "boostable": false
+    },
+    {
+     "skill": "MINING",
+     "level": 42,
+     "boostable": false
+    },
+    {
+     "skill": "CRAFTING",
+     "level": 38,
+     "boostable": false
+    },
+    {
+     "skill": "MAGIC",
+     "level": 35,
+     "boostable": false
+    }
+   ]
+  },
+  {
+   "id": 3466,
+   "name": "Defender of Varrock",
+   "quests": [
+    {
+     "id": 132,
+     "name": "Shield of Arrav"
+    },
+    {
+     "id": 146,
+     "name": "Temple of Ikov"
+    },
+    {
+     "id": 6,
+     "name": "Below Ice Mountain"
+    },
+    {
+     "id": 48,
+     "name": "Family Crest"
+    },
+    {
+     "id": 58,
+     "name": "Garden of Tranquillity"
+    },
+    {
+     "id": 159,
+     "name": "What Lies Below"
+    },
+    {
+     "id": 121,
+     "name": "Romeo & Juliet"
+    },
+    {
+     "id": 25,
+     "name": "Demon Slayer"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "SMITHING",
+     "level": 55,
+     "boostable": false
+    },
+    {
+     "skill": "HUNTER",
+     "level": 52,
+     "boostable": false
+    }
+   ]
+  },
+  {
+   "id": 3937,
+   "name": "The Curse of Arrav",
+   "quests": [
+    {
+     "id": 3466,
+     "name": "Defender of Varrock"
+    },
+    {
+     "id": 152,
+     "name": "Troll Romance"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "MINING",
+     "level": 64,
+     "boostable": false
+    },
+    {
+     "skill": "RANGED",
+     "level": 62,
+     "boostable": false
+    },
+    {
+     "skill": "THIEVING",
+     "level": 62,
+     "boostable": false
+    },
+    {
+     "skill": "AGILITY",
+     "level": 61,
+     "boostable": false
+    },
+    {
+     "skill": "STRENGTH",
+     "level": 58,
+     "boostable": false
+    },
+    {
+     "skill": "SLAYER",
+     "level": 37,
+     "boostable": false
+    }
+   ],
+   "note": "Slayer 37 is marked [unknown] for boosting on the wiki."
+  },
+  {
+   "id": 3467,
+   "name": "While Guthix Sleeps",
+   "quests": [
+    {
+     "id": 3466,
+     "name": "Defender of Varrock"
+    },
+    {
+     "id": 3425,
+     "name": "The Path of Glouphrie"
+    },
+    {
+     "id": 51,
+     "name": "Fight Arena"
+    },
+    {
+     "id": 33,
+     "name": "Dream Mentor"
+    },
+    {
+     "id": 69,
+     "name": "The Hand in the Sand"
+    },
+    {
+     "id": 156,
+     "name": "Wanted!"
+    },
+    {
+     "id": 167,
+     "name": "Temple of the Eye"
+    },
+    {
+     "id": 145,
+     "name": "Tears of Guthix"
+    },
+    {
+     "id": 103,
+     "name": "Nature Spirit"
+    },
+    {
+     "id": 142,
+     "name": "A Tail of Two Cats"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "THIEVING",
+     "level": 72,
+     "boostable": false
+    },
+    {
+     "skill": "MAGIC",
+     "level": 67,
+     "boostable": false
+    },
+    {
+     "skill": "AGILITY",
+     "level": 66,
+     "boostable": false
+    },
+    {
+     "skill": "FARMING",
+     "level": 65,
+     "boostable": false
+    },
+    {
+     "skill": "HERBLORE",
+     "level": 65,
+     "boostable": false
+    },
+    {
+     "skill": "HUNTER",
+     "level": 62,
+     "boostable": false
+    },
+    {
+     "skill": "FIREMAKING",
+     "level": 49,
+     "boostable": false
+    }
+   ],
+   "questPoints": 180,
+   "note": "Firemaking 49 has no boostable marker on the wiki. Also needs Warriors' Guild access (130 combined Attack and Strength, or 99 in either)."
+  },
+  {
+   "id": 147,
+   "name": "Throne of Miscellania",
+   "quests": [
+    {
+     "id": 72,
+     "name": "Heroes' Quest"
+    },
+    {
+     "id": 57,
+     "name": "The Fremennik Trials"
+    }
+   ],
+   "skills": []
+  },
+  {
+   "id": 123,
+   "name": "Royal Trouble",
+   "quests": [
+    {
+     "id": 147,
+     "name": "Throne of Miscellania"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "AGILITY",
+     "level": 40,
+     "boostable": true
+    },
+    {
+     "skill": "SLAYER",
+     "level": 40,
+     "boostable": true
+    }
+   ]
+  },
+  {
+   "id": 77,
+   "name": "In Aid of the Myreque",
+   "quests": [
+    {
+     "id": 79,
+     "name": "In Search of the Myreque"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "AGILITY",
+     "level": 25,
+     "boostable": true
+    },
+    {
+     "skill": "CRAFTING",
+     "level": 25,
+     "boostable": false
+    },
+    {
+     "skill": "MINING",
+     "level": 15,
+     "boostable": false
+    },
+    {
+     "skill": "MAGIC",
+     "level": 7,
+     "boostable": true
+    }
+   ]
+  },
+  {
+   "id": 22,
+   "name": "Darkness of Hallowvale",
+   "quests": [
+    {
+     "id": 77,
+     "name": "In Aid of the Myreque"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "CONSTRUCTION",
+     "level": 5,
+     "boostable": true
+    },
+    {
+     "skill": "MINING",
+     "level": 20,
+     "boostable": false
+    },
+    {
+     "skill": "THIEVING",
+     "level": 22,
+     "boostable": false
+    },
+    {
+     "skill": "AGILITY",
+     "level": 26,
+     "boostable": true
+    },
+    {
+     "skill": "CRAFTING",
+     "level": 32,
+     "boostable": false
+    },
+    {
+     "skill": "MAGIC",
+     "level": 33,
+     "boostable": true
+    },
+    {
+     "skill": "STRENGTH",
+     "level": 40,
+     "boostable": false
+    }
+   ],
+   "note": "The wiki marks Thieving 22 as not boostable but a footnote says the start requirement can be boosted; Agility obstacles in the city need an unboosted 25."
+  },
+  {
+   "id": 144,
+   "name": "A Taste of Hope",
+   "quests": [
+    {
+     "id": 22,
+     "name": "Darkness of Hallowvale"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "CRAFTING",
+     "level": 48,
+     "boostable": false
+    },
+    {
+     "skill": "AGILITY",
+     "level": 45,
+     "boostable": false
+    },
+    {
+     "skill": "ATTACK",
+     "level": 40,
+     "boostable": false
+    },
+    {
+     "skill": "HERBLORE",
+     "level": 40,
+     "boostable": false
+    },
+    {
+     "skill": "SLAYER",
+     "level": 38,
+     "boostable": false
+    }
+   ]
+  },
+  {
+   "id": 134,
+   "name": "Sins of the Father",
+   "quests": [
+    {
+     "id": 155,
+     "name": "Vampyre Slayer"
+    },
+    {
+     "id": 144,
+     "name": "A Taste of Hope"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "WOODCUTTING",
+     "level": 62,
+     "boostable": false
+    },
+    {
+     "skill": "FLETCHING",
+     "level": 60,
+     "boostable": false
+    },
+    {
+     "skill": "CRAFTING",
+     "level": 56,
+     "boostable": false
+    },
+    {
+     "skill": "AGILITY",
+     "level": 52,
+     "boostable": false
+    },
+    {
+     "skill": "ATTACK",
+     "level": 50,
+     "boostable": false
+    },
+    {
+     "skill": "SLAYER",
+     "level": 50,
+     "boostable": false
+    },
+    {
+     "skill": "MAGIC",
+     "level": 49,
+     "boostable": false
+    }
+   ]
+  },
+  {
+   "id": 16414,
+   "name": "The Blood Moon Rises",
+   "quests": [
+    {
+     "id": 104,
+     "name": "A Night at the Theatre"
+    },
+    {
+     "id": 134,
+     "name": "Sins of the Father"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "SLAYER",
+     "level": 74,
+     "boostable": false
+    },
+    {
+     "skill": "WOODCUTTING",
+     "level": 74,
+     "boostable": false
+    },
+    {
+     "skill": "SMITHING",
+     "level": 72,
+     "boostable": false
+    },
+    {
+     "skill": "COOKING",
+     "level": 72,
+     "boostable": false
+    },
+    {
+     "skill": "FLETCHING",
+     "level": 70,
+     "boostable": false
+    },
+    {
+     "skill": "MINING",
+     "level": 66,
+     "boostable": false
+    },
+    {
+     "skill": "HUNTER",
+     "level": 65,
+     "boostable": false
+    },
+    {
+     "skill": "CRAFTING",
+     "level": 64,
+     "boostable": false
+    },
+    {
+     "skill": "HERBLORE",
+     "level": 64,
+     "boostable": false
+    },
+    {
+     "skill": "MAGIC",
+     "level": 57,
+     "boostable": false
+    }
+   ]
+  },
+  {
+   "id": 124,
+   "name": "Rum Deal",
+   "quests": [
+    {
+     "id": 163,
+     "name": "Zogre Flesh Eaters"
+    },
+    {
+     "id": 111,
+     "name": "Priest in Peril"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "CRAFTING",
+     "level": 42,
+     "boostable": true
+    },
+    {
+     "skill": "FARMING",
+     "level": 40,
+     "boostable": true
+    },
+    {
+     "skill": "PRAYER",
+     "level": 47,
+     "boostable": true
+    },
+    {
+     "skill": "SLAYER",
+     "level": 42,
+     "boostable": false
+    },
+    {
+     "skill": "FISHING",
+     "level": 50,
+     "boostable": true
+    }
+   ],
+   "note": "Fishing can be bypassed with 5 Karamthulhu."
+  },
+  {
+   "id": 12,
+   "name": "Cabin Fever",
+   "quests": [
+    {
+     "id": 108,
+     "name": "Pirate's Treasure"
+    },
+    {
+     "id": 124,
+     "name": "Rum Deal"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "AGILITY",
+     "level": 42,
+     "boostable": false
+    },
+    {
+     "skill": "CRAFTING",
+     "level": 45,
+     "boostable": false
+    },
+    {
+     "skill": "SMITHING",
+     "level": 50,
+     "boostable": false
+    },
+    {
+     "skill": "RANGED",
+     "level": 40,
+     "boostable": false
+    }
+   ]
+  },
+  {
+   "id": 67,
+   "name": "The Great Brain Robbery",
+   "quests": [
+    {
+     "id": 19,
+     "name": "Creature of Fenkenstrain"
+    },
+    {
+     "id": 12,
+     "name": "Cabin Fever"
+    },
+    {
+     "id": 2310,
+     "name": "Recipe for Disaster - Pirate Pete"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "CRAFTING",
+     "level": 16,
+     "boostable": false
+    },
+    {
+     "skill": "CONSTRUCTION",
+     "level": 30,
+     "boostable": false
+    },
+    {
+     "skill": "PRAYER",
+     "level": 50,
+     "boostable": false
+    }
+   ]
+  },
+  {
+   "id": 114,
+   "name": "Rag and Bone Man I",
+   "quests": [],
+   "skills": []
+  },
+  {
+   "id": 115,
+   "name": "Rag and Bone Man II",
+   "quests": [
+    {
+     "id": 114,
+     "name": "Rag and Bone Man I"
+    },
+    {
+     "id": 135,
+     "name": "Skippy and the Mogres"
+    }
+   ],
+   "partial": [
+    {
+     "id": 19,
+     "name": "Creature of Fenkenstrain",
+     "text": "Partial completion of Creature of Fenkenstrain"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "SLAYER",
+     "level": 40,
+     "boostable": true
+    },
+    {
+     "skill": "DEFENCE",
+     "level": 20,
+     "boostable": false
+    }
+   ]
+  },
+  {
+   "id": 13730,
+   "name": "Rag and Bone Man III",
+   "quests": [
+    {
+     "id": 115,
+     "name": "Rag and Bone Man II"
+    },
+    {
+     "id": 31,
+     "name": "Dragon Slayer I"
+    },
+    {
+     "id": 67,
+     "name": "The Great Brain Robbery"
+    },
+    {
+     "id": 3466,
+     "name": "Defender of Varrock"
+    },
+    {
+     "id": 149,
+     "name": "Tower of Life"
+    },
+    {
+     "id": 138,
+     "name": "A Soul's Bane"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "SLAYER",
+     "level": 58,
+     "boostable": false
+    }
+   ],
+   "note": "The wiki notes this quest is new and its page may be incomplete."
+  },
+  {
+   "id": 63,
+   "name": "The Giant Dwarf",
+   "quests": [],
+   "skills": [
+    {
+     "skill": "CRAFTING",
+     "level": 12,
+     "boostable": true
+    },
+    {
+     "skill": "FIREMAKING",
+     "level": 16,
+     "boostable": true
+    },
+    {
+     "skill": "MAGIC",
+     "level": 33,
+     "boostable": true
+    },
+    {
+     "skill": "THIEVING",
+     "level": 14,
+     "boostable": true
+    }
+   ]
+  },
+  {
+   "id": 53,
+   "name": "Forgettable Tale...",
+   "quests": [
+    {
+     "id": 63,
+     "name": "The Giant Dwarf"
+    },
+    {
+     "id": 52,
+     "name": "Fishing Contest"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "COOKING",
+     "level": 22,
+     "boostable": true
+    },
+    {
+     "skill": "FARMING",
+     "level": 17,
+     "boostable": true
+    }
+   ],
+   "note": "The wiki's Requirements list Cooking 22; a footnote says the in-game listing shows 20."
+  },
+  {
+   "id": 136,
+   "name": "The Slug Menace",
+   "quests": [
+    {
+     "id": 156,
+     "name": "Wanted!"
+    },
+    {
+     "id": 127,
+     "name": "Sea Slug"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "CRAFTING",
+     "level": 30,
+     "boostable": false
+    },
+    {
+     "skill": "RUNECRAFT",
+     "level": 30,
+     "boostable": false
+    },
+    {
+     "skill": "SLAYER",
+     "level": 30,
+     "boostable": false
+    },
+    {
+     "skill": "THIEVING",
+     "level": 30,
+     "boostable": false
+    }
+   ]
+  },
+  {
+   "id": 7106,
+   "name": "Troubled Tortugans",
+   "quests": [
+    {
+     "id": 7103,
+     "name": "Pandemonium"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "SLAYER",
+     "level": 51,
+     "boostable": false
+    },
+    {
+     "skill": "CONSTRUCTION",
+     "level": 48,
+     "boostable": false
+    },
+    {
+     "skill": "SAILING",
+     "level": 45,
+     "boostable": false
+    },
+    {
+     "skill": "HUNTER",
+     "level": 45,
+     "boostable": false
+    },
+    {
+     "skill": "WOODCUTTING",
+     "level": 40,
+     "boostable": false
+    },
+    {
+     "skill": "CRAFTING",
+     "level": 34,
+     "boostable": false
+    }
+   ]
+  },
+  {
+   "id": 7107,
+   "name": "The Red Reef",
+   "quests": [
+    {
+     "id": 7106,
+     "name": "Troubled Tortugans"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "SAILING",
+     "level": 52,
+     "boostable": false
+    },
+    {
+     "skill": "SMITHING",
+     "level": 48,
+     "boostable": false
+    }
+   ]
+  },
+  {
+   "id": 61,
+   "name": "Getting Ahead",
+   "quests": [],
+   "skills": [
+    {
+     "skill": "CRAFTING",
+     "level": 30,
+     "boostable": false
+    },
+    {
+     "skill": "CONSTRUCTION",
+     "level": 26,
+     "boostable": false
+    }
+   ]
+  },
+  {
+   "id": 17231,
+   "name": "The Writing's on the Wall",
+   "quests": [],
+   "skills": [
+    {
+     "skill": "AGILITY",
+     "level": 22,
+     "boostable": false
+    },
+    {
+     "skill": "THIEVING",
+     "level": 20,
+     "boostable": false
+    }
+   ]
+  },
+  {
+   "id": 135,
+   "name": "Skippy and the Mogres",
+   "quests": [],
+   "skills": [
+    {
+     "skill": "COOKING",
+     "level": 20,
+     "boostable": true
+    }
+   ]
+  },
+  {
+   "id": 138,
+   "name": "A Soul's Bane",
+   "quests": [],
+   "skills": []
+  },
+  {
+   "id": 7103,
+   "name": "Pandemonium",
+   "quests": [],
+   "skills": []
+  },
+  {
+   "id": 155,
+   "name": "Vampyre Slayer",
+   "quests": [],
+   "skills": []
+  },
+  {
+   "id": 104,
+   "name": "A Night at the Theatre",
+   "quests": [
+    {
+     "id": 144,
+     "name": "A Taste of Hope"
+    }
+   ],
+   "skills": []
+  },
+  {
+   "id": 108,
+   "name": "Pirate's Treasure",
+   "quests": [],
+   "skills": []
+  },
+  {
+   "id": 159,
+   "name": "What Lies Below",
+   "quests": [
+    {
+     "id": 125,
+     "name": "Rune Mysteries"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "RUNECRAFT",
+     "level": 35,
+     "boostable": false
+    }
+   ]
+  },
+  {
+   "id": 152,
+   "name": "Troll Romance",
+   "quests": [
+    {
+     "id": 153,
+     "name": "Troll Stronghold"
+    }
+   ],
+   "skills": [
+    {
+     "skill": "AGILITY",
+     "level": 28,
+     "boostable": true
+    }
+   ]
+  },
+  {
+   "id": 69,
+   "name": "The Hand in the Sand",
+   "quests": [],
+   "skills": [
+    {
+     "skill": "THIEVING",
+     "level": 17,
+     "boostable": false
+    },
+    {
+     "skill": "CRAFTING",
+     "level": 49,
+     "boostable": false
+    }
+   ]
+  },
+  {
+   "id": 145,
+   "name": "Tears of Guthix",
+   "quests": [],
+   "skills": [
+    {
+     "skill": "FIREMAKING",
+     "level": 49,
+     "boostable": true
+    },
+    {
+     "skill": "CRAFTING",
+     "level": 20,
+     "boostable": true
+    },
+    {
+     "skill": "MINING",
+     "level": 20,
+     "boostable": true
+    }
+   ],
+   "questPoints": 43
+  }
+ ],
+ "series": [
+  {
+   "name": "Camelot",
+   "quests": [
+    {
+     "id": 93,
+     "name": "Merlin's Crystal"
+    },
+    {
+     "id": 73,
+     "name": "Holy Grail"
+    },
+    {
+     "id": 82,
+     "name": "King's Ransom"
+    }
+   ]
+  },
+  {
+   "name": "Demon Slayer",
+   "quests": [
+    {
+     "id": 25,
+     "name": "Demon Slayer"
+    },
+    {
+     "id": 129,
+     "name": "Shadow of the Storm"
+    }
+   ]
+  },
+  {
+   "name": "Dorgeshuun",
+   "quests": [
+    {
+     "id": 87,
+     "name": "The Lost Tribe"
+    },
+    {
+     "id": 24,
+     "name": "Death to the Dorgeshuun"
+    },
+    {
+     "id": 1,
+     "name": "Another Slice of H.A.M."
+    },
+    {
+     "id": 165,
+     "name": "Land of the Goblins"
+    }
+   ]
+  },
+  {
+   "name": "Dragonkin",
+   "quests": [
+    {
+     "id": 31,
+     "name": "Dragon Slayer I"
+    },
+    {
+     "id": 142,
+     "name": "A Tail of Two Cats"
+    },
+    {
+     "id": 32,
+     "name": "Dragon Slayer II"
+    }
+   ]
+  },
+  {
+   "name": "Elemental Workshop",
+   "quests": [
+    {
+     "id": 38,
+     "name": "Elemental Workshop I"
+    },
+    {
+     "id": 39,
+     "name": "Elemental Workshop II"
+    }
+   ]
+  },
+  {
+   "name": "Elf",
+   "quests": [
+    {
+     "id": 109,
+     "name": "Plague City"
+    },
+    {
+     "id": 9,
+     "name": "Biohazard"
+    },
+    {
+     "id": 154,
+     "name": "Underground Pass"
+    },
+    {
+     "id": 119,
+     "name": "Regicide"
+    },
+    {
+     "id": 122,
+     "name": "Roving Elves"
+    },
+    {
+     "id": 99,
+     "name": "Mourning's End Part I"
+    },
+    {
+     "id": 100,
+     "name": "Mourning's End Part II"
+    },
+    {
+     "id": 137,
+     "name": "Song of the Elves"
+    }
+   ]
+  },
+  {
+   "name": "Fairytale",
+   "quests": [
+    {
+     "id": 46,
+     "name": "Fairytale I - Growing Pains"
+    },
+    {
+     "id": 47,
+     "name": "Fairytale II - Cure a Queen"
+    }
+   ]
+  },
+  {
+   "name": "Fremennik",
+   "quests": [
+    {
+     "id": 57,
+     "name": "The Fremennik Trials"
+    },
+    {
+     "id": 56,
+     "name": "The Fremennik Isles"
+    },
+    {
+     "id": 88,
+     "name": "Lunar Diplomacy"
+    },
+    {
+     "id": 55,
+     "name": "The Fremennik Exiles"
+    }
+   ]
+  },
+  {
+   "name": "Gnome",
+   "quests": [
+    {
+     "id": 66,
+     "name": "The Grand Tree"
+    },
+    {
+     "id": 45,
+     "name": "The Eyes of Glouphrie"
+    },
+    {
+     "id": 3425,
+     "name": "The Path of Glouphrie"
+    },
+    {
+     "id": 95,
+     "name": "Monkey Madness I"
+    },
+    {
+     "id": 96,
+     "name": "Monkey Madness II"
+    }
+   ]
+  },
+  {
+   "name": "Kharidian",
+   "quests": [
+    {
+     "id": 112,
+     "name": "Prince Ali Rescue"
+    },
+    {
+     "id": 75,
+     "name": "Icthlarin's Little Helper"
+    },
+    {
+     "id": 16,
+     "name": "Contact!"
+    },
+    {
+     "id": 168,
+     "name": "Beneath Cursed Sands"
+    },
+    {
+     "id": 2306,
+     "name": "Into the Tombs"
+    }
+   ]
+  },
+  {
+   "name": "Kourend",
+   "quests": [
+    {
+     "id": 162,
+     "name": "X Marks the Spot"
+    },
+    {
+     "id": 13,
+     "name": "Client of Kourend"
+    },
+    {
+     "id": 113,
+     "name": "The Queen of Thieves"
+    },
+    {
+     "id": 26,
+     "name": "The Depths of Despair"
+    },
+    {
+     "id": 3,
+     "name": "The Ascent of Arceuus"
+    },
+    {
+     "id": 54,
+     "name": "The Forsaken Tower"
+    },
+    {
+     "id": 143,
+     "name": "Tale of the Righteous"
+    },
+    {
+     "id": 81,
+     "name": "A Kingdom Divided"
+    }
+   ]
+  },
+  {
+   "name": "Mahjarrat",
+   "quests": [
+    {
+     "id": 29,
+     "name": "The Dig Site"
+    },
+    {
+     "id": 71,
+     "name": "Hazeel Cult"
+    },
+    {
+     "id": 51,
+     "name": "Fight Arena"
+    },
+    {
+     "id": 40,
+     "name": "Enakhra's Lament"
+    },
+    {
+     "id": 146,
+     "name": "Temple of Ikov"
+    },
+    {
+     "id": 3466,
+     "name": "Defender of Varrock"
+    },
+    {
+     "id": 27,
+     "name": "Desert Treasure I"
+    },
+    {
+     "id": 20,
+     "name": "Curse of the Empty Lord"
+    },
+    {
+     "id": 59,
+     "name": "The General's Shadow"
+    },
+    {
+     "id": 3937,
+     "name": "The Curse of Arrav"
+    },
+    {
+     "id": 28,
+     "name": "Devious Minds"
+    },
+    {
+     "id": 3250,
+     "name": "His Faithful Servants"
+    },
+    {
+     "id": 2338,
+     "name": "Secrets of the North"
+    },
+    {
+     "id": 2343,
+     "name": "Desert Treasure II - The Fallen Empire"
+    },
+    {
+     "id": 3467,
+     "name": "While Guthix Sleeps"
+    }
+   ]
+  },
+  {
+   "name": "Miscellania",
+   "quests": [
+    {
+     "id": 147,
+     "name": "Throne of Miscellania"
+    },
+    {
+     "id": 123,
+     "name": "Royal Trouble"
+    }
+   ]
+  },
+  {
+   "name": "Myreque",
+   "quests": [
+    {
+     "id": 79,
+     "name": "In Search of the Myreque"
+    },
+    {
+     "id": 77,
+     "name": "In Aid of the Myreque"
+    },
+    {
+     "id": 22,
+     "name": "Darkness of Hallowvale"
+    },
+    {
+     "id": 144,
+     "name": "A Taste of Hope"
+    },
+    {
+     "id": 134,
+     "name": "Sins of the Father"
+    },
+    {
+     "id": 16414,
+     "name": "The Blood Moon Rises"
+    }
+   ]
+  },
+  {
+   "name": "Order of Wizards",
+   "quests": [
+    {
+     "id": 125,
+     "name": "Rune Mysteries"
+    },
+    {
+     "id": 43,
+     "name": "Enter the Abyss"
+    },
+    {
+     "id": 167,
+     "name": "Temple of the Eye"
+    }
+   ]
+  },
+  {
+   "name": "Penguin",
+   "quests": [
+    {
+     "id": 15,
+     "name": "Cold War"
+    }
+   ]
+  },
+  {
+   "name": "Pirate",
+   "quests": [
+    {
+     "id": 124,
+     "name": "Rum Deal"
+    },
+    {
+     "id": 12,
+     "name": "Cabin Fever"
+    },
+    {
+     "id": 67,
+     "name": "The Great Brain Robbery"
+    }
+   ]
+  },
+  {
+   "name": "Rag and Bone Man",
+   "quests": [
+    {
+     "id": 114,
+     "name": "Rag and Bone Man I"
+    },
+    {
+     "id": 115,
+     "name": "Rag and Bone Man II"
+    },
+    {
+     "id": 13730,
+     "name": "Rag and Bone Man III"
+    }
+   ]
+  },
+  {
+   "name": "Red Axe",
+   "quests": [
+    {
+     "id": 63,
+     "name": "The Giant Dwarf"
+    },
+    {
+     "id": 53,
+     "name": "Forgettable Tale..."
+    }
+   ]
+  },
+  {
+   "name": "Temple Knight",
+   "quests": [
+    {
+     "id": 118,
+     "name": "Recruitment Drive"
+    },
+    {
+     "id": 156,
+     "name": "Wanted!"
+    },
+    {
+     "id": 127,
+     "name": "Sea Slug"
+    },
+    {
+     "id": 136,
+     "name": "The Slug Menace"
+    }
+   ]
+  },
+  {
+   "name": "Tortugan",
+   "quests": [
+    {
+     "id": 7106,
+     "name": "Troubled Tortugans"
+    },
+    {
+     "id": 7107,
+     "name": "The Red Reef"
+    }
+   ]
+  },
+  {
+   "name": "Troll",
+   "quests": [
+    {
+     "id": 23,
+     "name": "Death Plateau"
+    },
+    {
+     "id": 153,
+     "name": "Troll Stronghold"
+    },
+    {
+     "id": 36,
+     "name": "Eadgar's Ruse"
+    },
+    {
+     "id": 102,
+     "name": "My Arm's Big Adventure"
+    },
+    {
+     "id": 91,
+     "name": "Making Friends with My Arm"
+    }
+   ]
+  },
+  {
+   "name": "Twilight Emissaries",
+   "quests": [
+    {
+     "id": 3450,
+     "name": "Children of the Sun"
+    },
+    {
+     "id": 3512,
+     "name": "Twilight's Promise"
+    },
+    {
+     "id": 3710,
+     "name": "The Heart of Darkness"
+    },
+    {
+     "id": 5189,
+     "name": "The Final Dawn"
+    }
+   ]
+  },
+  {
+   "name": "Twisted Tales",
+   "quests": [
+    {
+     "id": 61,
+     "name": "Getting Ahead"
+    },
+    {
+     "id": 180,
+     "name": "The Garden of Death"
+    },
+    {
+     "id": 17231,
+     "name": "The Writing's on the Wall"
     }
    ]
   }

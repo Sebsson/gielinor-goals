@@ -236,14 +236,31 @@ final class GoalActions
 
 	private void updateFromTemplate()
 	{
-		TemplateUpdates.Plan plan = services.getTemplateUpdates().plan(tree, goal);
-		if (plan == null)
-		{
-			JOptionPane.showMessageDialog(owner, "The template this goal came from is no longer available.",
-				"Update from template", JOptionPane.INFORMATION_MESSAGE);
-			return;
-		}
+		// Templaten byggs om med de sparade värdena, på klienttråden om den behöver spelets data.
 		ProfileGuard guard = ProfileGuard.of(goalManager);
+		services.getTemplateUpdates().rebuildAsync(goal, services.getTemplateBuilder(), result ->
+		{
+			if (result == null)
+			{
+				JOptionPane.showMessageDialog(owner, "The template this goal came from is no longer available.",
+					"Update from template", JOptionPane.INFORMATION_MESSAGE);
+				return;
+			}
+			if (!result.isReady())
+			{
+				JOptionPane.showMessageDialog(owner, result.getMessage(), "Update from template",
+					JOptionPane.INFORMATION_MESSAGE);
+				return;
+			}
+			if (stillSameProfile(owner, guard))
+			{
+				showUpdate(services.getTemplateUpdates().plan(tree, goal, result.getNode()), guard);
+			}
+		});
+	}
+
+	private void showUpdate(TemplateUpdates.Plan plan, ProfileGuard guard)
+	{
 		TemplateUpdateDialog.Selection selection = TemplateUpdateDialog.show(owner, plan, tree);
 		if (selection != null && stillSameProfile(owner, guard))
 		{

@@ -24,24 +24,89 @@
  */
 package com.gielinorgoals.template;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Nullable;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.Value;
 
 /**
- * En siffra som användaren väljer innan templaten byggs, t.ex. N i Base N.
+ * Ett val som användaren gör innan templaten byggs: en siffra (t.ex. N i Base N) eller ett av
+ * flera värden (t.ex. en skill). Siffror sparas i template-rotens {@code templateParams},
+ * val i {@code templateChoices}, så att "Update from template" kan bygga om likadant.
  */
-@Value
-public class TemplateParameter
+@Getter
+@EqualsAndHashCode
+public final class TemplateParameter
 {
-	String key;
-	String label;
-	int min;
-	int max;
-	int defaultValue;
+	public enum Kind
+	{
+		NUMBER,
+		CHOICE
+	}
 
 	/**
-	 * Värdet från parameterkartan, inom gränserna; standardvärdet om det saknas.
+	 * Ett värde i ett val: det som sparas (stabilt, t.ex. "ATTACK") och det som visas.
 	 */
-	public int valueIn(java.util.Map<String, Integer> values)
+	@Value
+	public static class Option
+	{
+		String value;
+		String label;
+
+		@Override
+		public String toString()
+		{
+			return label;
+		}
+	}
+
+	private final Kind kind;
+	private final String key;
+	private final String label;
+	private final int min;
+	private final int max;
+	private final int defaultValue;
+	private final List<Option> options;
+	@Nullable
+	private final String defaultChoice;
+
+	private TemplateParameter(Kind kind, String key, String label, int min, int max, int defaultValue,
+		List<Option> options, @Nullable String defaultChoice)
+	{
+		this.kind = kind;
+		this.key = key;
+		this.label = label;
+		this.min = min;
+		this.max = max;
+		this.defaultValue = defaultValue;
+		this.options = options;
+		this.defaultChoice = defaultChoice;
+	}
+
+	public static TemplateParameter number(String key, String label, int min, int max, int defaultValue)
+	{
+		return new TemplateParameter(Kind.NUMBER, key, label, min, max, defaultValue, Collections.emptyList(), null);
+	}
+
+	/**
+	 * @param defaultChoice värdet som är valt från början; måste finnas bland {@code options}
+	 */
+	public static TemplateParameter choice(String key, String label, List<Option> options, String defaultChoice)
+	{
+		if (options.isEmpty() || options.stream().noneMatch(option -> option.getValue().equals(defaultChoice)))
+		{
+			throw new IllegalArgumentException("The default must be one of the options");
+		}
+		return new TemplateParameter(Kind.CHOICE, key, label, 0, 0, 0, List.copyOf(options), defaultChoice);
+	}
+
+	/**
+	 * Siffran från parameterkartan, inom gränserna; standardvärdet om den saknas.
+	 */
+	public int valueIn(Map<String, Integer> values)
 	{
 		Integer value = values.get(key);
 		if (value == null)
@@ -49,5 +114,22 @@ public class TemplateParameter
 			return defaultValue;
 		}
 		return Math.max(min, Math.min(max, value));
+	}
+
+	/**
+	 * Valet från valkartan, eller standardvalet om det saknas eller inte längre finns bland
+	 * alternativen (t.ex. i äldre sparad data).
+	 */
+	public String choiceIn(Map<String, String> choices)
+	{
+		String value = choices.get(key);
+		for (Option option : options)
+		{
+			if (option.getValue().equals(value))
+			{
+				return value;
+			}
+		}
+		return defaultChoice;
 	}
 }

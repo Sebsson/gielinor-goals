@@ -96,4 +96,25 @@ public interface GoalTemplate
 	 * @param parameters värden för {@link #getParameters()}; saknade får standardvärdet
 	 */
 	TemplateNode build(Map<String, Integer> parameters);
+
+	/**
+	 * Bygger med både siffror och val. Templates med valparametrar ({@link TemplateParameter.Kind#CHOICE})
+	 * överskuggar den här; övriga behöver bara siffrorna.
+	 *
+	 * @param choices värden för valparametrarna; saknade eller okända får standardvalet
+	 * @throws TemplateUnavailableException om templaten behöver spelets data och den inte finns
+	 */
+	default TemplateNode build(Map<String, Integer> parameters, Map<String, String> choices)
+	{
+		return build(parameters);
+	}
+
+	/**
+	 * Om templaten läser spelets data (t.ex. combat achievements ur cachen). Den byggs då på
+	 * klienttråden via {@link TemplateBuilder}, och "Update from template" gör likadant.
+	 */
+	default boolean needsClientData()
+	{
+		return false;
+	}
 }

@@ -33,6 +33,7 @@ import com.gielinorgoals.template.QuestRequirementsDb;
 import com.gielinorgoals.template.TemplateCategories;
 import com.gielinorgoals.template.TemplateNode;
 import com.gielinorgoals.template.TemplateUpdates;
+import com.gielinorgoals.template.TemplateBuilder;
 import com.gielinorgoals.template.TemplateParameter;
 import com.gielinorgoals.template.TemplatePlanner;
 import java.awt.BorderLayout;
@@ -93,6 +94,11 @@ final class TemplateDialog
 	private final Map<GoalTemplate, Icon> templateIcons = new HashMap<>();
 	private final JPanel parameterPanel = new JPanel(new DynamicGridLayout(0, 2, 6, 4));
 	private final Map<String, JSpinner> spinners = new HashMap<>();
+	private final Map<String, javax.swing.JComboBox<TemplateParameter.Option>> combos = new HashMap<>();
+	private final TemplateBuilder builder;
+	// Räknas upp vid varje nytt bygge, så att ett sent svar från klienttråden för ett gammalt
+	// val inte skriver över förhandsvisningen.
+	private int generation;
 	private final JPanel previewPanel = new JPanel(new DynamicGridLayout(0, 1, 0, 1));
 	private final JLabel summaryLabel = new JLabel(" ");
 	private final JCheckBox questChainBox = new JCheckBox("Show full quest chains");
@@ -106,9 +112,10 @@ final class TemplateDialog
 	private final Map<TemplateNode, PreviewRow> rows = new IdentityHashMap<>();
 
 	private TemplateDialog(List<GoalTemplate> templates, GoalTree tree, GameData data, GoalIcons icons,
-		QuestRequirementsDb questRequirements, boolean ironman)
+		QuestRequirementsDb questRequirements, boolean ironman, TemplateBuilder builder)
 	{
 		this.questRequirements = questRequirements;
+		this.builder = builder;
 		this.templates = templates;
 		this.tree = tree;
 		this.data = data;
@@ -138,13 +145,13 @@ final class TemplateDialog
 	 */
 	@Nullable
 	static TemplateNode show(Component parent, List<GoalTemplate> templates, GoalTree tree, GameData data,
-		GoalIcons icons, QuestRequirementsDb questRequirements, boolean ironman)
+		GoalIcons icons, QuestRequirementsDb questRequirements, boolean ironman, TemplateBuilder builder)
 	{
 		if (templates.isEmpty())
 		{
 			return null;
 		}
-		TemplateDialog dialog = new TemplateDialog(templates, tree, data, icons, questRequirements, ironman);
+		TemplateDialog dialog = new TemplateDialog(templates, tree, data, icons, questRequirements, ironman, builder);
 		JPanel content = dialog.buildContent();
 		int choice = JOptionPane.showOptionDialog(parent, content, "Add from template",
 			JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, new Object[]{"Add", "Cancel"}, "Add");
@@ -291,10 +298,30 @@ final class TemplateDialog
 		questChainBox.setSelected(template != null && template.defaultExpandQuestChains());
 		parameterPanel.removeAll();
 		spinners.clear();
+		combos.clear();
 		if (template != null)
 		{
 			for (TemplateParameter parameter : template.getParameters())
 			{
+				if (parameter.getKind() == TemplateParameter.Kind.CHOICE)
+				{
+					javax.swing.JComboBox<TemplateParameter.Option> combo = new javax.swing.JComboBox<>(
+						parameter.getOptions().toArray(new TemplateParameter.Option[0]));
+					for (TemplateParameter.Option option : parameter.getOptions())
+					{
+						if (option.getValue().equals(parameter.getDefaultChoice()))
+						{
+							combo.setSelectedItem(option);
+						}
+					}
+					combo.setMaximumRowCount(Math.min(24, parameter.getOptions().size()));
+					// Förhandsvisningen följer med direkt när valet ändras.
+					combo.addActionListener(e -> rebuildPreview(template));
+					combos.put(parameter.getKey(), combo);
+					parameterPanel.add(new JLabel(parameter.getLabel()));
+					parameterPanel.add(combo);
+					continue;
+				}
 				JSpinner spinner = new JSpinner(new SpinnerNumberModel(parameter.getDefaultValue(),
 					parameter.getMin(), parameter.getMax(), 1));
 				// Förhandsvisningen följer med direkt när värdet ändras.
@@ -314,25 +341,79 @@ final class TemplateDialog
 		previewPanel.removeAll();
 		rows.clear();
 		current = null;
-		if (template != null)
+		int build = ++generation;
+		if (template == null)
 		{
-			Map<String, Integer> values = new HashMap<>();
-			spinners.forEach((key, spinner) -> values.put(key, (Integer) spinner.getValue()));
-			current = template.build(values);
-			boolean hasQuests = QuestChains.hasQuestNodes(current);
-			questChainBox.setVisible(hasQuests);
-			boolean chains = hasQuests && questChainBox.isSelected();
-			if (chains)
-			{
-				QuestChains.expand(current, questRequirements, tree);
-			}
-			// Sparas på roten så att templaten kan byggas om likadant vid "Update from template".
-			Map<String, Integer> params = new HashMap<>(values);
-			params.put(TemplateUpdates.QUEST_CHAINS_PARAM, chains ? 1 : 0);
-			current.setTemplateId(template.getId());
-			current.setTemplateParams(params);
-			addRows(current, null, 0);
+			refreshStatuses();
+			previewPanel.revalidate();
+			previewPanel.repaint();
+			return;
 		}
+		Map<String, Integer> values = new HashMap<>();
+		spinners.forEach((key, spinner) -> values.put(key, (Integer) spinner.getValue()));
+		Map<String, String> choices = new HashMap<>();
+		combos.forEach((key, combo) ->
+		{
+			TemplateParameter.Option option = (TemplateParameter.Option) combo.getSelectedItem();
+			if (option != null)
+			{
+				choices.put(key, option.getValue());
+			}
+		});
+		if (template.needsClientData())
+		{
+			// Byggs på klienttråden; svaret kommer strax.
+			showMessage("Loading...");
+		}
+		builder.build(template, values, choices, result ->
+		{
+			if (build == generation && template == selected)
+			{
+				showResult(template, values, choices, result);
+			}
+		});
+	}
+
+	private void showMessage(String message)
+	{
+		previewPanel.removeAll();
+		rows.clear();
+		current = null;
+		JLabel label = new JLabel(message);
+		label.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
+		label.setBorder(new EmptyBorder(8, 8, 8, 8));
+		previewPanel.add(label);
+		summaryLabel.setText(" ");
+		previewPanel.revalidate();
+		previewPanel.repaint();
+	}
+
+	private void showResult(GoalTemplate template, Map<String, Integer> values, Map<String, String> choices,
+		TemplateBuilder.Result result)
+	{
+		if (!result.isReady())
+		{
+			questChainBox.setVisible(false);
+			showMessage(result.getMessage());
+			return;
+		}
+		previewPanel.removeAll();
+		rows.clear();
+		current = result.getNode();
+		boolean hasQuests = QuestChains.hasQuestNodes(current);
+		questChainBox.setVisible(hasQuests);
+		boolean chains = hasQuests && questChainBox.isSelected();
+		if (chains)
+		{
+			QuestChains.expand(current, questRequirements, tree);
+		}
+		// Sparas på roten så att templaten kan byggas om likadant vid "Update from template".
+		Map<String, Integer> params = new HashMap<>(values);
+		params.put(TemplateUpdates.QUEST_CHAINS_PARAM, chains ? 1 : 0);
+		current.setTemplateId(template.getId());
+		current.setTemplateParams(params);
+		current.setTemplateChoices(choices.isEmpty() ? null : new HashMap<>(choices));
+		addRows(current, null, 0);
 		refreshStatuses();
 		previewPanel.revalidate();
 		previewPanel.repaint();

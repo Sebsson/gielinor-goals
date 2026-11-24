@@ -58,6 +58,10 @@ public class TemplateNode
 	@Setter
 	@Nullable
 	private java.util.Map<String, Integer> templateParams;
+	// Valparametrarna (t.ex. vilken skill), som text.
+	@Setter
+	@Nullable
+	private java.util.Map<String, String> templateChoices;
 
 	// Egen wikisida från en handplockad template, t.ex. "Barrows gloves".
 	@Setter
