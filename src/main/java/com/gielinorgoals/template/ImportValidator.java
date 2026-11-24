@@ -56,7 +56,8 @@ final class ImportValidator
 		"diary", Set.of("area", "tier"),
 		"item", Set.of("id", "name", "quantity", "includeVariants", "variants", "countsAlso"),
 		"icon", Set.of("item", "activity", "sideIcon"),
-		"dropSource", Set.of("hiscore", "npc", "manual", "count", "rate", "perDrop"),
+		"dropSource", Set.of("hiscore", "npc", "manual", "count", "rate", "perDrop", "approximate",
+			"approximateNote"),
 		"killCount", Set.of("hiscore", "npc", "manual", "count", "rate", "perDrop"),
 		"combatAchievement", Set.of("id", "name", "tier"),
 		"points", Set.of("activity", "count"));

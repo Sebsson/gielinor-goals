@@ -403,6 +403,12 @@ public final class TemplateExport
 			source.getActivityName());
 		spec.rate = source.getRate();
 		spec.perDrop = source.getPerDrop() == 1 ? null : source.getPerDrop();
+		if (source.isApproximate())
+		{
+			spec.approximate = true;
+			spec.approximateNote = DropSource.DEFAULT_APPROXIMATE_NOTE.equals(source.getApproximateNote())
+				? null : source.getApproximateNote();
+		}
 		return spec;
 	}
 

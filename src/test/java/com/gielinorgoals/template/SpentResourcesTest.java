@@ -88,7 +88,7 @@ public class SpentResourcesTest
 		GoalTree loaded = serializer.deserialize(serializer.serialize(tree)).getTree();
 		Goal back = loaded.find(points.getId());
 		assertTrue(Boolean.TRUE.equals(back.getDoneWhenAll()));
-		assertEquals(15, SchemaMigrator.CURRENT_VERSION);
+		assertTrue(SchemaMigrator.CURRENT_VERSION >= 15);
 	}
 
 	// Tar bort doneWhen på Pest Control-målen, som i version 1 av void-templates.

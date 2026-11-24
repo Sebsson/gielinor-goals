@@ -82,7 +82,9 @@ public final class DryMeter
 			return null;
 		}
 		double multiple = DropSource.rateMultiple(kc, source.getRate()) / dropsNeeded(goal, source);
-		return QuantityFormatter.formatNumber(kc) + " kc · " + String.format(Locale.ROOT, "%.1f", multiple) + "× rate";
+		// KC är exakt, men andelen av raten är bara ungefärlig när raten är det.
+		return QuantityFormatter.formatNumber(kc) + " kc · " + approx(source)
+			+ String.format(Locale.ROOT, "%.1f", multiple) + "× rate";
 	}
 
 	/**
@@ -99,11 +101,18 @@ public final class DryMeter
 		}
 		int drops = dropsNeeded(goal, source);
 		boolean certain = source.getRate() == 1 && kc >= drops;
-		String percent = formatPercent(DropSource.chanceAtLeast(kc, source.getRate(), drops), certain);
+		String percent = approx(source)
+			+ formatPercent(DropSource.chanceAtLeast(kc, source.getRate(), drops), certain);
 		long quantity = ((ItemRequirement) goal.getRequirement()).getQuantity();
 		return quantity == 1
 			? "Chance to have received it by now: " + percent
 			: "Chance to have all " + QuantityFormatter.formatNumber(quantity) + " by now: " + percent;
+	}
+
+	// "≈" framför värden som bygger på en ungefärlig rate.
+	private static String approx(DropSource source)
+	{
+		return source.isApproximate() ? "\u2248" : "";
 	}
 
 	/**

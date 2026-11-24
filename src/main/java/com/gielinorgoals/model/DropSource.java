@@ -49,6 +49,18 @@ public class DropSource
 	private int rate;
 	// Antal föremål per drop, t.ex. 3 Hueycoatl hides; 1 för de flesta.
 	private int perDrop = 1;
+	// Raten är en uppskattning, t.ex. en raid där chansen beror på poäng. Null i äldre data
+	// och för exakta rates.
+	@Nullable
+	private Boolean approximate;
+	// Varför raten är ungefärlig; visas i hover-texten.
+	@Nullable
+	private String approximateNote;
+
+	public static final String DEFAULT_APPROXIMATE_NOTE = "The chance depends on how the activity goes, so this rate"
+		+ " is an estimate.";
+	// Samma gräns som texter i delade templates.
+	public static final int MAX_NOTE_LENGTH = 200;
 
 	// För Gson.
 	DropSource()
@@ -78,9 +90,53 @@ public class DropSource
 		{
 			throw new IllegalArgumentException("perDrop must be between 1 and " + MAX_PER_DROP);
 		}
-		DropSource copy = new DropSource(activityType, activityId, activityName, rate);
+		DropSource copy = copy();
 		copy.perDrop = perDrop;
 		return copy;
+	}
+
+	/**
+	 * Samma källa med en ungefärlig rate. Torrhetsmätaren visar då "≈" och hover-texten
+	 * förklarar varför med {@code note} (eller en standardtext om den är tom).
+	 */
+	public DropSource withApproximate(@Nullable String note)
+	{
+		String trimmed = note == null ? null : note.trim();
+		if (trimmed != null && trimmed.length() > MAX_NOTE_LENGTH)
+		{
+			throw new IllegalArgumentException("The approximate note can be at most " + MAX_NOTE_LENGTH + " characters");
+		}
+		DropSource copy = copy();
+		copy.approximate = true;
+		copy.approximateNote = trimmed == null || trimmed.isEmpty() ? null : trimmed;
+		return copy;
+	}
+
+	private DropSource copy()
+	{
+		DropSource copy = new DropSource(activityType, activityId, activityName, rate);
+		copy.perDrop = perDrop;
+		copy.approximate = approximate;
+		copy.approximateNote = approximateNote;
+		return copy;
+	}
+
+	public boolean isApproximate()
+	{
+		return Boolean.TRUE.equals(approximate);
+	}
+
+	/**
+	 * Förklaringen till en ungefärlig rate, eller null för en exakt.
+	 */
+	@Nullable
+	public String getApproximateNote()
+	{
+		if (!isApproximate())
+		{
+			return null;
+		}
+		return approximateNote == null ? DEFAULT_APPROXIMATE_NOTE : approximateNote;
 	}
 
 	public static DropSource hiscore(HiscoreSkill skill, int rate)
@@ -206,11 +262,11 @@ public class DropSource
 	}
 
 	/**
-	 * T.ex. "1/5,000 from Zulrah".
+	 * T.ex. "1/5,000 from Zulrah", eller "≈1/500 from Chambers of Xeric" för en ungefärlig rate.
 	 */
 	public String describe()
 	{
-		return "1/" + net.runelite.client.util.QuantityFormatter.formatNumber(rate) + " from " + activityName
+		return (isApproximate() ? "\u2248" : "") + "1/" + net.runelite.client.util.QuantityFormatter.formatNumber(rate) + " from " + activityName
 			+ (getPerDrop() > 1 ? ", " + getPerDrop() + " per drop" : "");
 	}
 }

@@ -566,6 +566,10 @@ class GoalRow extends JPanel
 		if (drop != null && !goal.isCompleted())
 		{
 			html.append("<br>Drop rate ").append(UiText.escapeHtml(drop.describe()));
+			if (drop.isApproximate())
+			{
+				html.append("<br><i>").append(UiText.escapeHtml(drop.getApproximateNote())).append("</i>");
+			}
 			String chance = DryMeter.chanceText(goal, dropKc());
 			html.append("<br>").append(chance != null ? UiText.escapeHtml(chance)
 				: "<i>Kill count not known yet</i>");

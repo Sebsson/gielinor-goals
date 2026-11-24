@@ -77,8 +77,10 @@ public class SchemaMigrator
 	 *     blir skrivskyddade i stället för att tyst kasta bort fältet.
 	 * 15 – valfritt fält doneWhenAll på mål (klart först när alla doneWhen-nycklar är klara, t.ex.
 	 *     poäng som gått åt till flera delar). Ingen dataändring; höjd av samma skäl.
+	 * 16 – valfria fält approximate och approximateNote på drop-källor (ungefärlig rate, t.ex.
+	 *     raids där chansen beror på poäng). Ingen dataändring; höjd av samma skäl.
 	 */
-	public static final int CURRENT_VERSION = 15;
+	public static final int CURRENT_VERSION = 16;
 	static final String VERSION_FIELD = "schemaVersion";
 	private static final String GOALS_FIELD = GoalSerializer.GOALS_FIELD;
 	private static final String ROOT_IDS_FIELD = GoalSerializer.ROOT_IDS_FIELD;
@@ -106,7 +108,8 @@ public class SchemaMigrator
 			Map.entry(11, SchemaMigrator::noStructuralChange),
 			Map.entry(12, SchemaMigrator::noStructuralChange),
 			Map.entry(13, SchemaMigrator::noStructuralChange),
-			Map.entry(14, SchemaMigrator::noStructuralChange)));
+			Map.entry(14, SchemaMigrator::noStructuralChange),
+			Map.entry(15, SchemaMigrator::noStructuralChange)));
 	}
 
 	/**

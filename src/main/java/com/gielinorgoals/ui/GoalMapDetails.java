@@ -185,6 +185,7 @@ final class GoalMapDetails extends JPanel
 		{
 			section("Drop");
 			line("Drop rate " + goal.getDropSource().describe());
+			addIfPresent(goal.getDropSource().getApproximateNote());
 			long kc = goalManager.getCounters().value(goal.getDropSource().counterKey());
 			addIfPresent(DryMeter.rowText(goal, kc));
 			addIfPresent(DryMeter.chanceText(goal, kc));

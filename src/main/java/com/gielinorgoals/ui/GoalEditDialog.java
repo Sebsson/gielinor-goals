@@ -740,6 +740,10 @@ final class GoalEditDialog
 		return card;
 	}
 
+	// Källan dialogen öppnades med, för att behålla en ungefärlig rate som inte ändrats.
+	@Nullable
+	private DropSource prefilledDropSource;
+
 	private void prefillDropSource(@Nullable DropSource source)
 	{
 		if (source == null || !source.isValid())
@@ -761,6 +765,7 @@ final class GoalEditDialog
 		}
 		dropRateField.setText(String.valueOf(source.getRate()));
 		dropPerDrop = source.getPerDrop();
+		prefilledDropSource = source;
 		updateDropFields();
 	}
 
@@ -807,7 +812,15 @@ final class GoalEditDialog
 			source = option == OTHER_NPC ? DropSource.npc(dropNameField.getText(), (int) rate)
 				: DropSource.manual(dropNameField.getText(), (int) rate);
 		}
-		return dropPerDrop == 1 ? source : source.withPerDrop(dropPerDrop);
+		source = dropPerDrop == 1 ? source : source.withPerDrop(dropPerDrop);
+		// Samma källa och rate som förut: behåll att raten är ungefärlig och varför.
+		if (prefilledDropSource != null && prefilledDropSource.isApproximate()
+			&& prefilledDropSource.counterKey().equals(source.counterKey())
+			&& prefilledDropSource.getRate() == source.getRate())
+		{
+			source = source.withApproximate(prefilledDropSource.getApproximateNote());
+		}
+		return source;
 	}
 
 	private static JPanel northAligned(JPanel panel)

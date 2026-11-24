@@ -64,6 +64,8 @@ import net.runelite.client.hiscore.HiscoreSkill;
  * för att inte fällas ut med sin kedja. Item-noder kan ha en drop-källa för torrhetsmätaren:
  * <pre>
  * "dropSource": {"npc": "Lizardman shaman", "rate": 5000}
+ * "dropSource": {"hiscore": "CHAMBERS_OF_XERIC", "rate": 500, "approximate": true,
+ *   "approximateNote": "Depends on points per raid"}
  * </pre>
  * Noder utan krav kan ha en egen ikon: {@code "icon": {"item": 25865}},
  * {@code {"activity": "THE_HUEYCOATL"}} eller {@code {"sideIcon": "QUEST"}}.
@@ -213,6 +215,9 @@ public class JsonTemplate implements GoalTemplate
 		Integer rate;
 		// Bara dropSource: föremål per drop, t.ex. 3 Hueycoatl hides.
 		Integer perDrop;
+		// Bara dropSource: raten är en uppskattning (t.ex. raids), med en förklaring för hover-texten.
+		Boolean approximate;
+		String approximateNote;
 	}
 
 	private final String id;
@@ -999,7 +1004,12 @@ public class JsonTemplate implements GoalTemplate
 			default:
 				source = DropSource.manual(spec.manual, spec.rate);
 		}
-		return spec.perDrop == null ? source : source.withPerDrop(spec.perDrop);
+		source = spec.perDrop == null ? source : source.withPerDrop(spec.perDrop);
+		if (spec.approximateNote != null && !Boolean.TRUE.equals(spec.approximate))
+		{
+			throw new IllegalArgumentException("approximateNote needs \"approximate\": true");
+		}
+		return Boolean.TRUE.equals(spec.approximate) ? source.withApproximate(spec.approximateNote) : source;
 	}
 
 	private static GoalIcon toIcon(IconSpec spec)
