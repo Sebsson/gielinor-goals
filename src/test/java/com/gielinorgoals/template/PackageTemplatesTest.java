@@ -41,11 +41,11 @@ public class PackageTemplatesTest
 			}
 		}
 		assertEquals(13, catalog.find("package-early-iron").build(Map.of()).getChildren().size());
-		assertEquals(10, catalog.find("package-mid-iron").build(Map.of()).getChildren().size());
-		assertEquals(5, catalog.find("package-late-iron").build(Map.of()).getChildren().size());
+		assertEquals(15, catalog.find("package-mid-iron").build(Map.of()).getChildren().size());
+		assertEquals(12, catalog.find("package-late-iron").build(Map.of()).getChildren().size());
 		assertEquals(10, catalog.find("package-all-capes").build(Map.of()).getChildren().size());
 		assertEquals("Base 70", catalog.find("package-early-iron").build(Map.of()).getChildren().get(12).getTitle());
-		assertEquals("Base 90", catalog.find("package-late-iron").build(Map.of()).getChildren().get(4).getTitle());
+		assertEquals("Base 90", catalog.find("package-late-iron").build(Map.of()).getChildren().get(11).getTitle());
 	}
 
 	@Test
@@ -67,8 +67,8 @@ public class PackageTemplatesTest
 
 	// Unika mål per paket, med quest-kedjorna utfällda per del-template som i dialogen.
 	private static final int EARLY = 211;
-	private static final int MID = 163;
-	private static final int LATE = 69;
+	private static final int MID = 227;
+	private static final int LATE = 248;
 	private static final int CAPES = 376;
 
 	@Test

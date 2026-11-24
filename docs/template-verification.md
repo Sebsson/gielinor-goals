@@ -291,12 +291,15 @@ Packages contain only references to other templates and notes, so only the order
 
 ### Mid ironman (`package-mid-iron.json`)
 - [ ] Order verified
-- Order: Lunar spellbook, Ancient Magicks, Fire cape, Slayer helmet, Elite void, Ash sanctifier, Zenyte jewellery, Prifddinas access, Dragon warhammer, Bow of Faerdhinen and crystal armour.
+- Order (version 2): Lunar spellbook, Ancient Magicks, Barrows set, Fire cape, Slayer helmet, Toxic blowpipe + Serpentine helm, Trident of the swamp, Moons of Peril, Elite void, Ash sanctifier, Dragonfire shield, Zenyte jewellery, Prifddinas access, Dragon warhammer, Bow of Faerdhinen and crystal armour.
+- Version 2 (milestone 15) added Barrows set, the blowpipe, the trident, Moons of Peril and the DFS. Their order was not checked against the guide.
+- The Barrows set uses the default brother, Ahrim. Another brother needs the Barrows set template inserted on its own.
 - **Differs from the guide:** the guide places Fire cape and Slayer helmet in early game, and zenyte in late game.
 
 ### Late ironman (`package-late-iron.json`)
 - [ ] Order verified
-- Order: Infernal cape, Dizana's quiver, Doom of Mokhaiotl, The Hueycoatl, Base 90.
+- Order (version 2): Infernal cape, Dizana's quiver, Sunfire fanatic armour, Tormented bracelet + Amulet of torture, Desert Treasure II rings, Chambers of Xeric, Dragon hunter crossbow, Theatre of Blood, Tombs of Amascut, Doom of Mokhaiotl, The Hueycoatl, Base 90.
+- Version 2 (milestone 15) added Sunfire, torture + tormented, the DT2 rings, the three raids and the DHCB. Their order was not checked against the guide.
 
 ### All capes (`package-all-capes.json`)
 - [ ] Order verified

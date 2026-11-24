@@ -4,13 +4,15 @@
     "Guiden nämner Infernal cape bland late-game-höjdpunkterna. Dizana's quiver, Doom of Mokhaiotl, The Hueycoatl och base 90",
     "nämns inte; guiden nämner maxning under Approaching late-game.",
     "Paketet innehåller bara referenser till andra templates och anteckningar, ingen egen kravdata; delarna verifieras i",
-    "sina egna filer."
+    "sina egna filer.",
+    "Version 2 (milstolpe 15): Sunfire fanatic, Torture + tormented, DT2 rings, Chambers of Xeric, Dragon hunter crossbow, Theatre of Blood och Tombs of Amascut, godkänt av användaren 2026-11-24. Ordningen är ett eget förslag; guiden har inte kontrollerats för dem."
   ],
+  "version": 2,
   "id": "package-late-iron",
   "verifiedBy": "",
   "verifiedAt": "",
   "name": "Late ironman",
-  "description": "Late ironman goals in a suggested order, from the Infernal cape to base 90",
+  "description": "Late ironman goals in a suggested order, from the Infernal cape through the raids to base 90",
   "category": "Packages",
   "tags": [
     "late iron",
@@ -36,6 +38,34 @@
       {
         "template": "dizanas-quiver",
         "note": "The best ranged cape slot, from the Fortis Colosseum."
+      },
+      {
+        "template": "sunfire-fanatic",
+        "note": "Prayer-boosting armour from the same Colosseum as the quiver."
+      },
+      {
+        "template": "torture-tormented",
+        "note": "The best melee amulet and magic bracelet from zenyte."
+      },
+      {
+        "template": "dt2-rings",
+        "note": "The best rings for each style from the Desert Treasure II bosses."
+      },
+      {
+        "template": "chambers-of-xeric",
+        "note": "The first raid, with the twisted bow, ancestral robes and prayer scrolls."
+      },
+      {
+        "template": "dhcb",
+        "note": "A Chambers of Xeric unique, shared with the raid above."
+      },
+      {
+        "template": "theatre-of-blood",
+        "note": "The second raid, with the scythe and the Avernic defender."
+      },
+      {
+        "template": "tombs-of-amascut",
+        "note": "The third raid, with Osmumten's fang, the Masori armour and Tumeken's shadow."
       },
       {
         "template": "doom-of-mokhaiotl",

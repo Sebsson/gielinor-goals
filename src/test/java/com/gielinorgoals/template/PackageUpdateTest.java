@@ -56,6 +56,35 @@ public class PackageUpdateTest
 	}
 
 	@Test
+	public void anOldPackageGetsTheNewPartsAsAnUpdate()
+	{
+		// Mid ironman som i version 1, utan delarna från milstolpe 15.
+		List<String> added = List.of("barrows-set", "blowpipe-serp", "trident-swamp", "moons-of-peril",
+			"dragonfire-shield");
+		GoalTree tree = new GoalTree();
+		TemplateNode full = asInDialog(tree, "package-mid-iron");
+		TemplateNode node = TemplateNode.aggregate(full.getTitle());
+		node.setTemplateId(full.getTemplateId());
+		node.setTemplateParams(full.getTemplateParams());
+		full.getChildren().stream().filter(child -> !added.contains(child.getTemplateId())).forEach(node::add);
+		Goal root = TemplateInserter.insert(tree, node).getRoot();
+		root.setTemplateVersion(1);
+
+		TemplateUpdates.Plan plan = updates.plan(tree, root);
+		assertTrue(plan.isNewVersion());
+		List<String> parts = new ArrayList<>();
+		plan.getAdditions().forEach(addition ->
+		{
+			if (addition.getNode().getTemplateId() != null)
+			{
+				parts.add(addition.getNode().getTemplateId());
+			}
+		});
+		assertTrue(parts.toString(), parts.containsAll(added));
+		assertTrue(plan.getRemoved().isEmpty());
+	}
+
+	@Test
 	public void aRealChangeIsStillFoundAfterTheFix()
 	{
 		GoalTree tree = new GoalTree();

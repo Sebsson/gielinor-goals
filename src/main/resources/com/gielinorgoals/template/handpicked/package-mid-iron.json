@@ -5,13 +5,15 @@
     "under Approaching late-game. Lunar spellbook, Ancient Magicks, Ash sanctifier och Prifddinas nämns inte.",
     "Avvikelser: guiden lägger Fire cape och Slayer helmet under Early-game och Zenyte under late-game; de är med här enligt uppdraget.",
     "Paketet innehåller bara referenser till andra templates och anteckningar, ingen egen kravdata; delarna verifieras i",
-    "sina egna filer."
+    "sina egna filer.",
+    "Version 2 (milstolpe 15): Barrows set, Toxic blowpipe + Serpentine helm, Trident of the swamp, Moons of Peril och Dragonfire shield, godkänt av användaren 2026-11-24. Ordningen är ett eget förslag; guiden har inte kontrollerats för dem."
   ],
+  "version": 2,
   "id": "package-mid-iron",
   "verifiedBy": "",
   "verifiedAt": "",
   "name": "Mid ironman",
-  "description": "Mid ironman unlocks in a suggested order, from the Lunar spellbook to the Bow of Faerdhinen",
+  "description": "Mid ironman unlocks and gear in a suggested order, from the Lunar spellbook to the Bow of Faerdhinen",
   "category": "Packages",
   "tags": [
     "mid iron",
@@ -38,6 +40,10 @@
         "note": "Desert Treasure I gives ice spells for multi-combat slayer and bossing."
       },
       {
+        "template": "barrows-set",
+        "note": "A full Barrows set is strong early-mid gear. Ahrim's is the default; insert the Barrows set template on its own for another brother."
+      },
+      {
         "template": "fire-cape",
         "note": "The best melee cape until the Infernal cape. The guide counts it as an early milestone."
       },
@@ -46,12 +52,28 @@
         "note": "Makes every slayer task faster; the guide counts it as an early milestone."
       },
       {
+        "template": "blowpipe-serp",
+        "note": "Zulrah gives the blowpipe for fast ranged damage and the serpentine helm against venom."
+      },
+      {
+        "template": "trident-swamp",
+        "note": "A powered staff for magic slayer and bossing, upgraded at Zulrah."
+      },
+      {
+        "template": "moons-of-peril",
+        "note": "Three armour sets and weapons that cover all styles."
+      },
+      {
         "template": "elite-void",
         "note": "A key gear upgrade in the guide for higher-level bossing and raids."
       },
       {
         "template": "ash-sanctifier",
         "note": "Turns demonic ashes into Prayer XP while slaying, after the hard Kourend & Kebos Diary."
+      },
+      {
+        "template": "dragonfire-shield",
+        "note": "Dragonfire protection with good defensive stats."
       },
       {
         "template": "zenyte-jewellery",
