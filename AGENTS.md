@@ -1,3 +1,7 @@
+## Innan du börjar
+
+Läs `docs/ARCHITECTURE.md` och `docs/PROCESS.md` innan du börjar.
+
 # RuneLite Plugin Development — Agent Guidelines
 
 ## Logging
