@@ -3,7 +3,7 @@
     "Källor (OSRS Wiki, hämtade 2026-11-24):",
     "https://oldschool.runescape.wiki/w/Dragon_hunter_crossbow (ändrad 16 nov 2026) - bara från Chambers of Xerics Ancient chest:",
     "4/60 av uniques (normal), 4/56 (Challenge Mode). Fossil Island har inget med den att göra. 70 Ranged är wield-krav.",
-    "Chansen per raid beror på poäng; den får en ungefärlig drop-källa när raid-templaten finns (del 2). Item-id 21012",
+    "Chansen per raid beror på poäng; ungefärlig rate som i chambers-of-xeric.json (26 025 poäng, wikins exempel). Item-id 21012",
     "DRAGONHUNTER_XBOW."
   ],
   "id": "dhcb",
@@ -61,7 +61,13 @@
               "name": "Dragon hunter crossbow",
               "includeVariants": true
             },
-            "note": "4/60 of Chambers of Xeric uniques (4/56 in Challenge Mode)."
+            "note": "4/60 of Chambers of Xeric uniques (4/56 in Challenge Mode).",
+            "dropSource": {
+              "hiscore": "CHAMBERS_OF_XERIC",
+              "rate": 500,
+              "approximate": true,
+              "approximateNote": "Depends on points: about 3% for a unique with 26,025 personal points per raid (the wiki's example). More points give a better chance."
+            }
           }
         ]
       }

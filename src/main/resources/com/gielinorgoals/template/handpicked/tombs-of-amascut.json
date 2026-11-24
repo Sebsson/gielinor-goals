@@ -1,0 +1,189 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Chest_(Tombs_of_Amascut) (ändrad 29 okt 2026) - 1 % chans för en unique per",
+    "(10 500 − 20 × RL) poäng, RL = raidnivå upp till 310 (skalad över det), tak 55 %, högst en unique per raid. Man börjar med",
+    "5 000 poäng som dras av; totalt högst 64 000. Vikter vid nivå 150-300 (summa 24): fang 7, lightbearer 7, ward 3, masori 2",
+    "per del, shadow 1; högre nivåer ändrar vikterna (tabell på wikin). Ungefärliga rates: solo, nivå 300, maxpoäng",
+    "(59 000 räknade) ger 1 % per 4 500 poäng ≈ 13,1 % per raid; rate = 1 / (0,131 × vikt/24). Nivåindelning: Entry 0-149,",
+    "Normal 150-299, Expert 300-600. https://oldschool.runescape.wiki/w/Tombs_of_Amascut - kräver Beneath Cursed Sands.",
+    "Item-id från gameval: 26219 OSMUMTENS_FANG, 25975 LIGHTBEARER, 25985 ELIDINIS_WARD, 27226/27229/27232 MASORI_MASK/BODY/CHAPS,",
+    "27277 TUMEKENS_SHADOW_UNCHARGED. KC-målen är 1 completion; användaren kan höja dem. Entry Mode finns inte på hiscores."
+  ],
+  "id": "tombs-of-amascut",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Tombs of Amascut",
+  "description": "Raid completions in normal and Expert Mode and every unique from the reward chest",
+  "category": "Bosses",
+  "tags": [
+    "toa",
+    "raids",
+    "raids 3",
+    "tombs of amascut",
+    "wardens",
+    "expert",
+    "expert mode",
+    "shadow",
+    "tumekens shadow",
+    "fang",
+    "osmumtens fang",
+    "lightbearer",
+    "masori",
+    "elidinis ward",
+    "ward"
+  ],
+  "root": {
+    "title": "Tombs of Amascut",
+    "aggregate": true,
+    "wikiPage": "Tombs of Amascut",
+    "icon": {
+      "activity": "TOMBS_OF_AMASCUT"
+    },
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "QUEST"
+        },
+        "children": [
+          {
+            "quest": "BENEATH_CURSED_SANDS",
+            "note": "Beneath Cursed Sands is needed to enter the Tombs."
+          }
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "INVENTORY"
+        },
+        "children": [
+          {
+            "killCount": {
+              "hiscore": "TOMBS_OF_AMASCUT",
+              "count": 1
+            },
+            "note": "Your first completion. Raise the count to set your own target."
+          },
+          {
+            "killCount": {
+              "hiscore": "TOMBS_OF_AMASCUT_EXPERT",
+              "count": 1
+            },
+            "note": "Expert Mode is raid level 300 and up, and counts separately."
+          },
+          {
+            "title": "Uniques",
+            "aggregate": true,
+            "icon": {
+              "item": 27277
+            },
+            "children": [
+              {
+                "item": {
+                  "id": 26219,
+                  "name": "Osmumten's fang",
+                  "includeVariants": true
+                },
+                "dropSource": {
+                  "hiscore": "TOMBS_OF_AMASCUT",
+                  "rate": 26,
+                  "approximate": true,
+                  "approximateNote": "Depends on raid level and points: estimated for a solo raid at level 300 with the 64,000 point maximum. Lower levels or fewer points give less."
+                },
+                "note": "7/24 of uniques at raid levels 150-300; higher levels shift the weights."
+              },
+              {
+                "item": {
+                  "id": 25975,
+                  "name": "Lightbearer",
+                  "includeVariants": true
+                },
+                "dropSource": {
+                  "hiscore": "TOMBS_OF_AMASCUT",
+                  "rate": 26,
+                  "approximate": true,
+                  "approximateNote": "Depends on raid level and points: estimated for a solo raid at level 300 with the 64,000 point maximum. Lower levels or fewer points give less."
+                },
+                "note": "7/24 of uniques at raid levels 150-300; higher levels shift the weights."
+              },
+              {
+                "item": {
+                  "id": 25985,
+                  "name": "Elidinis' ward",
+                  "includeVariants": true
+                },
+                "dropSource": {
+                  "hiscore": "TOMBS_OF_AMASCUT",
+                  "rate": 61,
+                  "approximate": true,
+                  "approximateNote": "Depends on raid level and points: estimated for a solo raid at level 300 with the 64,000 point maximum. Lower levels or fewer points give less."
+                },
+                "note": "3/24 of uniques at raid levels 150-300; higher levels shift the weights."
+              },
+              {
+                "item": {
+                  "id": 27226,
+                  "name": "Masori mask",
+                  "includeVariants": true
+                },
+                "dropSource": {
+                  "hiscore": "TOMBS_OF_AMASCUT",
+                  "rate": 92,
+                  "approximate": true,
+                  "approximateNote": "Depends on raid level and points: estimated for a solo raid at level 300 with the 64,000 point maximum. Lower levels or fewer points give less."
+                },
+                "note": "2/24 of uniques at raid levels 150-300; higher levels shift the weights."
+              },
+              {
+                "item": {
+                  "id": 27229,
+                  "name": "Masori body",
+                  "includeVariants": true
+                },
+                "dropSource": {
+                  "hiscore": "TOMBS_OF_AMASCUT",
+                  "rate": 92,
+                  "approximate": true,
+                  "approximateNote": "Depends on raid level and points: estimated for a solo raid at level 300 with the 64,000 point maximum. Lower levels or fewer points give less."
+                },
+                "note": "2/24 of uniques at raid levels 150-300; higher levels shift the weights."
+              },
+              {
+                "item": {
+                  "id": 27232,
+                  "name": "Masori chaps",
+                  "includeVariants": true
+                },
+                "dropSource": {
+                  "hiscore": "TOMBS_OF_AMASCUT",
+                  "rate": 92,
+                  "approximate": true,
+                  "approximateNote": "Depends on raid level and points: estimated for a solo raid at level 300 with the 64,000 point maximum. Lower levels or fewer points give less."
+                },
+                "note": "2/24 of uniques at raid levels 150-300; higher levels shift the weights."
+              },
+              {
+                "item": {
+                  "id": 27277,
+                  "name": "Tumeken's shadow (uncharged)",
+                  "includeVariants": true
+                },
+                "dropSource": {
+                  "hiscore": "TOMBS_OF_AMASCUT",
+                  "rate": 183,
+                  "approximate": true,
+                  "approximateNote": "Depends on raid level and points: estimated for a solo raid at level 300 with the 64,000 point maximum. Lower levels or fewer points give less."
+                },
+                "note": "1/24 of uniques at raid levels 150-300; higher levels shift the weights."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

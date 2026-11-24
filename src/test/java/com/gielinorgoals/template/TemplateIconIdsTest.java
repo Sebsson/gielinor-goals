@@ -68,7 +68,10 @@ public class TemplateIconIdsTest
 		ItemID.DRAGONHUNTER_XBOW,
 		ItemID.ULTOR_RING,
 		ItemID.SUNFIRE_BODY,
-		ItemID.BLOOD_MOON_CHESTPLATE);
+		ItemID.BLOOD_MOON_CHESTPLATE,
+		ItemID.TWISTED_BOW,
+		ItemID.SCYTHE_OF_VITUR_UNCHARGED,
+		ItemID.TUMEKENS_SHADOW_UNCHARGED);
 
 	@Test
 	public void everyItemIconIsAKnownGamevalItem()

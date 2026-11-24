@@ -159,7 +159,8 @@ public class EquipmentTemplatesTest
 	{
 		assertEquals(List.of("Toxic blowpipe + Serpentine helm"), search("bp"));
 		assertEquals(List.of("Toxic blowpipe + Serpentine helm"), search("serp"));
-		assertEquals(List.of("Dragon hunter crossbow"), search("dhcb"));
+		// Chambers of Xeric har också taggen dhcb.
+		assertTrue(search("dhcb").contains("Dragon hunter crossbow"));
 		assertEquals(List.of("Dragonfire shield"), search("dfs"));
 		// Zenyte-templaten har också taggarna torture och tormented.
 		assertTrue(search("torture").contains("Tormented bracelet + Amulet of torture"));

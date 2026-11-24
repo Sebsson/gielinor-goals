@@ -1,0 +1,251 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Ancient_chest (ändrad 1 nov 2026) - 1 % chans för en unique per 8 676 poäng, tak 65,7 %",
+    "(570 000 poäng). Vikter normal (summa 60): prayer scrolls 14 vardera, buckler 4, DHCB 4, Dinh's 3, ancestral 4 per del,",
+    "claws 3, elder maul 2, kodai 2, twisted bow 2. Challenge Mode (summa 56): samma men scrolls 12. Ändrat 12 aug 2026",
+    "(tidigare 69/69). Wikins exempel 26 025 poäng per raid används för ungefärliga rates: chans för en unique ≈ 3 %,",
+    "rate = 1 / (0,03 × vikt/60). https://oldschool.runescape.wiki/w/Chambers_of_Xeric - inga quest- eller skillkrav.",
+    "Item-id från gameval: 21034 RAIDS_PRAYERSCROLL (Dexterous), 21079 RAIDS_PRAYERSCROLL_AUGURY (Arcane), 21000 TWISTED_BUCKLER,",
+    "21012 DRAGONHUNTER_XBOW, 21015 DINHS_BULWARK, 21018/21021/21024 ANCESTRAL_*, 13652 DRAGON_CLAWS, 21003 ELDER_MAUL,",
+    "21043 KODAI_INSIGNIA, 20997 TWISTED_BOW. KC-målen är 1 completion; användaren kan höja dem."
+  ],
+  "id": "chambers-of-xeric",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Chambers of Xeric",
+  "description": "Raid completions in both modes and every unique from the Ancient chest",
+  "category": "Bosses",
+  "tags": [
+    "cox",
+    "olm",
+    "raids",
+    "raids 1",
+    "chambers of xeric",
+    "xeric",
+    "great olm",
+    "cm",
+    "challenge mode",
+    "tbow",
+    "twisted bow",
+    "dhcb",
+    "ancestral",
+    "kodai",
+    "claws",
+    "elder maul",
+    "dinhs",
+    "buckler",
+    "prayer scroll",
+    "rigour",
+    "augury"
+  ],
+  "root": {
+    "title": "Chambers of Xeric",
+    "aggregate": true,
+    "wikiPage": "Chambers of Xeric",
+    "icon": {
+      "activity": "CHAMBERS_OF_XERIC"
+    },
+    "note": "There are no quest or skill requirements to enter.",
+    "children": [
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "INVENTORY"
+        },
+        "children": [
+          {
+            "killCount": {
+              "hiscore": "CHAMBERS_OF_XERIC",
+              "count": 1
+            },
+            "note": "Your first completion. Raise the count to set your own target."
+          },
+          {
+            "killCount": {
+              "hiscore": "CHAMBERS_OF_XERIC_CHALLENGE_MODE",
+              "count": 1
+            },
+            "note": "Challenge Mode counts separately on the hiscores."
+          },
+          {
+            "title": "Uniques",
+            "aggregate": true,
+            "icon": {
+              "item": 20997
+            },
+            "children": [
+              {
+                "item": {
+                  "id": 21034,
+                  "name": "Dexterous prayer scroll"
+                },
+                "dropSource": {
+                  "hiscore": "CHAMBERS_OF_XERIC",
+                  "rate": 143,
+                  "approximate": true,
+                  "approximateNote": "Depends on points: about 3% for a unique with 26,025 personal points per raid (the wiki's example). More points give a better chance."
+                },
+                "note": "Reading the scroll uses it up, so a scroll you have already read is not counted. 14/60 of uniques (12/56 in Challenge Mode)."
+              },
+              {
+                "item": {
+                  "id": 21079,
+                  "name": "Arcane prayer scroll"
+                },
+                "dropSource": {
+                  "hiscore": "CHAMBERS_OF_XERIC",
+                  "rate": 143,
+                  "approximate": true,
+                  "approximateNote": "Depends on points: about 3% for a unique with 26,025 personal points per raid (the wiki's example). More points give a better chance."
+                },
+                "note": "Reading the scroll uses it up, so a scroll you have already read is not counted. 14/60 of uniques (12/56 in Challenge Mode)."
+              },
+              {
+                "item": {
+                  "id": 21000,
+                  "name": "Twisted buckler",
+                  "includeVariants": true
+                },
+                "dropSource": {
+                  "hiscore": "CHAMBERS_OF_XERIC",
+                  "rate": 500,
+                  "approximate": true,
+                  "approximateNote": "Depends on points: about 3% for a unique with 26,025 personal points per raid (the wiki's example). More points give a better chance."
+                },
+                "note": "4/60 of uniques (4/56 in Challenge Mode)."
+              },
+              {
+                "item": {
+                  "id": 21012,
+                  "name": "Dragon hunter crossbow",
+                  "includeVariants": true
+                },
+                "dropSource": {
+                  "hiscore": "CHAMBERS_OF_XERIC",
+                  "rate": 500,
+                  "approximate": true,
+                  "approximateNote": "Depends on points: about 3% for a unique with 26,025 personal points per raid (the wiki's example). More points give a better chance."
+                },
+                "note": "4/60 of uniques (4/56 in Challenge Mode)."
+              },
+              {
+                "item": {
+                  "id": 21015,
+                  "name": "Dinh's bulwark",
+                  "includeVariants": true
+                },
+                "dropSource": {
+                  "hiscore": "CHAMBERS_OF_XERIC",
+                  "rate": 667,
+                  "approximate": true,
+                  "approximateNote": "Depends on points: about 3% for a unique with 26,025 personal points per raid (the wiki's example). More points give a better chance."
+                },
+                "note": "3/60 of uniques (3/56 in Challenge Mode)."
+              },
+              {
+                "item": {
+                  "id": 21018,
+                  "name": "Ancestral hat",
+                  "includeVariants": true
+                },
+                "dropSource": {
+                  "hiscore": "CHAMBERS_OF_XERIC",
+                  "rate": 500,
+                  "approximate": true,
+                  "approximateNote": "Depends on points: about 3% for a unique with 26,025 personal points per raid (the wiki's example). More points give a better chance."
+                },
+                "note": "4/60 of uniques (4/56 in Challenge Mode)."
+              },
+              {
+                "item": {
+                  "id": 21021,
+                  "name": "Ancestral robe top",
+                  "includeVariants": true
+                },
+                "dropSource": {
+                  "hiscore": "CHAMBERS_OF_XERIC",
+                  "rate": 500,
+                  "approximate": true,
+                  "approximateNote": "Depends on points: about 3% for a unique with 26,025 personal points per raid (the wiki's example). More points give a better chance."
+                },
+                "note": "4/60 of uniques (4/56 in Challenge Mode)."
+              },
+              {
+                "item": {
+                  "id": 21024,
+                  "name": "Ancestral robe bottom",
+                  "includeVariants": true
+                },
+                "dropSource": {
+                  "hiscore": "CHAMBERS_OF_XERIC",
+                  "rate": 500,
+                  "approximate": true,
+                  "approximateNote": "Depends on points: about 3% for a unique with 26,025 personal points per raid (the wiki's example). More points give a better chance."
+                },
+                "note": "4/60 of uniques (4/56 in Challenge Mode)."
+              },
+              {
+                "item": {
+                  "id": 13652,
+                  "name": "Dragon claws",
+                  "includeVariants": true
+                },
+                "dropSource": {
+                  "hiscore": "CHAMBERS_OF_XERIC",
+                  "rate": 667,
+                  "approximate": true,
+                  "approximateNote": "Depends on points: about 3% for a unique with 26,025 personal points per raid (the wiki's example). More points give a better chance."
+                },
+                "note": "3/60 of uniques (3/56 in Challenge Mode)."
+              },
+              {
+                "item": {
+                  "id": 21003,
+                  "name": "Elder maul",
+                  "includeVariants": true
+                },
+                "dropSource": {
+                  "hiscore": "CHAMBERS_OF_XERIC",
+                  "rate": 1000,
+                  "approximate": true,
+                  "approximateNote": "Depends on points: about 3% for a unique with 26,025 personal points per raid (the wiki's example). More points give a better chance."
+                },
+                "note": "2/60 of uniques (2/56 in Challenge Mode)."
+              },
+              {
+                "item": {
+                  "id": 21043,
+                  "name": "Kodai insignia",
+                  "includeVariants": true
+                },
+                "dropSource": {
+                  "hiscore": "CHAMBERS_OF_XERIC",
+                  "rate": 1000,
+                  "approximate": true,
+                  "approximateNote": "Depends on points: about 3% for a unique with 26,025 personal points per raid (the wiki's example). More points give a better chance."
+                },
+                "note": "2/60 of uniques (2/56 in Challenge Mode)."
+              },
+              {
+                "item": {
+                  "id": 20997,
+                  "name": "Twisted bow",
+                  "includeVariants": true
+                },
+                "dropSource": {
+                  "hiscore": "CHAMBERS_OF_XERIC",
+                  "rate": 1000,
+                  "approximate": true,
+                  "approximateNote": "Depends on points: about 3% for a unique with 26,025 personal points per raid (the wiki's example). More points give a better chance."
+                },
+                "note": "2/60 of uniques (2/56 in Challenge Mode)."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

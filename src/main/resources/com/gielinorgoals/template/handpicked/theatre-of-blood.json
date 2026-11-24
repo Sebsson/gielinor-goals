@@ -1,0 +1,190 @@
+{
+  "_comment": [
+    "Källor (OSRS Wiki, hämtade 2026-11-24):",
+    "https://oldschool.runescape.wiki/w/Monumental_chest (ändrad 23 sep 2026) - unique 1/9,1 per raid i normal, 1/7,7 i Hard",
+    "Mode, samma oavsett lagstorlek; föremålet går till en spelare, viktat efter dödsfall och skada (MVP störst chans).",
+    "Vikter normal (summa 19): hilt 8, rapier 2, sanguinesti 2, justiciar 2 per del, scythe 1. Hard (summa 18): hilt 7, övriga lika.",
+    "Wikin anger ingen chans per spelare; ungefärliga rates antar 4 spelare med lika andel och inga dödsfall:",
+    "rate = 1 / (1/9,1 / 4 × vikt/19). https://oldschool.runescape.wiki/w/Theatre_of_Blood (ändrad 4 nov 2026) - enda",
+    "kravet är Priest in Peril (Morytania); Hard Mode kräver en hel normal raid. Entry Mode ger inga uniques och finns inte på",
+    "hiscores. Item-id från gameval: 22477 INFERNAL_DEFENDER_HILT (Avernic), 22324 GHRAZI_RAPIER, 22481 SANGUINESTI_STAFF_UNCHARGED,",
+    "22326/22327/22328 JUSTICIAR_*, 22486 SCYTHE_OF_VITUR_UNCHARGED. KC-målen är 1 completion; användaren kan höja dem."
+  ],
+  "id": "theatre-of-blood",
+  "verifiedBy": "",
+  "verifiedAt": "",
+  "name": "Theatre of Blood",
+  "description": "Raid completions in normal and Hard Mode and every unique from the Monumental chest",
+  "category": "Bosses",
+  "tags": [
+    "tob",
+    "raids",
+    "raids 2",
+    "theatre of blood",
+    "verzik",
+    "hm",
+    "hard mode",
+    "scythe",
+    "scythe of vitur",
+    "rapier",
+    "ghrazi rapier",
+    "sang",
+    "sanguinesti staff",
+    "justiciar",
+    "avernic",
+    "avernic defender"
+  ],
+  "root": {
+    "title": "Theatre of Blood",
+    "aggregate": true,
+    "wikiPage": "Theatre of Blood",
+    "icon": {
+      "activity": "THEATRE_OF_BLOOD"
+    },
+    "children": [
+      {
+        "title": "Unlock",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "QUEST"
+        },
+        "children": [
+          {
+            "quest": "PRIEST_IN_PERIL",
+            "note": "Priest in Peril opens Morytania, the only requirement to enter."
+          }
+        ]
+      },
+      {
+        "title": "Obtain",
+        "aggregate": true,
+        "icon": {
+          "sideIcon": "INVENTORY"
+        },
+        "children": [
+          {
+            "killCount": {
+              "hiscore": "THEATRE_OF_BLOOD",
+              "count": 1
+            },
+            "note": "Your first completion. Raise the count to set your own target."
+          },
+          {
+            "killCount": {
+              "hiscore": "THEATRE_OF_BLOOD_HARD_MODE",
+              "count": 1
+            },
+            "note": "Hard Mode needs one full normal-mode run first."
+          },
+          {
+            "title": "Uniques",
+            "aggregate": true,
+            "icon": {
+              "item": 22486
+            },
+            "children": [
+              {
+                "item": {
+                  "id": 22477,
+                  "name": "Avernic defender hilt",
+                  "includeVariants": true
+                },
+                "dropSource": {
+                  "hiscore": "THEATRE_OF_BLOOD",
+                  "rate": 86,
+                  "approximate": true,
+                  "approximateNote": "Depends on the team: 1/9.1 for a unique per raid, shared by the team. Estimated for 4 players with an equal share and no deaths."
+                },
+                "note": "8/19 of uniques (7/18 in Hard Mode)."
+              },
+              {
+                "item": {
+                  "id": 22324,
+                  "name": "Ghrazi rapier",
+                  "includeVariants": true
+                },
+                "dropSource": {
+                  "hiscore": "THEATRE_OF_BLOOD",
+                  "rate": 346,
+                  "approximate": true,
+                  "approximateNote": "Depends on the team: 1/9.1 for a unique per raid, shared by the team. Estimated for 4 players with an equal share and no deaths."
+                },
+                "note": "2/19 of uniques (2/18 in Hard Mode)."
+              },
+              {
+                "item": {
+                  "id": 22481,
+                  "name": "Sanguinesti staff (uncharged)",
+                  "includeVariants": true
+                },
+                "dropSource": {
+                  "hiscore": "THEATRE_OF_BLOOD",
+                  "rate": 346,
+                  "approximate": true,
+                  "approximateNote": "Depends on the team: 1/9.1 for a unique per raid, shared by the team. Estimated for 4 players with an equal share and no deaths."
+                },
+                "note": "2/19 of uniques (2/18 in Hard Mode)."
+              },
+              {
+                "item": {
+                  "id": 22326,
+                  "name": "Justiciar faceguard",
+                  "includeVariants": true
+                },
+                "dropSource": {
+                  "hiscore": "THEATRE_OF_BLOOD",
+                  "rate": 346,
+                  "approximate": true,
+                  "approximateNote": "Depends on the team: 1/9.1 for a unique per raid, shared by the team. Estimated for 4 players with an equal share and no deaths."
+                },
+                "note": "2/19 of uniques (2/18 in Hard Mode)."
+              },
+              {
+                "item": {
+                  "id": 22327,
+                  "name": "Justiciar chestguard",
+                  "includeVariants": true
+                },
+                "dropSource": {
+                  "hiscore": "THEATRE_OF_BLOOD",
+                  "rate": 346,
+                  "approximate": true,
+                  "approximateNote": "Depends on the team: 1/9.1 for a unique per raid, shared by the team. Estimated for 4 players with an equal share and no deaths."
+                },
+                "note": "2/19 of uniques (2/18 in Hard Mode)."
+              },
+              {
+                "item": {
+                  "id": 22328,
+                  "name": "Justiciar legguards",
+                  "includeVariants": true
+                },
+                "dropSource": {
+                  "hiscore": "THEATRE_OF_BLOOD",
+                  "rate": 346,
+                  "approximate": true,
+                  "approximateNote": "Depends on the team: 1/9.1 for a unique per raid, shared by the team. Estimated for 4 players with an equal share and no deaths."
+                },
+                "note": "2/19 of uniques (2/18 in Hard Mode)."
+              },
+              {
+                "item": {
+                  "id": 22486,
+                  "name": "Scythe of vitur (uncharged)",
+                  "includeVariants": true
+                },
+                "dropSource": {
+                  "hiscore": "THEATRE_OF_BLOOD",
+                  "rate": 692,
+                  "approximate": true,
+                  "approximateNote": "Depends on the team: 1/9.1 for a unique per raid, shared by the team. Estimated for 4 players with an equal share and no deaths."
+                },
+                "note": "1/19 of uniques (1/18 in Hard Mode)."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

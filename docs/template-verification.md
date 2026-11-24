@@ -392,3 +392,42 @@ Packages contain only references to other templates and notes, so only the order
 
 - Each vestige is done once you own its ring.
 - **(uncertain)** The wiki pages disagreed on whether the magus and venator rings need blood runes or similar to make. It is not a goal.
+
+---
+
+## Wave 3 – raids (milestone 15, part 2)
+
+Raid uniques have **approximate** rates (`"approximate": true` on the drop source). The chance depends on points, team or raid level, so each rate is worked out from the wiki's formula under one stated assumption. The dry meter shows "≈" and the tooltip gives the assumption. The KC goals are one completion each, and users can raise the count.
+
+### Chambers of Xeric (`chambers-of-xeric.json`)
+- [ ] Verified
+- Wiki: [Chambers of Xeric](https://oldschool.runescape.wiki/w/Chambers_of_Xeric), [Ancient chest](https://oldschool.runescape.wiki/w/Ancient_chest)
+- No quest or skill requirements to enter, so there is no Unlock group.
+- KC goals: Chambers of Xeric and Chambers of Xeric: Challenge Mode, on the hiscores separately.
+- Unique chance: 1% per 8,676 points, capped at 65.7% (570,000 points).
+- Weights, normal mode (total 60): prayer scrolls 14 each, Twisted buckler 4, DHCB 4, Dinh's bulwark 3, each Ancestral piece 4, Dragon claws 3, Elder maul 2, Kodai insignia 2, Twisted bow 2. Challenge Mode (total 56): scrolls 12, the rest the same. These changed on 12 August 2026; they were 69 in both modes before.
+- **Assumption:** 26,025 personal points per raid, the wiki's own example. That gives about 3% for a unique. Rates: scrolls 1/143; buckler, DHCB and Ancestral 1/500; Dinh's and claws 1/667; maul, kodai and tbow 1/1,000.
+- The DHCB template now uses the same approximate rate (1/500).
+- **(uncertain)** Reading a prayer scroll uses it up, so a scroll that was already read is not counted as owned.
+- **(uncertain)** Item ids from gameval: Dexterous prayer scroll 21034 (`RAIDS_PRAYERSCROLL`), Arcane prayer scroll 21079 (`RAIDS_PRAYERSCROLL_AUGURY`), buckler 21000, DHCB 21012, Dinh's 21015, Ancestral 21018/21021/21024, claws 13652, maul 21003, kodai 21043, tbow 20997.
+
+### Theatre of Blood (`theatre-of-blood.json`)
+- [ ] Verified
+- Wiki: [Theatre of Blood](https://oldschool.runescape.wiki/w/Theatre_of_Blood), [Monumental chest](https://oldschool.runescape.wiki/w/Monumental_chest)
+- Unlock: Priest in Peril, the only requirement. Hard Mode needs one full normal run.
+- KC goals: Theatre of Blood and Theatre of Blood: Hard Mode. Entry Mode gives no uniques and is not on the hiscores.
+- Unique chance per raid: 1/9.1 in normal mode and 1/7.7 in Hard Mode, the same for any team size. The item goes to one player, weighted by deaths and damage.
+- Weights, normal (total 19): Avernic defender hilt 8, Ghrazi rapier 2, Sanguinesti staff 2, each Justiciar piece 2, Scythe of vitur 1. Hard Mode (total 18): hilt 7, the rest the same.
+- **Assumption:** a team of 4 with an equal share and no deaths, so 1/36.4 for a personal unique. Rates: hilt 1/86; rapier, staff and Justiciar 1/346; scythe 1/692. The wiki gives no per-player rate.
+- Item ids from gameval: hilt 22477 (`INFERNAL_DEFENDER_HILT`), rapier 22324, staff 22481 (uncharged), Justiciar 22326/22327/22328, scythe 22486 (uncharged).
+
+### Tombs of Amascut (`tombs-of-amascut.json`)
+- [ ] Verified
+- Wiki: [Tombs of Amascut](https://oldschool.runescape.wiki/w/Tombs_of_Amascut), [Chest (Tombs of Amascut)](https://oldschool.runescape.wiki/w/Chest_(Tombs_of_Amascut))
+- Unlock: Beneath Cursed Sands.
+- KC goals: Tombs of Amascut and Tombs of Amascut: Expert Mode. Entry Mode (levels 0–149) is not on the hiscores. Normal is 150–299 and Expert is 300–600.
+- Unique chance: 1% per (10,500 − 20 × RL) points, where RL is the raid level up to 310 and scaled above that. Capped at 55%, with at most one unique per raid. The first 5,000 points do not count, and the total is capped at 64,000.
+- Weights at levels 150–300 (total 24): Osmumten's fang 7, Lightbearer 7, Elidinis' ward 3, each Masori piece 2, Tumeken's shadow 1. Higher levels change the weights; the wiki has a table.
+- **Assumption:** a solo raid at level 300 with the maximum points (59,000 counted), so 1% per 4,500 points, about 13.1% for a unique. Rates: fang and lightbearer 1/26, ward 1/61, each Masori piece 1/92, shadow 1/183.
+- **(uncertain)** That the 5,000 starting points are subtracted before the unique roll. This was read from the wiki's summary, not the full text.
+- Item ids from gameval: fang 26219, lightbearer 25975, ward 25985, Masori 27226/27229/27232, shadow 27277 (uncharged).

@@ -25,7 +25,8 @@ public class TemplateCategoriesTest
 		assertEquals(List.of("Quest cape", "Achievement diary cape", "Max cape", "Dizana's quiver", "Mythical cape",
 			"Champion's cape"),
 			names(grouped.get(TemplateCategories.CAPES)));
-		assertEquals(List.of("Combat Achievements tier"), names(grouped.get(TemplateCategories.BOSSES)));
+		assertEquals(List.of("Combat Achievements tier", "Chambers of Xeric", "Theatre of Blood", "Tombs of Amascut"),
+			names(grouped.get(TemplateCategories.BOSSES)));
 		assertEquals(List.of("Quest series"), names(grouped.get(TemplateCategories.QUESTS)));
 		assertEquals(List.of("All diaries in a tier", "Diary reward items"), names(grouped.get(TemplateCategories.DIARIES)));
 		assertTrue(names(grouped.get(TemplateCategories.IRONMAN_MID)).contains("Barrows gloves"));

@@ -41,7 +41,8 @@ public class HandpickedTemplatesTest
 			"Smiths' uniform", "Spirit angler's outfit", "Dizana's quiver", "Mythical cape", "Champion's cape", "Early ironman",
 			"Mid ironman", "Late ironman", "All capes", "Toxic blowpipe + Serpentine helm", "Trident of the seas",
 			"Trident of the swamp", "Dragon hunter crossbow", "Moons of Peril", "Sunfire fanatic armour",
-			"Tormented bracelet + Amulet of torture", "Dragonfire shield", "Desert Treasure II rings"), names);
+			"Tormented bracelet + Amulet of torture", "Dragonfire shield", "Desert Treasure II rings",
+			"Chambers of Xeric", "Theatre of Blood", "Tombs of Amascut"), names);
 	}
 
 	@Test

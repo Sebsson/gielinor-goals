@@ -38,6 +38,33 @@ public class KillCountMessagesTest
 			"Your Corrupted Gauntlet completion count is: <col=ff0000>9</col>.");
 	}
 
+	// Exempelsträngar från RuneLites ChatCommandsPluginTest (spelets egna completion-meddelanden).
+	@Test
+	public void raidCompletionMessages()
+	{
+		assertCount(HiscoreSkill.CHAMBERS_OF_XERIC, 52,
+			"Your completed Chambers of Xeric count is: <col=ff0000>52</col>.");
+		assertCount(HiscoreSkill.CHAMBERS_OF_XERIC_CHALLENGE_MODE, 13,
+			"Your completed Chambers of Xeric Challenge Mode count is: <col=ff0000>13</col>.");
+		assertCount(HiscoreSkill.THEATRE_OF_BLOOD, 73,
+			"Your completed Theatre of Blood count is: <col=ff0000>73</col>.");
+		assertCount(HiscoreSkill.TOMBS_OF_AMASCUT, 2,
+			"Your completed Tombs of Amascut count is: <col=ff0000>2</col>.");
+		assertCount(HiscoreSkill.TOMBS_OF_AMASCUT_EXPERT, 1,
+			"Your completed Tombs of Amascut: Expert Mode count is: <col=ff0000>1</col>.");
+		// RuneLites mönster tillåter också färg runt raidnamnet.
+		assertCount(HiscoreSkill.THEATRE_OF_BLOOD_HARD_MODE, 4,
+			"Your completed <col=ff0000>Theatre of Blood: Hard Mode</col> count is: <col=ff0000>4</col>.");
+	}
+
+	@Test
+	public void entryModesAreNotOnTheHiscores()
+	{
+		// Entry Mode räknas inte mot normal-läget och finns inte på hiscores.
+		assertNull(KillCountMessages.parse("Your completed Theatre of Blood: Entry Mode count is: <col=ff0000>73</col>."));
+		assertNull(KillCountMessages.parse("Your completed Tombs of Amascut: Entry Mode count is: <col=ff0000>3</col>."));
+	}
+
 	@Test
 	public void namesWithPunctuationAndTheArticle()
 	{
